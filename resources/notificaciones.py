@@ -6,6 +6,8 @@ from bson.objectid import ObjectId
 from flask import request
 from flask_restful import Resource
 
+from pymongo import TEXT
+from pymongo.operations import IndexModel
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError
@@ -29,10 +31,48 @@ class NotificacionList(Resource):
     #Participante id = part_id
         part_id = ObjectId(id)
         try:
-            notifs = NotificacionModel.objects.get({'id_participante': part_id})
+            """
+            Dependiendo del id que se consulta Pymodm genera
+            una respuesta específica: 
+            -Un query a el _id de la notificacion (_id) regresa:
+                [
+                    {
+                        "_id": "5dfb4cbf23acb0be88ff5e9b",
+                        "id_participante": "<ParticipanteModel object>",
+                        "titulo": "Bienvenido al programa"
+                    }
+                ]
+            
+            -Un query a el _id del participante (id_participante) regresa:
+            NotificacionModel(id_participante=ParticipanteModel(paterno='Martinez', email='correo@gmail.com', fecha_nacimiento=datetime.datetime(1997, 6, 6, 21, 0), _id=ObjectId('5dfb2779272294ec0c7052fc'), fecha_antiguedad=datetime.datetime(2019, 12, 19, 1, 32, 9, 278000), foto='https://estaticos.muyinteresante.es/media/cache/760x570_thumb/uploads/images/article/5536592a70a1ae8d775df846/dia-del-mono.jpg', tarjeta_sellos=TarjetaSellosModel(num_sellos=1, _id=ObjectId('5dfb3be68989a2f1e2918008')), nombre='Emmanuel3', password='12346', sexo='Masculino'), titulo='Bienvenido al programa', _id=ObjectId('5dfb4cbf23acb0be88ff5e9b'))
+            NotificacionModel(id_participante=ParticipanteModel(paterno='Martinez', email='correo@gmail.com', fecha_nacimiento=datetime.datetime(1997, 6, 6, 21, 0), _id=ObjectId('5dfb2779272294ec0c7052fc'), fecha_antiguedad=datetime.datetime(2019, 12, 19, 1, 32, 9, 278000), foto='https://estaticos.muyinteresante.es/media/cache/760x570_thumb/uploads/images/article/5536592a70a1ae8d775df846/dia-del-mono.jpg', tarjeta_sellos=TarjetaSellosModel(num_sellos=1, _id=ObjectId('5dfb3be68989a2f1e2918008')), nombre='Emmanuel3', password='12346', sexo='Masculino'), titulo='Bienvenido al programa', _id=ObjectId('5dfb4d0268032c30e8e9fd00'))
+            i,e. 
+                [
+                    {
+                        "id_participante": "<ParticipanteModel object>",
+                        "titulo": "Bienvenido al programa",
+                        "_id": "5dfb4cbf23acb0be88ff5e9b"
+                    },
+                    {
+                        "id_participante": "<ParticipanteModel object>",
+                        "titulo": "Bienvenido al programa",
+                        "_id": "5dfb4d0268032c30e8e9fd00"
+                    }
+                ]
+            NOTE: Nice! :), en este caso, el primero es el que queremos.
+            """
+            participante_notifs_id = NotificacionModel.objects.raw({'_id': part_id})
+            notifs = participante_notifs_id
+            #for item in notifs:
+            #    pprint(item)
         except NotificacionModel.DoesNotExist:
             return {'message': f"No sellos_card in participante with id{ id }"}
-        return not_schemas().dump(only=("_id"))
+        return NotificacionSchema(
+            only=(
+            "_id",
+            "titulo",
+            "id_participante"
+            ), many=True).dump(notifs), 200
     
     @classmethod
     def post(self, id):
@@ -47,10 +87,9 @@ class NotificacionList(Resource):
             return {"message": "No se pudo crear la notificacion."} 
         return NotificacionSchema(
             only=(
-            "_id",
             "titulo",
             "id_participante"
-            )).dump(p), 200
+            )).dump(notif), 200
 
 
 

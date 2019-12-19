@@ -2,6 +2,7 @@ from ma import ma
 from marshmallow import Schema, fields, ValidationError
 
 class NotificacionSchema(ma.Schema):
+    _id = fields.Str()
     id_participante = fields.Str()
     titulo = fields.Str()
     mensaje = fields.Str()
@@ -17,6 +18,7 @@ class NotificacionSchema(ma.Schema):
 
     class Meta:
         fields = (
+            "_id",
             "id_participante",
             "titulo"
         )
