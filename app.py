@@ -13,7 +13,7 @@ from resources.facebook_login import FacebookLogin, FacebookAuthorize
 from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList
 from resources.upload import ImageUpload, ImageDownload
-from resources.tarjeta import TarjetaSellos
+from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList #Task:Desacoplar list
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
@@ -52,6 +52,7 @@ api.add_resource(GoogleCallback, "/login/google/callback")
 api.add_resource(Participante, "/participante/<string:id>")
 api.add_resource(ParticipanteList, "/participante")
 api.add_resource(TarjetaSellos, "/tarjetasellos/<string:id>")
+api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")

@@ -127,7 +127,8 @@ class ParticipanteSchema(ma.Schema):
             "fresh_token",
             "facebook_fields",
             "google_fields",
-            "tarjeta_sellos"
+            "tarjeta_sellos",
+            "tarjeta_puntos"
         )
 
 

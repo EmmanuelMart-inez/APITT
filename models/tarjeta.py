@@ -13,7 +13,7 @@ from models.producto import (
 # Establish a connection to the database.
 connect('mongodb://localhost:27017/ej1')
 
-class TarjetaPuntosModel(EmbeddedMongoModel):
+class TarjetaPuntosModel(MongoModel):
     codigo_qr = fields.CharField()
     codigo_barras = fields.CharField()
     qr_imagen = fields.URLField()

@@ -13,11 +13,12 @@ from pymongo.errors import DuplicateKeyError
 from models.tarjeta import TarjetaPuntosModel, TarjetaSellosModel
 from schemas.participante import ParticipanteSchema 
 from models.participante import ParticipanteModel 
-from schemas.tarjeta import TarjetaSellosSchema
+from schemas.tarjeta import TarjetaSellosSchema, TarjetaPuntosSchema
 from marshmallow import pprint
 
 participante_schema = ParticipanteSchema(many=True)
 selloscard_schema = TarjetaSellosSchema()
+puntoscard_schema = TarjetaPuntosSchema()
 # user_schema = UserSchema()
 # Establish a connection to the database.
 connect("mongodb://localhost:27017/ej1")
@@ -63,25 +64,72 @@ class TarjetaSellos(Resource):
             "tarjeta_sellos"
             )).dump(p), 200
 
-
-class ParticipanteList(Resource):
+class TarjetaPuntos(Resource):
+    """Busca una tarjeta de sellos 
+    asociada a un ID de un participante"""
     @classmethod
-    def post(self):
-        user_json = request.get_json()
-        print(user_json)
-        user = participante_schema.load(user_json)
+    def get(self, id_participante):
+        parti_id = ObjectId(id_participante)
         try:
-            ParticipanteModel(
-                nombre=user["nombre"],
-                paterno=user["paterno"],
-                sexo=user["sexo"],
-                password=user["password"],
-                email=user["email"],
-                fecha_nacimiento=user["fecha_nacimiento"],
-                fecha_antiguedad=dt.datetime.now(),
-                foto=user["foto"]
+            p = ParticipanteModel.objects.get({'_id': parti_id})
+        except ParticipanteModel.DoesNotExist:
+            return {'message': f"No participante with id{ id }"}
+        return ParticipanteSchema(
+            only=(
+            "tarjeta_puntos",
+            )).dump(p), 200
+
+    """Añade una tarjeta de puntos al 
+    participante con el _id = id_participante"""
+    @classmethod
+    def post(self, id_participante):
+        parti_id = ObjectId(id_participante)
+        try:
+            p = ParticipanteModel.objects.get({'_id': parti_id})
+        except ParticipanteModel.DoesNotExist:
+            return {'message': f"No participante with id{ id }"}
+        try: 
+            puntos_card = TarjetaPuntosModel(
+                balance = 10.0,
             ).save()
+            p.tarjeta_puntos=puntos_card
+            p.save()
         except ValidationError as exc:
-            print(exc)
-            return {"message": "ValidationError '{}'".format(errors=exc.message)}
-        return {'message': "Participante creado"}, 200
+            print(exc.message)
+            return {"message": "No se pudo crear la tarjeta de puntos."} 
+        return ParticipanteSchema(
+            only=(
+            "_id",
+            "nombre",
+            "tarjeta_puntos"
+            )).dump(p), 200
+
+
+
+    """Actualiza los puntos que tiene un participante
+    con el _id = id_participante"""
+    @classmethod
+    def put(self, id_participante):
+        tarjeta_puntos_json = request.get_json()
+        print(tarjeta_puntos_json)
+        tarjeta = puntoscard_schema.load(tarjeta_puntos_json)
+        parti_id = ObjectId(id_participante)
+        try:
+            p = ParticipanteModel.objects.get({'_id': parti_id})
+            card_id = p.tarjeta_puntos._id
+        except ParticipanteModel.DoesNotExist:
+            return {'message': f"No participante with id{ id }"}
+        try:     
+            card = TarjetaPuntosModel.objects.get({'_id': card_id})
+            card.balance = tarjeta["balance"]
+            card.save()
+        except TarjetaPuntosModel.DoesNotExist:
+            return {'message': f"Can't update tarjeta_puntos with id{ id }"}
+        return {'saldo': 'Actualizado',
+                'participante': ParticipanteSchema(
+                    only=(
+                    "_id",
+                    "nombre",
+                    "tarjeta_puntos"
+                    )).dump(p),
+                }, 200

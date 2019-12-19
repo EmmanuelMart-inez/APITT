@@ -2,6 +2,7 @@ from ma import ma
 from marshmallow import Schema, fields, ValidationError
 
 class TarjetaPuntosSchema(ma.Schema):
+    _id = fields.Str()
     codigo_qr = fields.Str()
     codigo_barras = fields.Str()
     qr_imagen = fields.URL()
@@ -11,6 +12,7 @@ class TarjetaPuntosSchema(ma.Schema):
 
     class Meta:
         fields = (
+            "_id",
             "codigo_qr",
             "codigo_barras", 
             "qr_imagen", 
