@@ -34,7 +34,8 @@ class TarjetaSellos(Resource):
         descripcion_tarjeta = "Por cada bebida que compras acumulas una estrella, al acumular 8 bebidas te regalamos una!"
         try:
             selloscard = TarjetaSellosModel(
-                num_sellos=1,
+                num_sellos=0,
+                descripcion=descripcion_tarjeta
             ).save()
             p.tarjeta_sellos=selloscard
             p.save()
@@ -62,7 +63,7 @@ class TarjetaSellos(Resource):
             "tarjeta_sellos"
             )).dump(p), 200
 
-            
+
 class ParticipanteList(Resource):
     @classmethod
     def post(self):

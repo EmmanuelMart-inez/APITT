@@ -43,7 +43,7 @@ class ParticipanteList(Resource):
         print(user_json)
         user = participante_schema.load(user_json)
         try:
-            ParticipanteModel(
+            p = ParticipanteModel(
                 nombre=user["nombre"],
                 paterno=user["paterno"],
                 sexo=user["sexo"],
@@ -56,7 +56,12 @@ class ParticipanteList(Resource):
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear el nuevo participante."}   
-        return {'message': "Participante creado"}, 200
+        return {'message': "Participante creado",
+                'ObjectId': ParticipanteSchema(
+                only=(
+                "_id",
+                )).dump(p)
+        }, 200
 
         #return item.json(), 201
 """

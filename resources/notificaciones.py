@@ -61,18 +61,21 @@ class NotificacionList(Resource):
                 ]
             NOTE: Nice! :), en este caso, el primero es el que queremos.
             """
-            participante_notifs_id = NotificacionModel.objects.raw({'_id': part_id})
+            participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id})
             notifs = participante_notifs_id
             #for item in notifs:
             #    pprint(item)
+            total_notifs = notifs.count()
         except NotificacionModel.DoesNotExist:
             return {'message': f"No sellos_card in participante with id{ id }"}
-        return NotificacionSchema(
-            only=(
-            "_id",
-            "titulo",
-            "id_participante"
-            ), many=True).dump(notifs), 200
+        return {"Notificaciones":
+                    NotificacionSchema(
+                    only=(
+                    "_id",
+                    "titulo",
+                    ), many=True).dump(notifs),
+                "Total": total_notifs    
+                },200
     
     @classmethod
     def post(self, id):
