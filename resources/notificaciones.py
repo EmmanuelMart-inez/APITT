@@ -12,13 +12,12 @@ from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError
 
-from schemas.participante import ParticipanteSchema 
-from models.participante import ParticipanteModel 
+#from schemas.participante import ParticipanteSchema 
+#from models.participante import ParticipanteModel 
 from schemas.notificacion import NotificacionSchema
 from models.notificacion import NotificacionModel 
 from marshmallow import pprint
 
-participante_schema = ParticipanteSchema()
 not_schema = NotificacionSchema()
 not_schemas = NotificacionSchema(many=True)
 
@@ -68,31 +67,53 @@ class NotificacionList(Resource):
             total_notifs = notifs.count()
         except NotificacionModel.DoesNotExist:
             return {'message': f"No sellos_card in participante with id{ id }"}
+        # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
+        # TODO: Buscar en Google TODO Python vsCode
         return {"Notificaciones":
                     NotificacionSchema(
                     only=(
                     "_id",
                     "titulo",
+                    # "id_participante"
+                    "mensaje",
+                    "fecha",
+                    "imagenIcon",
+                    "bar_text",
+                    "tipo_notificacion",
                     ), many=True).dump(notifs),
                 "Total": total_notifs    
                 },200
     
     @classmethod
+    def delete(self, id):
+        notif_id = ObjectId(id)
+        try:
+            notif = NotificacionModel.objects.get({'_id': notif_id})
+            notif.delete()
+        except NotificacionModel.DoesNotExist as exc:
+            print(exc)
+            return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 504 
+        return {"message": "Eliminado"}, 200
+    
+    @classmethod
     def post(self, id):
         part_id = ObjectId(id)
+        notificacion_json = request.get_json()
+        print(notificacion_json)
+        n = not_schema.load(notificacion_json)
+        print("loaded")
         try:
             notif = NotificacionModel(
                 id_participante=part_id,
-                titulo="Bienvenido al programa",
+                titulo=n["titulo"],
+                mensaje=n["mensaje"],
+                imagenIcon=n["imagenIcon"],
+                bar_text=n["bar_text"],
+                fecha=dt.datetime.now(),
+                tipo_notificacion=n["tipo_notificacion"],
             ).save()
+            print("guardado")
         except ValidationError as exc:
             print(exc.message)
-            return {"message": "No se pudo crear la notificacion."} 
-        return NotificacionSchema(
-            only=(
-            "titulo",
-            "id_participante"
-            )).dump(notif), 200
-
-
-
+            return {"message": "No se pudo crear la notificacion."}
+        return {"message": "Notificacion guardada con éxito."}

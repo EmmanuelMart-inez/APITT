@@ -11,10 +11,11 @@ from oa import oauth
 from models.empleado import Usuario
 from resources.facebook_login import FacebookLogin, FacebookAuthorize
 from resources.google_login import GoogleLogin, GoogleCallback
-from resources.participante import Participante, ParticipanteList
+from resources.participante import Participante, ParticipanteList, WelcomeParticipante
 from resources.upload import ImageUpload, ImageDownload
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList #Task:Desacoplar list
+from resources.producto import CatalogoList, Catalogo
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
@@ -50,10 +51,13 @@ api.add_resource(
 api.add_resource(GoogleLogin, "/login/google")
 api.add_resource(GoogleCallback, "/login/google/callback")
 api.add_resource(Participante, "/participante/<string:id>")
+api.add_resource(WelcomeParticipante, "/wparticipante/<string:id>")
 api.add_resource(ParticipanteList, "/participante")
 api.add_resource(TarjetaSellos, "/tarjetasellos/<string:id>")
 api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
+api.add_resource(Catalogo, "/catalogo/<string:id>")
+api.add_resource(CatalogoList, "/catalogo")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
 # api.add_resource(SetPassword, "/user/password")

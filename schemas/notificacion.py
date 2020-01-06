@@ -20,5 +20,10 @@ class NotificacionSchema(ma.Schema):
         fields = (
             "_id",
             "id_participante",
-            "titulo"
+            "titulo",
+            "mensaje",
+            "fecha",
+            "imagenIcon",
+            "bar_text",
+            "tipo_notificacion",
         )

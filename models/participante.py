@@ -12,6 +12,7 @@ connect('mongodb://localhost:27017/ej1')
 # another document (i.e. a Participante),
 
 
+
 class FacebookFieldsModel(EmbeddedMongoModel):
     public_fields = fields.CharField()
     email = fields.EmailField()
@@ -52,6 +53,8 @@ class ParticipanteModel(MongoModel):
         GoogleFieldsModel, default=[])
     tarjeta_sellos = fields.ReferenceField(TarjetaSellosModel)
     tarjeta_puntos = fields.ReferenceField(TarjetaPuntosModel)
+    #saldo = fields.FloatField(default=0)
+    #sellos = fields.IntegerField(default=0)
 
 
     @classmethod

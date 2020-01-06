@@ -97,10 +97,12 @@ class Producto(MongoModel):
         Atributos, default=[])
 
 
-class Catalogo(MongoModel):
+class CatalogoModel(MongoModel):
     tipo = fields.CharField()
     imagen = fields.URLField()
     titulo = fields.CharField()
     descripcion = fields.CharField()
     fecha_vigencia = fields.DateTimeField()
-    id_producto = fields.ReferenceField(Producto)
+    #id_producto = fields.ReferenceField(Producto)
+
+    #TODO: Agregar metodos DAO

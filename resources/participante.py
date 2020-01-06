@@ -13,12 +13,16 @@ from pymongo.errors import DuplicateKeyError
 
 from models.participante import ParticipanteModel
 from models.tarjeta import TarjetaSellosModel
+from schemas.notificacion import NotificacionSchema
+from models.notificacion import NotificacionModel 
 from schemas.participante import ParticipanteSchema
 from schemas.tarjeta import TarjetaSellosSchema
 from marshmallow import pprint
 
 participante_schema = ParticipanteSchema()
 selloscard_schema = TarjetaSellosSchema()
+not_schema = NotificacionSchema()
+not_schemas = NotificacionSchema(many=True)
 # user_schema = UserSchema()
 # Establish a connection to the database.
 connect("mongodb://localhost:27017/ej1")
@@ -33,7 +37,8 @@ class Participante(Resource):
             only=(
             "_id",
             "nombre",
-            "tarjeta_sellos"
+            "tarjeta_sellos", 
+            "tarjeta_puntos",
             )).dump(p), 200
         
 class ParticipanteList(Resource):
@@ -74,3 +79,30 @@ class ParticipanteList(Resource):
     def get(self):
         pass
 """
+
+
+class WelcomeParticipante(Resource):
+    @classmethod
+    def get(self, id):
+        p = ParticipanteModel.find_by_id(id)
+        if not p:
+            return {"message": "No se encontro el usuario"}
+        try:
+            part_id = ObjectId(id)
+            participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id})
+            notifs = participante_notifs_id
+            #for item in notifs:
+                # pprint(item)
+            total_notifs = notifs.count()
+        except NotificacionModel.DoesNotExist:
+            return {'message': f"No sellos_card in participante with id{ id }"}
+        return {
+            'Participante': ParticipanteSchema(
+            only=(
+            "_id",
+            "nombre",
+            "tarjeta_sellos", 
+            "tarjeta_puntos",
+            )).dump(p),
+            "total_notificaciones": total_notifs,
+            }, 200

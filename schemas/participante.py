@@ -1,5 +1,6 @@
 from ma import ma
 from marshmallow import Schema, fields, ValidationError
+from schemas.notificacion import NotificacionSchema
 
 class FacebookFieldsSchema(ma.Schema):
     #public_fields = fields.CharField()
@@ -106,6 +107,7 @@ class ParticipanteSchema(ma.Schema):
     google_fields = fields.Nested(GoogleFieldsSchema)
     tarjeta_sellos = fields.Nested(TarjetaSellosSchema)
     tarjeta_puntos = fields.Nested(TarjetaPuntosSchema)
+    #total_notificaciones = fields.Nested(NotificacionSchema)
 
     class Meta:
         fields = (
@@ -128,7 +130,7 @@ class ParticipanteSchema(ma.Schema):
             "facebook_fields",
             "google_fields",
             "tarjeta_sellos",
-            "tarjeta_puntos"
+            "tarjeta_puntos",
         )
 
 
