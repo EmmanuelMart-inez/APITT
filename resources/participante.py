@@ -37,6 +37,40 @@ class Participante(Resource):
             only=(
             "_id",
             "nombre",
+            "paterno",
+            "password",
+            "email",
+            "foto",
+            "fecha_nacimiento",
+            "tarjeta_sellos", 
+            "tarjeta_puntos",
+            )).dump(p), 200
+
+    @classmethod
+    def put(self, id):
+        p = ParticipanteModel.find_by_id(id)
+        if not p:
+            return {"message": "No se encontro el usuario"}
+        user_json = request.get_json()
+        # print(user_json)
+        user = participante_schema.load(user_json)
+        try:
+            p.nombre=user["nombre"]
+            p.password=user["password"]
+            p.email=user["email"]
+            p.foto=user["foto"]
+            p.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear el nuevo participante."}
+        return ParticipanteSchema(
+            only=(
+            "_id",
+            "nombre",
+            "password",
+            "email",
+            "foto",
+            "fecha_nacimiento",
             "tarjeta_sellos", 
             "tarjeta_puntos",
             )).dump(p), 200

@@ -9,7 +9,7 @@ class FacebookFieldsSchema(ma.Schema):
     last_name = fields.Str()
     email = fields.Email()
     birthday = fields.DateTime()
-    user_photo = fields.URL()  # "Change to ImageField"
+    user_photo = fields.URL()  #TODO: "Change to ImageField"
     gender = fields.Str()
 
     class Meta:

@@ -15,6 +15,8 @@ from resources.participante import Participante, ParticipanteList, WelcomePartic
 from resources.upload import ImageUpload, ImageDownload
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList #Task:Desacoplar list
+from resources.premio import Premio, PremioList #Task:Desacoplar list
+from resources.ayuda import  AyudaList
 from resources.producto import CatalogoList, Catalogo
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
@@ -58,6 +60,9 @@ api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
 api.add_resource(Catalogo, "/catalogo/<string:id>")
 api.add_resource(CatalogoList, "/catalogo")
+api.add_resource(Premio, "/premios")
+api.add_resource(PremioList, "/premios/<string:id>")
+api.add_resource(AyudaList, "/ayuda")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
 # api.add_resource(SetPassword, "/user/password")
