@@ -71,4 +71,23 @@ class CatalogoList(Resource):
 
 
 class Catalogo(Resource):
-    pass
+    @classmethod
+    def get(self, vartipo):
+        try:
+            catalogo = CatalogoModel.objects.raw({'tipo': vartipo})
+            #for item in notifs:
+            #    pprint(item)
+        except CatalogoModel.DoesNotExist:
+            return {'message': "No se encontro resultados que coincidan con su busqueda"}
+        # TODO: Agregar el URL para la solicitud al API del producto para generar pedido, el link para personalizarla
+        return {"Catalogo":
+                    CatalogoSchema(
+                    only=(
+                    "_id", 
+                    "tipo", 
+                    "imagen", 
+                    "titulo", 
+                    "descripcion", 
+                    "fecha_vigencia",
+                    ), many=True).dump(catalogo),
+                },200

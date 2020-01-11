@@ -58,7 +58,7 @@ api.add_resource(ParticipanteList, "/participante")
 api.add_resource(TarjetaSellos, "/tarjetasellos/<string:id>")
 api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
-api.add_resource(Catalogo, "/catalogo/<string:id>")
+api.add_resource(Catalogo, "/catalogo/<string:vartipo>")
 api.add_resource(CatalogoList, "/catalogo")
 api.add_resource(Premio, "/premios")
 api.add_resource(PremioList, "/premios/<string:id>")
@@ -72,3 +72,14 @@ if __name__ == "__main__":
     # oauth.init_app(app)
     #app.run(ssl_context="adhoc")
     app.run(port=5000)
+
+
+
+# TODO: 
+
+# Refactorizar
+# Clases de servicios y modelos
+    # Codigos
+    # Movimientos
+    # Encuesta (Cerrada y abierta)
+    # Logout

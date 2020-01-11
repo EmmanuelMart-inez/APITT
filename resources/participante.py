@@ -135,6 +135,7 @@ class WelcomeParticipante(Resource):
             only=(
             "_id",
             "nombre",
+            "sexo",
             "tarjeta_sellos", 
             "tarjeta_puntos",
             )).dump(p),
