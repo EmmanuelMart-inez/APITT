@@ -80,6 +80,7 @@ class NotificacionList(Resource):
                     "imagenIcon",
                     "bar_text",
                     "tipo_notificacion",
+                    "link"
                     ), many=True).dump(notifs),
                 "Total": total_notifs    
                 },200
@@ -90,6 +91,7 @@ class NotificacionList(Resource):
         try:
             notif = NotificacionModel.objects.get({'_id': notif_id})
             notif.delete()
+            #TODO: Marcar como eliminada la encuesta o desde el app hacerlo, checar
         except NotificacionModel.DoesNotExist as exc:
             print(exc)
             return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 504 
@@ -111,6 +113,7 @@ class NotificacionList(Resource):
                 bar_text=n["bar_text"],
                 fecha=dt.datetime.now(),
                 tipo_notificacion=n["tipo_notificacion"],
+                link=n["link"],
             ).save()
             print("guardado")
         except ValidationError as exc:

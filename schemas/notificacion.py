@@ -10,6 +10,7 @@ class NotificacionSchema(ma.Schema):
     imagenIcon = fields.Str()
     bar_text = fields.Str()
     tipo_notificacion = fields.Str()
+    link = fields.Str()
     #link_encuesta = fields.Nested(EncuestaSchema)
     #link_premio = fields.EmbeddedDocumentListField(
     #    Premio, default=[])
@@ -26,4 +27,5 @@ class NotificacionSchema(ma.Schema):
             "imagenIcon",
             "bar_text",
             "tipo_notificacion",
+            "link"
         )

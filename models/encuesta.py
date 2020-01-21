@@ -1,30 +1,37 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
-
+from models.participante import ParticipanteModel
 # Establish a connection to the database.
 connect('mongodb://localhost:27017/ej1')
 
 
-class EncuestaOpciones(MongoModel):
+class EncuestaOpcionesModel(MongoModel):
     descripcion = fields.CharField()
     calificacion = fields.CharField()
-    rubrica = fields.IntegerField()
+    rubrica = fields.FloatField()
+    icon = fields.URLField()
+    # Icono sirve para las encuestas del tipo
+    # emogie y puede ser un gif animado
 
-
-class EncuestaPagina(MongoModel):
+class EncuestaPaginaModel(MongoModel):
     titulo = fields.CharField()
     tipo = fields.CharField()
     metrica = fields.CharField()
-    opciones: = fields.EmbeddedDocumentListField(
-        EncuestaOpciones, default=[])
-    repuesta: fields.CharField()
+    opciones = fields.EmbeddedDocumentListField(
+        EncuestaOpcionesModel, default=[])
 
 
-class Encuesta(MongoModel):
+class EncuestaModel(MongoModel):
     titulo = fields.CharField()
     categoria = fields.CharField()
     fecha_creacion = fields.DateTimeField()
-    fecha_respuesta = fields.DateTimeField()
     metrica = fields.CharField()
-    puntos = fields.IntegerField()
-    paginas = fields.ReferenceField(EncuestaPagina)
-    id_participante = fields.ReferenceField(Participante)
+    puntos = fields.FloatField()
+    paginas = fields.EmbeddedDocumentListField(
+        EncuestaPaginaModel, default=[])
+    
+class ParticipantesEncuestaModel(MongoModel):
+    id_participante = fields.ReferenceField(ParticipanteModel)
+    id_encuesta = fields.ReferenceField(EncuestaModel)
+    fecha_respuesta = fields.DateTimeField()
+    estado = fields.CharField()
+    respuestas = fields.ListField(fields.CharField(), default=[], required=False)
