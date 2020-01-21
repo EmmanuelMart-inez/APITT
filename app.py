@@ -16,6 +16,7 @@ from resources.upload import ImageUpload, ImageDownload
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList #Task:Desacoplar list
 from resources.premio import Premio, PremioList #Task:Desacoplar list
+from resources.movimiento import MovimientoList, Movimiento
 from resources.ayuda import  AyudaList
 from resources.producto import CatalogoList, Catalogo
 
@@ -62,6 +63,8 @@ api.add_resource(Catalogo, "/catalogo/<string:vartipo>")
 api.add_resource(CatalogoList, "/catalogo")
 api.add_resource(Premio, "/premios")
 api.add_resource(PremioList, "/premios/<string:id>")
+api.add_resource(MovimientoList, "/movimientos/<string:id_participante>")
+api.add_resource(Movimiento, "/movimiento/<string:id_movimiento>")
 api.add_resource(AyudaList, "/ayuda")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
