@@ -38,5 +38,8 @@ class TarjetaSellosModel(MongoModel):
 
 class HistorialTarjetaSellos(MongoModel):
     fecha_obtencion = fields.DateTimeField()
-    id_tarjeta = ReferenceField(TarjetaSellosModel)
+    id_tarjeta = fields.CharField()
+    total_sellos = fields.CharField()
+    # id_tarjeta = ReferenceField(TarjetaSellosModel)
+    # total_sellos = fields.IntegerField()
     #id_empleado_otorga = ReferenceField(Usuario)

@@ -32,7 +32,7 @@ class GoogleFieldsModel(EmbeddedMongoModel):
 
 
 class ParticipanteModel(MongoModel):
-    #_id = fields.ObjectIdField(primary_key=True)
+    # _id = fields.ObjectIdField(primary_key=True)
     nombre = fields.CharField()
     paterno = fields.CharField()
     email = fields.EmailField()
@@ -63,6 +63,8 @@ class ParticipanteModel(MongoModel):
             ParticipanteModel(nombre=username).save()
             user = cls.objects.get({'nombre': username})
             return user
+        except cls.MultipleObjectsReturned:
+            return None
         except cls.DoesNotExist:
             return None
 
@@ -75,6 +77,13 @@ class ParticipanteModel(MongoModel):
         except cls.DoesNotExist:
             return None
 
+    @classmethod
+    def find_by_credentials(cls, email: str, password: str) -> "ParticipanteModel":
+        try:
+            user = cls.objects.get({'email': email, 'password': password})
+            return user
+        except cls.DoesNotExist:
+            return None
 
     @classmethod
     def save_to_db(self):

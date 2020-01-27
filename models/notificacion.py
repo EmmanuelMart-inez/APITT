@@ -16,6 +16,7 @@ class NotificacionModel(MongoModel):
     bar_text = fields.CharField()
     tipo_notificacion = fields.CharField()
     link = fields.CharField(default="null")
+    estado = fields.IntegerField()
     #link_encuesta = fields.EmbeddedDocumentListField(
     #    Encuesta, default=[])
     #link_premio = fields.EmbeddedDocumentListField(

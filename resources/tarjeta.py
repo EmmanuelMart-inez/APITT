@@ -50,6 +50,8 @@ class TarjetaSellos(Resource):
             "tarjeta_sellos"
             )).dump(p), 200
     
+    """Busca la tarjeta de sellos del participante 
+    con el _id dado en el URL"""
     @classmethod
     def get(self, id):
         parti_id = ObjectId(id)
@@ -63,6 +65,51 @@ class TarjetaSellos(Resource):
             "nombre",
             "tarjeta_sellos"
             )).dump(p), 200
+
+    """ Acumula los sellos en la tarjeta de sellos de un participante
+        Si el # sellos + los que se desea poner es < total asignar, de lo contrario 
+        poner el excedente y otorgarle un premio al participante y una notificación
+    """
+    @classmethod
+    def patch(self, id):
+        p = ParticipanteModel.find_by_id(id)
+        if not p:
+            return {'message': f"No participante with id:{ id }"}
+        tarjeta_sellos_json = request.get_json()
+        # print(user_json)
+        tarjeta = TarjetaSellosSchema().load(tarjeta_sellos_json)
+        # Validaciones
+        print(p.tarjeta_sellos.num_sellos)
+        print(tarjeta["num_sellos"])
+        p.tarjeta_sellos.num_sellos = p.tarjeta_sellos.num_sellos +tarjeta["num_sellos"] 
+        p.tarjeta_sellos.save()
+        return {"_id": str(p._id), 
+                "nombre": p.nombre,
+                "num_sellos": p.tarjeta_sellos.num_sellos}, 200
+        ## TODO: Generar notificación y premio, ademas de reiniciar la cuenta cuando se excede un límite
+
+    """ Actualiza los sellos en la tarjeta de sellos de un participante
+        Si el # sellos + los que se desea poner es < total asignar, de lo contrario 
+        poner el excedente y otorgarle un premio al participante y una notificación
+    """
+    @classmethod
+    def put(self, id):
+        p = ParticipanteModel.find_by_id(id)
+        if not p:
+            return {'message': f"No participante with id:{ id }"}
+        tarjeta_sellos_json = request.get_json()
+        # print(user_json)
+        tarjeta = TarjetaSellosSchema().load(tarjeta_sellos_json)
+        # Validaciones
+        print(p.tarjeta_sellos.num_sellos)
+        print(tarjeta["num_sellos"])
+        p.tarjeta_sellos.num_sellos = tarjeta["num_sellos"] 
+        p.tarjeta_sellos.save()
+        return {"_id": str(p._id), 
+                "nombre": p.nombre,
+                "num_sellos": p.tarjeta_sellos.num_sellos}, 200
+        ## TODO: Generar notificación y premio, ademas de reiniciar la cuenta cuando se excede un límite
+        
 
 class TarjetaPuntos(Resource):
     """Busca una tarjeta de sellos 

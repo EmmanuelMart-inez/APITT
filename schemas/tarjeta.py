@@ -37,6 +37,7 @@ class TarjetaSellosSchema(ma.Schema):
             "fecha_inicio", 
             "fecha_fin", 
             "num_sellos", 
+            "total_sellos",
             "titulo", 
             "descripcion", 
             "icono_off", 

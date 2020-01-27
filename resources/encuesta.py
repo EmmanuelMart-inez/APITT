@@ -58,6 +58,24 @@ class Encuesta(Resource):
     # TODO: Segmentación
     # TODO: Hacer opcionales los campos como ya antes lo habia hecho con algun endpoint
 
+    # Obtener todas las encuestas creadas
+    @classmethod
+    def get(self):
+        try:
+            encuestas = EncuestaModel.objects.all()
+        except EncuestaModel.DoesNotExist:
+            return {"message": "Encontró ninguna encuesta."}, 200   
+        return EncuestaSchema(
+                    only=(
+                        "_id",
+                        "categoria",
+                        "fecha_creacion",
+                        "fecha_respuesta",
+                        "metrica",
+                        "puntos",
+                        "paginas",
+                    ), many=True).dump(encuestas), 200
+
     # Crear encuesta
     @classmethod
     def post(self):
@@ -83,7 +101,28 @@ class Encuesta(Resource):
                 )).dump(e)
         }, 200
 
+class AdministradorEncuestas(Resource):
+    # Obtener el registro de todas las encuestas
+    # responidadas
+    @classmethod
+    def get(self):
+        try:
+            participantes_encuestas = ParticipantesEncuestaModel.objects.all()
+            pprint(participantes_encuestas)
+        except ParticipantesEncuestaModel.DoesNotExist:
+            return {"message": "Encontró ningún registro de encuesta, primero debe crear una encuesta para despues ser asignada en POST /controlencuestas."}, 200   
+        return ParticipanteEncuestaSchema(
+                    only=(
+                        "_id",
+                        "id_participante",
+                        "id_encuesta",
+                        "fecha_respuesta",
+                        "estado",
+                        "respuestas"
+                    ), many=True).dump(participantes_encuestas), 200
+
 class ControlEncuestas(Resource):
+    
     # Enviar nuevas encuestas a participantes
     @classmethod
     def post(self, id_encuesta):
@@ -104,8 +143,8 @@ class ControlEncuestas(Resource):
                         # pprint(participante)
                         # pprint(encuesta)
                         encuestaParticipante = ParticipantesEncuestaModel(
-                            id_participante=participante._id,
-                            id_encuesta=encuesta._id,
+                            id_participante=str(participante._id),
+                            id_encuesta=str(encuesta._id),
                             estado="sin responder",
                             fecha_respuesta=dt.datetime.now()
                         ).save()
@@ -116,8 +155,16 @@ class ControlEncuestas(Resource):
             except ParticipanteModel.DoesNotExist as exc:
                 print(exc.message)
                 return {"message": "No se encontro participantes."}
-            return {"message": "Operación exitosa, participantes agregados a la encuesta"}, 200
+            return {"message": "Operación exitosa, participantes agregados a la encuesta",
+            'info': ParticipanteEncuestaSchema(
+                only=(
+                "_id",
+                "estado"
+                )).dump(encuestaParticipante)
+            }, 200
         else:
+            # TODO: Regresar los datos del los participantes_encuestas para pruebas
+            # TODO: Ajustar la fecha solo si el estado es respondido, en caso de eliminar dejar igual
             return {"message": "No ingreso un metodo de segmentación"}, 500 
         
     # Enviar formulario de encuesta
@@ -149,3 +196,10 @@ class ControlEncuestas(Resource):
                 )).dump(participante_encuesta)
         }, 200
 
+
+
+#  TODO: Refactorizar los metodos a 
+    # /encuesta/id/participante/id
+    # -> desencadenar la creacioón de todas las notificaciones
+    # a los usuarios y tener una notificación única y una tabla
+    # auxiliar con todos los datos de estas

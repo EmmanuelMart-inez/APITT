@@ -11,13 +11,13 @@ from oa import oauth
 from models.empleado import Usuario
 from resources.facebook_login import FacebookLogin, FacebookAuthorize
 from resources.google_login import GoogleLogin, GoogleCallback
-from resources.participante import Participante, ParticipanteList, WelcomeParticipante
+from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion
 from resources.upload import ImageUpload, ImageDownload
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList #Task:Desacoplar list
 from resources.premio import Premio, PremioList #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
-from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas
+from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas
 from resources.ayuda import  AyudaList
 from resources.producto import CatalogoList, Catalogo
 
@@ -69,9 +69,11 @@ api.add_resource(Movimiento, "/movimiento/<string:id_movimiento>")
 api.add_resource(Encuesta, "/encuesta")
 api.add_resource(EncuestaParticipante, "/encuesta/<string:id_encuesta>")
 api.add_resource(ControlEncuestas, "/controlencuestas/<string:id_encuesta>")
+api.add_resource(AdministradorEncuestas, "/controlencuestas")
 api.add_resource(AyudaList, "/ayuda")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
+api.add_resource(Autenticacion, "/autenticacion")
 # api.add_resource(SetPassword, "/user/password")
 
 if __name__ == "__main__":

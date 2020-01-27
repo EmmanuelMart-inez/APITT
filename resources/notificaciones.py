@@ -25,6 +25,9 @@ not_schemas = NotificacionSchema(many=True)
 connect("mongodb://localhost:27017/ej1")
 
 class NotificacionList(Resource):
+
+    #Devolver aquellas en el estado sin eliminar
+
     @classmethod
     def get(self, id):
     #Participante id = part_id
@@ -60,7 +63,7 @@ class NotificacionList(Resource):
                 ]
             NOTE: Nice! :), en este caso, el primero es el que queremos.
             """
-            participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id})
+            participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id, 'estado': 0})
             notifs = participante_notifs_id
             #for item in notifs:
             #    pprint(item)
@@ -80,17 +83,33 @@ class NotificacionList(Resource):
                     "imagenIcon",
                     "bar_text",
                     "tipo_notificacion",
-                    "link"
+                    "link",
+                    "estado"
                     ), many=True).dump(notifs),
                 "Total": total_notifs    
                 },200
     
+    #Solo para el uso del admin del sistema
     @classmethod
     def delete(self, id):
         notif_id = ObjectId(id)
         try:
             notif = NotificacionModel.objects.get({'_id': notif_id})
             notif.delete()
+            #TODO: Marcar como eliminada la encuesta o desde el app hacerlo, checar
+        except NotificacionModel.DoesNotExist as exc:
+            print(exc)
+            return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 504 
+        return {"message": "Eliminado"}, 200
+    
+    ## Historial notificaciones
+    @classmethod
+    def patch(self, id):
+        notif_id = ObjectId(id)
+        try:
+            notif = NotificacionModel.objects.get({'_id': notif_id})
+            notif.estado=1
+            notif.save()
             #TODO: Marcar como eliminada la encuesta o desde el app hacerlo, checar
         except NotificacionModel.DoesNotExist as exc:
             print(exc)
@@ -114,6 +133,7 @@ class NotificacionList(Resource):
                 fecha=dt.datetime.now(),
                 tipo_notificacion=n["tipo_notificacion"],
                 link=n["link"],
+                estado=n["estado"],
             ).save()
             print("guardado")
         except ValidationError as exc:

@@ -74,6 +74,39 @@ class Participante(Resource):
             "tarjeta_sellos", 
             "tarjeta_puntos",
             )).dump(p), 200
+
+    @classmethod
+    def patch(self, id):
+        p = ParticipanteModel.find_by_id(id)
+        if not p:
+            return {"message": "No se encontro el usuario"}
+        user_json = request.get_json()
+        # print(user_json)
+        user = participante_schema.load(user_json)
+        try:
+            if "nombre" in user:
+                p.nombre=user["nombre"]
+            if "password" in user:
+                p.password=user["password"]
+            if "email" in user:
+                p.email=user["email"]
+            if "foto" in user:
+                p.foto=user["foto"]
+            p.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear el nuevo participante."}
+        return ParticipanteSchema(
+            only=(
+            "_id",
+            "nombre",
+            "password",
+            "email",
+            "foto",
+            "fecha_nacimiento",
+            "tarjeta_sellos", 
+            "tarjeta_puntos",
+            )).dump(p), 200
         
 class ParticipanteList(Resource):
     @classmethod
@@ -90,8 +123,24 @@ class ParticipanteList(Resource):
                 email=user["email"],
                 fecha_nacimiento=user["fecha_nacimiento"],
                 fecha_antiguedad=dt.datetime.now(),
-                foto=user["foto"],
-            ).save()
+                # foto=user["foto"],
+            )
+            # if "nombre" in user:
+            #     p.nombre = user["nombre"]
+            # if "paterno" in user:
+            #     p.paterno=user["paterno"]
+            # if "sexo" in user:
+            #     p.sexo=user["sexo"]
+            # if "password" in user:
+            #     p.password=user["password"]
+            # if "email" in user:
+            #     p.email=user["email"]
+            # if "fecha_nacimiento" in user:
+            #     p.fecha_nacimiento=user["fecha_nacimiento"]
+            # p.fecha_antiguedad=dt.datetime.now()
+            if "foto" in user:
+                p.foto=user["foto"]
+            p.save()
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear el nuevo participante."}   
@@ -101,6 +150,35 @@ class ParticipanteList(Resource):
                 "_id",
                 )).dump(p)
         }, 200
+
+
+class Autenticacion(Resource):
+        ## Login resource para participantes
+        ## A pesar de que en el modelo de el Participante no aparece definido
+        ## el _id, este atributo ya viene incluido, no hace falta especificarlo
+        ## puesto que se genera automaticamente
+        @classmethod
+        def post(self):
+            user_json = request.get_json()
+            user = participante_schema.load(user_json)
+            p = ParticipanteModel.find_by_credentials(user["email"], user["password"])
+            if not p:
+                return {"message": "No se encontro el participante con las credenciales proporcionas"}, 400
+            try:
+                part_id = ObjectId(p._id)
+                participante_notifs = NotificacionModel.objects.raw({'id_participante': part_id})
+                #for item in participante_notifs:
+                    # pprint(item)
+                total_notifs = participante_notifs.count()
+            except NotificacionModel.DoesNotExist:
+                return {'message': f"No notifications with participante with id{ id }"}
+            return ParticipanteSchema(
+                only=(
+                "_id",
+                )).dump(p), 200 
+            
+            
+
 
         #return item.json(), 201
 """
