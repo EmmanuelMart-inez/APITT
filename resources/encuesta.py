@@ -143,8 +143,8 @@ class ControlEncuestas(Resource):
                         # pprint(participante)
                         # pprint(encuesta)
                         encuestaParticipante = ParticipantesEncuestaModel(
-                            id_participante=str(participante._id),
-                            id_encuesta=str(encuesta._id),
+                            id_participante=participante._id,
+                            id_encuesta=encuesta._id,
                             estado="sin responder",
                             fecha_respuesta=dt.datetime.now()
                         ).save()
@@ -158,7 +158,7 @@ class ControlEncuestas(Resource):
             return {"message": "Operación exitosa, participantes agregados a la encuesta",
             'info': ParticipanteEncuestaSchema(
                 only=(
-                "_id",
+                "id_encuesta",
                 "estado"
                 )).dump(encuestaParticipante)
             }, 200
