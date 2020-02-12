@@ -205,7 +205,7 @@ class WelcomeParticipante(Resource):
             return {"message": "No se encontro el usuario"}
         try:
             part_id = ObjectId(id)
-            participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id})
+            participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id, 'estado': 0})
             notifs = participante_notifs_id
             #for item in notifs:
                 # pprint(item)
