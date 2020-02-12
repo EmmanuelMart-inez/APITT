@@ -132,15 +132,16 @@ class AdministradorEncuestas(Resource):
 class ControlEncuestas(Resource):
     
     # Enviar nuevas encuestas a participantes
+    # NOTE: id_participanteencuesta = id_encuesta ___ Ojo: fix later!
     @classmethod
-    def post(self, id_encuesta):
-        enc_id = ObjectId(id_encuesta)
+    def post(self, id_participanteencuesta):
+        enc_id = ObjectId(id_participanteencuesta)
         try:
             encuesta = EncuestaModel.objects.get({'_id': enc_id})
             # for item in encuesta:
             #     pprint(item)
         except EncuestaModel.DoesNotExist:
-            return {'message': f"No encuesta with participante with id{ id_encuesta }"}, 504
+            return {'message': f"No encuesta with participante with id{ id_participanteencuesta }"}, 504
         segmentacion = request.get_json()
         print(segmentacion)
         if(segmentacion["filtro"] == "todos"):
@@ -177,14 +178,14 @@ class ControlEncuestas(Resource):
         
     # Enviar formulario de encuesta
     @classmethod
-    def patch(self, id_encuesta):
-        e_id = ObjectId(id_encuesta)
+    def patch(self, id_participanteencuesta):
+        e_id = ObjectId(id_participanteencuesta)
         try:
             #_id de ParticipanteEncuestaModel 
             participante_encuesta = ParticipantesEncuestaModel.objects.get({'_id': e_id})
                 # pprint(item)
         except EncuestaModel.DoesNotExist:
-            return {'message': f"No encuesta with id{ id_encuesta }"}
+            return {'message': f"No ParticipanteEncuesta with id{ id_participanteencuesta }"}
         
         respuesta_json = request.get_json()
         respuesta = ParticipanteEncuestaSchema().load(respuesta_json)
@@ -204,6 +205,21 @@ class ControlEncuestas(Resource):
                 )).dump(participante_encuesta)
         }, 200
 
+    # Consultar la respuesta de un participante a una encuesta por id: id_participanteencuesta
+    @classmethod
+    def get(self, id_participanteencuesta):
+        resultado = ParticipantesEncuestaModel.find_by_id(id_participanteencuesta)
+        if not resultado:
+            return {"message": "No se encontro el registro de respuesta de encuesta que coincida con el id dado"}, 404
+        return ParticipanteEncuestaSchema(
+                    only=(
+                        "_id",
+                        "id_participante",
+                        "id_encuesta",
+                        "fecha_respuesta",
+                        "estado",
+                        "respuestas"
+                    )).dump(resultado), 200
 
 
 #  TODO: Refactorizar los metodos a 
@@ -211,3 +227,10 @@ class ControlEncuestas(Resource):
     # -> desencadenar la creacioón de todas las notificaciones
     # a los usuarios y tener una notificación única y una tabla
     # auxiliar con todos los datos de estas
+
+
+class Respuestas(Resource):
+    # Obtener información asociada a las encuestas y las respuestas que los participantes han de responder
+    @classmethod
+    def get(self, id_encuesta, id_participante):
+        pass

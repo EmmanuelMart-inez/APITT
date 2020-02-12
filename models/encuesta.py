@@ -1,5 +1,6 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from models.participante import ParticipanteModel
+from bson.objectid import ObjectId
 # Establish a connection to the database.
 connect('mongodb://localhost:27017/ej1')
 
@@ -35,3 +36,12 @@ class ParticipantesEncuestaModel(MongoModel):
     fecha_respuesta = fields.DateTimeField()
     estado = fields.CharField()
     respuestas = fields.ListField(fields.CharField(), default=[], required=False)
+
+    @classmethod
+    def find_by_id(cls, _Objectid: str) -> "ParticipantesEncuestaModel":
+        try:
+            oid = ObjectId(_Objectid)
+            pencuesta = cls.objects.get({'_id': oid})
+            return pencuesta
+        except cls.DoesNotExist:
+            return None
