@@ -31,8 +31,8 @@ class EncuestaModel(MongoModel):
         EncuestaPaginaModel, default=[])
     
 class ParticipantesEncuestaModel(MongoModel):
-    id_participante = fields.ReferenceField(ParticipanteModel)
-    id_encuesta = fields.ReferenceField(EncuestaModel)
+    id_participante = fields.CharField()
+    id_encuesta = fields.CharField()
     fecha_respuesta = fields.DateTimeField()
     estado = fields.CharField()
     respuestas = fields.ListField(fields.CharField(), default=[], required=False)

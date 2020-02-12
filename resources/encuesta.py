@@ -116,7 +116,8 @@ class AdministradorEncuestas(Resource):
     def get(self):
         try:
             participantes_encuestas = ParticipantesEncuestaModel.objects.all()
-            pprint(participantes_encuestas)
+            # for index, pencuesta in enumerate(participantes_encuestas):
+            #     pprint(str(pencuesta.id_encuesta))
         except ParticipantesEncuestaModel.DoesNotExist:
             return {"message": "Encontró ningún registro de encuesta, primero debe crear una encuesta para despues ser asignada en POST /controlencuestas."}, 200   
         return ParticipanteEncuestaSchema(
@@ -201,6 +202,8 @@ class ControlEncuestas(Resource):
                 'info': ParticipanteEncuestaSchema(
                 only=(
                 "_id",
+                # "id_encuesta",
+                # "id_participante",
                 "estado"
                 )).dump(participante_encuesta)
         }, 200
