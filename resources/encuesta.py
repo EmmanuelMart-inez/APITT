@@ -83,14 +83,22 @@ class Encuesta(Resource):
         # pprint(encuesta_json)
         encuesta = EncuestaSchema().load(encuesta_json)
         try:
-            e = EncuestaModel(
-                titulo=encuesta["titulo"],
-                categoria=encuesta["categoria"],
-                fecha_creacion=dt.datetime.now(),
-                metrica=encuesta["metrica"],
-                puntos=encuesta["puntos"],
-                paginas=encuesta["paginas"]
-            ).save()
+            e = EncuestaModel()
+            if "titulo" in encuesta:
+                e.titulo=encuesta["titulo"]
+            if "categoria" in encuesta:
+                e.categoria=encuesta["categoria"]
+            e.fecha_creacion=dt.datetime.now()
+            if "metrica" in encuesta:
+                e.metrica=encuesta["metrica"]
+            if "puntos" in encuesta:
+                e.puntos=encuesta["puntos"]
+            if "paginas" in encuesta:
+                e.paginas=encuesta["paginas"]
+                pprint(e.paginas)
+                # for pagina in e.paginas:
+                #     print(1)
+            e.save()
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear una nueva encuesta."}   

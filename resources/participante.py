@@ -111,6 +111,10 @@ class Participante(Resource):
 class ParticipanteList(Resource):
     @classmethod
     def post(self):
+        # Checar si el correo o _id del usuario ya existe
+        #  p = ParticipanteModel.find_by_id(id)
+        # if p:
+        #     return {"message": "Ya existe este usuario, trata recuperar tu contraseña"}
         user_json = request.get_json()
         print(user_json)
         user = participante_schema.load(user_json)
