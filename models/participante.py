@@ -67,6 +67,16 @@ class ParticipanteModel(MongoModel):
             return None
         except cls.DoesNotExist:
             return None
+    
+    @classmethod
+    def find_by_email(cls, email: str) -> "ParticipanteModel":
+        try:
+            user = cls.objects.get({'email': email})
+            return user
+        except cls.MultipleObjectsReturned:
+            return None
+        except cls.DoesNotExist:
+            return None
 
     @classmethod
     def find_by_id(cls, _Objectid: str) -> "ParticipanteModel":
