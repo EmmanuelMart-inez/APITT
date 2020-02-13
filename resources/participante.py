@@ -118,34 +118,25 @@ class ParticipanteList(Resource):
         # Checar si el correo o _id del usuario ya existe
         print(user["email"])
         p = ParticipanteModel.find_by_email(user["email"])
-        print(p)
-        if p is None:
+        # print(p)
+        if p is not None:
             return {"message": "Ya existe este usuario, inicia sesión, trata con otro correo o recupera tu contraseña"}, 400
         try:
-            p = ParticipanteModel(
-                nombre=user["nombre"],
-                paterno=user["paterno"],
-                sexo=user["sexo"],
-                password=user["password"],
-                email=user["email"],
-                fecha_nacimiento=user["fecha_nacimiento"],
-                fecha_antiguedad=dt.datetime.now(),
-                # foto=user["foto"],
-            )
-            # if "nombre" in user:
-            #     p.nombre = user["nombre"]
-            # if "paterno" in user:
-            #     p.paterno=user["paterno"]
-            # if "sexo" in user:
-            #     p.sexo=user["sexo"]
-            # if "password" in user:
-            #     p.password=user["password"]
-            # if "email" in user:
-            #     p.email=user["email"]
-            # if "fecha_nacimiento" in user:
-            #     p.fecha_nacimiento=user["fecha_nacimiento"]
-            # p.fecha_antiguedad=dt.datetime.now()
-            if "foto" in user:
+            p = ParticipanteModel()
+            if "nombre" in user_json:
+                p.nombre = user["nombre"]
+            if "paterno" in user_json:
+                p.paterno=user["paterno"]
+            if "sexo" in user_json:
+                p.sexo=user["sexo"]
+            if "password" in user_json:
+                p.password=user["password"]
+            if "email" in user_json:
+                p.email=user["email"]
+            if "fecha_nacimiento" in user_json:
+                p.fecha_nacimiento=user["fecha_nacimiento"]
+            p.fecha_antiguedad=dt.datetime.now()
+            if "foto" in user_json:
                 p.foto=user["foto"]
             p.save()
         except ValidationError as exc:
@@ -172,6 +163,8 @@ class Autenticacion(Resource):
             if not p:
                 return {"message": "No se encontro el participante con las credenciales proporcionas"}, 400
             try:
+                pprint(user)
+                pprint(user_json)
                 part_id = ObjectId(p._id)
                 participante_notifs = NotificacionModel.objects.raw({'id_participante': part_id})
                 #for item in participante_notifs:
@@ -184,11 +177,11 @@ class Autenticacion(Resource):
                 "_id",
                 )).dump(p), 200 
             
-class RegistroSocial(Resource):
-    pass
+# class RegistroSocial(Resource):
+#     pass
 
-class LoginSocial(Resource):
-    pass
+# class LoginSocial(Resource):
+#     pass
 
 
         #return item.json(), 201
