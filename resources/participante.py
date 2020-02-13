@@ -92,6 +92,8 @@ class Participante(Resource):
                 p.email=user["email"]
             if "foto" in user:
                 p.foto=user["foto"]
+            if "sexo" in user:
+                p.sexo=user["sexo"]
             p.save()
         except ValidationError as exc:
             print(exc.message)
@@ -151,50 +153,89 @@ class ParticipanteList(Resource):
 
 
 class Autenticacion(Resource):
-        ## Login resource para participantes
-        ## A pesar de que en el modelo de el Participante no aparece definido
-        ## el _id, este atributo ya viene incluido, no hace falta especificarlo
-        ## puesto que se genera automaticamente
-        @classmethod
-        def post(self):
-            user_json = request.get_json()
-            user = participante_schema.load(user_json)
-            p = ParticipanteModel.find_by_credentials(user["email"], user["password"])
-            if not p:
-                return {"message": "No se encontro el participante con las credenciales proporcionas"}, 400
-            try:
-                pprint(user)
-                pprint(user_json)
-                part_id = ObjectId(p._id)
-                participante_notifs = NotificacionModel.objects.raw({'id_participante': part_id})
-                #for item in participante_notifs:
-                    # pprint(item)
-                total_notifs = participante_notifs.count()
-            except NotificacionModel.DoesNotExist:
-                return {'message': f"No notifications with participante with id{ id }"}
-            return ParticipanteSchema(
+    ## Login resource para participantes
+    ## A pesar de que en el modelo de el Participante no aparece definido
+    ## el _id, este atributo ya viene incluido, no hace falta especificarlo
+    ## puesto que se genera automaticamente
+    @classmethod
+    def post(self):
+        user_json = request.get_json()
+        user = participante_schema.load(user_json)
+        p = ParticipanteModel.find_by_credentials(user["email"], user["password"])
+        if not p:
+            return {"message": "No se encontro el participante con las credenciales proporcionas"}, 400
+        return ParticipanteSchema(
+            only=(
+            "_id",
+            )).dump(p), 200 
+            
+class RegistroSocialNetwork(Resource):
+    @classmethod
+    def post(self, socialNetwork):
+        user_json = request.get_json()
+        # print(user_json)
+        user = participante_schema.load(user_json)
+        
+        # Checar si el correo o _id del usuario ya existe
+        print(user["email"])
+        if socialNetwork == 'facebook':
+            p = ParticipanteModel.find_by_socialNetwork(socialNetwork, user["facebook_id"], user["email"])
+        if socialNetwork == 'google':
+            p = ParticipanteModel.find_by_socialNetwork(socialNetwork, user["google_id"], user["email"])
+        print(p)
+        if p is not None:
+            {'message': "El participante que trató de registrar ya existe",
+                'ObjectId': ParticipanteSchema(
                 only=(
                 "_id",
-                )).dump(p), 200 
-            
-# class RegistroSocial(Resource):
-#     pass
+                )).dump(p)
+        }, 200
+        try:
+            p = ParticipanteModel()
+            if "google_id" in user_json:
+                p.google_id = user["google_id"]
+            if "facebook_id" in user_json:
+                p.facebook_id = user["facebook_id"]
+            if "nombre" in user_json:
+                p.nombre = user["nombre"]
+            if "paterno" in user_json:
+                p.paterno=user["paterno"]
+            if "sexo" in user_json:
+                p.sexo=user["sexo"]
+            if "password" in user_json:
+                p.password=user["password"]
+            if "email" in user_json:
+                p.email=user["email"]
+            if "fecha_nacimiento" in user_json:
+                p.fecha_nacimiento=user["fecha_nacimiento"]
+            p.fecha_antiguedad=dt.datetime.now()
+            if "foto" in user_json:
+                p.foto=user["foto"]
+            p.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear el nuevo participante."}   
+        return {'message': "Participante creado",
+                'ObjectId': ParticipanteSchema(
+                only=(
+                "_id",
+                )).dump(p)
+        }, 200
 
-# class LoginSocial(Resource):
-#     pass
-
-
-        #return item.json(), 201
-"""
-
+# TODO: Añadir los valores id de red social al registrar un participante por RED SOCIAL
+class LoginSocialNetwork(Resource):
     @classmethod
-    def delete(self):
-        pass
-
-class ParticipanteList(Resource):
-    def get(self):
-        pass
-"""
+    def post(self, socialNetwork):
+        user_json = request.get_json()
+        # user = participante_schema.load(user_json)
+        p = ParticipanteModel.find_by_socialNetwork(socialNetwork, user_json["id"], user_json["email"])
+        print(p)
+        if p is None:
+            return {"message": "No se encontro el participante con las credenciales proporcionas, favor de registrarse"}, 400
+        return ParticipanteSchema(
+            only=(
+            "_id",
+            )).dump(p), 200 
 
 
 class WelcomeParticipante(Resource):

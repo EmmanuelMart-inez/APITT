@@ -49,8 +49,10 @@ class ParticipanteModel(MongoModel):
     fresh_token = fields.CharField()
     facebook_fields = fields.EmbeddedDocumentListField(
         FacebookFieldsModel, default=[])
+    facebook_id = fields.CharField()
     google_fields = fields.EmbeddedDocumentListField(
         GoogleFieldsModel, default=[])
+    google_id = fields.CharField()
     tarjeta_sellos = fields.ReferenceField(TarjetaSellosModel)
     tarjeta_puntos = fields.ReferenceField(TarjetaPuntosModel)
     #saldo = fields.FloatField(default=0)
@@ -71,11 +73,28 @@ class ParticipanteModel(MongoModel):
     @classmethod
     def find_by_email(cls, email: str) -> "ParticipanteModel":
         try:
-            user = cls.objects.get({'email': email})
+            user = cls.objects.get({'id': id})
             return user
         except cls.MultipleObjectsReturned:
             return None
         except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def find_by_socialNetwork(cls, socialNetwork: str, id: str, email: str) -> "ParticipanteModel":
+        try:
+            print(socialNetwork, id)
+            if socialNetwork == 'google':
+                user = cls.objects.get({'google_id': id})
+                print(user)
+            if socialNetwork == 'facebook':
+                user = cls.objects.get({'facebook_id': id})
+            return user
+        except cls.MultipleObjectsReturned:
+            print("multiple objects")
+            return None
+        except cls.DoesNotExist:
+            print("does not exist")
             return None
 
     @classmethod

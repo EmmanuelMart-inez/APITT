@@ -104,7 +104,9 @@ class ParticipanteSchema(ma.Schema):
     token_user = fields.Str()
     fresh_token = fields.Str()
     facebook_fields = fields.Nested(FacebookFieldsSchema)
+    facebook_id = fields.Str()
     google_fields = fields.Nested(GoogleFieldsSchema)
+    google_id = fields.Str()
     tarjeta_sellos = fields.Nested(TarjetaSellosSchema)
     tarjeta_puntos = fields.Nested(TarjetaPuntosSchema)
     #total_notificaciones = fields.Nested(NotificacionSchema)
@@ -112,6 +114,8 @@ class ParticipanteSchema(ma.Schema):
     class Meta:
         fields = (
             "_id", 
+            "google_id",
+            "facebook_id",
             "nombre",
             "sexo",
             "paterno",
