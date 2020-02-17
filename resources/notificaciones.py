@@ -14,11 +14,13 @@ from pymongo.errors import DuplicateKeyError
 
 #from schemas.participante import ParticipanteSchema 
 #from models.participante import ParticipanteModel 
-from schemas.notificacion import NotificacionSchema
-from models.notificacion import NotificacionModel 
+from schemas.notificacion import NotificacionSchema, NotificacionTemplateSchema
+from models.notificacion import NotificacionModel, NotificacionTemplateModel  
 from marshmallow import pprint
 
 not_schema = NotificacionSchema()
+not_schemas_template = NotificacionTemplateSchema(many=True)
+not_schema_template = NotificacionTemplateSchema()
 not_schemas = NotificacionSchema(many=True)
 
 # Establish a connection to the database.
@@ -31,7 +33,6 @@ class NotificacionList(Resource):
     @classmethod
     def get(self, id):
     #Participante id = part_id
-        part_id = ObjectId(id)
         try:
             """
             Dependiendo del id que se consulta Pymodm genera
@@ -63,17 +64,21 @@ class NotificacionList(Resource):
                 ]
             NOTE: Nice! :), en este caso, el primero es el que queremos.
             """
+            part_id = ObjectId(id)
             participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id, 'estado': 0})
-            notifs = participante_notifs_id
+            notifsList=[]
+            for n in participante_notifs_id:
+                pprint(n.id_notificacion)
+                notifsList.append(n.id_notificacion)
             #for item in notifs:
             #    pprint(item)
-            total_notifs = notifs.count()
+            total_notifs = len(notifsList)
         except NotificacionModel.DoesNotExist:
             return {'message': f"No sellos_card in participante with id{ id }"}
         # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
         # TODO: Buscar en Google TODO Python vsCode
         return {"Notificaciones":
-                    NotificacionSchema(
+                    NotificacionTemplateSchema(
                     only=(
                     "_id",
                     "titulo",
@@ -84,12 +89,13 @@ class NotificacionList(Resource):
                     "bar_text",
                     "tipo_notificacion",
                     "link",
-                    "estado"
-                    ), many=True).dump(notifs),
+                    # "estado"
+                    ), many=True).dump(notifsList),
                 "Total": total_notifs    
                 },200
     
-    #Solo para el uso del admin del sistema
+    #Solo para el uso del admin del sistema 
+    # Es id de encuesta, no Template
     @classmethod
     def delete(self, id):
         notif_id = ObjectId(id)
@@ -99,7 +105,7 @@ class NotificacionList(Resource):
             #TODO: Marcar como eliminada la encuesta o desde el app hacerlo, checar
         except NotificacionModel.DoesNotExist as exc:
             print(exc)
-            return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 504 
+            return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 400 
         return {"message": "Eliminado"}, 200
     
     ## Historial notificaciones
@@ -116,6 +122,7 @@ class NotificacionList(Resource):
             return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 504 
         return {"message": "Eliminado"}, 200
     
+    # Crear una notificación para un participante
     @classmethod
     def post(self, id):
         part_id = ObjectId(id)
@@ -126,6 +133,43 @@ class NotificacionList(Resource):
         try:
             notif = NotificacionModel(
                 id_participante=part_id,
+                id_notificacion=n["id_notificacion"],
+                estado=n["estado"],
+            ).save()            
+            print("guardado")
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear la notificacion."}
+        return {"message": "Notificacion guardada con éxito."}
+
+
+class NotificacionesAdminList(Resource):
+    # Obtiene los templates de las notificaciones que han sido creadas
+    @classmethod
+    def get(self):
+        try:
+            all_notifs = NotificacionTemplateModel.objects.raw({})
+        except NotificacionTemplateModel.DoesNotExist:
+            return {'message': f"No se encontró ninguna notificación"}
+        # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
+        # TODO: Buscar en Google TODO Python vsCode
+        return  NotificacionTemplateSchema(
+                    only=(
+                    "_id",
+                    "titulo",
+                    "fecha",
+                    "tipo_notificacion"
+                    ), many=True).dump(all_notifs),200
+
+    # Crea un template de notificaciones
+    @classmethod
+    def post(self):
+        notificacion_json = request.get_json()
+        print(notificacion_json)
+        n = not_schemas_template.load(notificacion_json)
+        print("loaded")
+        try:
+            template = NotificacionTemplateModel(
                 titulo=n["titulo"],
                 mensaje=n["mensaje"],
                 imagenIcon=n["imagenIcon"],
@@ -133,10 +177,85 @@ class NotificacionList(Resource):
                 fecha=dt.datetime.now(),
                 tipo_notificacion=n["tipo_notificacion"],
                 link=n["link"],
-                estado=n["estado"],
             ).save()
             print("guardado")
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear la notificacion."}
-        return {"message": "Notificacion guardada con éxito."}
+        return {"message": "Notificacion guardada con éxito.",
+                    "_id": str(template._id)}
+
+
+class NotificacionesAdmin(Resource):
+    # Obtiene el template de una notificación
+    @classmethod
+    def get(self, id):
+        print("Admin")
+        n = NotificacionTemplateModel.find_by_id(id)
+        
+        if not n:
+            print("no se encontro")
+            return {"message": "No se encontro el la notificación!"}, 404
+        return NotificacionTemplateSchema(
+            only=(
+            "_id",
+            "titulo",
+            "mensaje",
+            "fecha",
+            "imagenIcon",
+            "bar_text",
+            "tipo_notificacion",
+            "link",
+            )).dump(n), 200
+
+    @classmethod
+    def delete(self, id):
+        notif_id = ObjectId(id)
+        try:
+            notif = NotificacionTemplateModel.objects.get({'_id': notif_id})
+            notif.delete()
+            #TODO: Marcar como eliminada la encuesta o desde el app hacerlo, checar
+        except NotificacionTemplateModel.DoesNotExist as exc:
+            print(exc)
+            return {"message": "No se pudo eliminar el template de la notificacion, porque no existe."}, 400 
+        return {"message": "Eliminado"}, 200
+
+    #  Editar una notifiación existente
+    @classmethod
+    def patch(self, id):
+        n = NotificacionTemplateModel.find_by_id(id)
+        if not n:
+            return {"message": "No se encontro el la notificación!"}
+        noti_json = request.get_json()
+        # print(user_json)
+        noti = not_schema_template.load(noti_json)
+        try:
+            if "tipo_notificacion" in noti:
+                n.tipo_notificacion=noti["tipo_notificacion"]
+            if "imagenIcon" in noti:
+                n.imagenIcon=noti["imagenIcon"]
+            if "titulo" in noti:
+                n.titulo=noti["titulo"]
+            if "fecha" in noti:
+                n.fecha=noti["fecha"]
+            if "bar_text" in noti:
+                n.bar_text=noti["bar_text"]
+            if "mensaje" in noti:
+                n.mensaje=noti["mensaje"]
+            if "link" in noti:
+                n.link=noti["link"]
+            n.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo actualizar la notificación."}
+        return NotificacionTemplateSchema(
+            only=(
+            "_id",
+            "titulo",
+            "mensaje",
+            "fecha",
+            "imagenIcon",
+            "bar_text",
+            "tipo_notificacion",
+            "link",
+            )).dump(n), 200

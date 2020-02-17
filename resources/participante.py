@@ -182,14 +182,15 @@ class RegistroSocialNetwork(Resource):
             p = ParticipanteModel.find_by_socialNetwork(socialNetwork, user["facebook_id"], user["email"])
         if socialNetwork == 'google':
             p = ParticipanteModel.find_by_socialNetwork(socialNetwork, user["google_id"], user["email"])
+        p_check_pass = ParticipanteModel.find_by_email(user["email"]) 
         print(p)
-        if p is not None:
-            {'message': "El participante que trató de registrar ya existe",
+        if p is not None or p_check_pass is not None:
+            return {'message': "El participante que trató de registrar ya existe",
                 'ObjectId': ParticipanteSchema(
                 only=(
                 "_id",
                 )).dump(p)
-        }, 200
+        }, 404
         try:
             p = ParticipanteModel()
             if "google_id" in user_json:
@@ -222,7 +223,6 @@ class RegistroSocialNetwork(Resource):
                 )).dump(p)
         }, 200
 
-# TODO: Añadir los valores id de red social al registrar un participante por RED SOCIAL
 class LoginSocialNetwork(Resource):
     @classmethod
     def post(self, socialNetwork):

@@ -73,7 +73,7 @@ class ParticipanteModel(MongoModel):
     @classmethod
     def find_by_email(cls, email: str) -> "ParticipanteModel":
         try:
-            user = cls.objects.get({'id': id})
+            user = cls.objects.get({'email': email})
             return user
         except cls.MultipleObjectsReturned:
             return None

@@ -14,7 +14,7 @@ from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
 from resources.upload import ImageUpload, ImageDownload
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
-from resources.notificaciones import NotificacionList #Task:Desacoplar list
+from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin #Task:Desacoplar list
 from resources.premio import Premio, PremioList #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
 from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas
@@ -60,6 +60,8 @@ api.add_resource(ParticipanteList, "/participante")
 api.add_resource(TarjetaSellos, "/tarjetasellos/<string:id>")
 api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
+api.add_resource(NotificacionesAdminList, "/notificaciones")
+api.add_resource(NotificacionesAdmin, "/admin/notificaciones/<string:id>")
 api.add_resource(Catalogo, "/catalogo/<string:vartipo>")
 api.add_resource(CatalogoList, "/catalogo")
 api.add_resource(Premio, "/premios")
