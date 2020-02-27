@@ -150,7 +150,7 @@ class NotificacionesAdminList(Resource):
         try:
             all_notifs = NotificacionTemplateModel.objects.raw({})
         except NotificacionTemplateModel.DoesNotExist:
-            return {'message': f"No se encontró ninguna notificación"}
+            return {'message': f"No se encontró ninguna notificación"}, 404
         # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
         # TODO: Buscar en Google TODO Python vsCode
         return  NotificacionTemplateSchema(
@@ -166,18 +166,28 @@ class NotificacionesAdminList(Resource):
     def post(self):
         notificacion_json = request.get_json()
         print(notificacion_json)
-        n = not_schemas_template.load(notificacion_json)
+        n = not_schema_template.load(notificacion_json)
+        pprint(n)
         print("loaded")
         try:
-            template = NotificacionTemplateModel(
-                titulo=n["titulo"],
-                mensaje=n["mensaje"],
-                imagenIcon=n["imagenIcon"],
-                bar_text=n["bar_text"],
-                fecha=dt.datetime.now(),
-                tipo_notificacion=n["tipo_notificacion"],
-                link=n["link"],
-            ).save()
+            template = NotificacionTemplateModel()
+            if "titulo" in n:
+                template.titulo=n["titulo"]
+            if "mensaje" in n:
+                template.mensaje=n["mensaje"]
+            if "imagenIcon" in n:
+                template.imagenIcon=n["imagenIcon"]
+            if "bar_text" in n:
+                template.bar_text=n["bar_text"]
+            if "fecha" in n:
+                template.fecha=n["fecha"]
+            else:
+                template.fecha=dt.datetime.now()
+            if  "tipo_notificacion" in n: 
+                template.tipo_notificacion=n["tipo_notificacion"]
+            if "link" in n:
+                template.link=n["link"]
+            template.save()
             print("guardado")
         except ValidationError as exc:
             print(exc.message)
