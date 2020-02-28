@@ -32,3 +32,19 @@ class PremioSchema(ma.Schema):
             "id_producto",
             "id_participante"
         )
+
+class PremioParticipanteSchema(ma.Schema):
+    _id = fields.Str()
+    id_participante = fields.Str()
+    id_premio = fields.Str()
+    id_promocion = fields.Str()
+    estado = fields.Integer()
+
+    class Meta:
+        fields = (
+            "_id",
+            "id_participante",
+            "id_premio",
+            "id_promocion",
+            "estado"
+        )

@@ -13,7 +13,7 @@ from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError
 
 #from schemas.participante import ParticipanteSchema 
-#from models.participante import ParticipanteModel 
+from models.participante import ParticipanteModel 
 from schemas.notificacion import NotificacionSchema, NotificacionTemplateSchema
 from models.notificacion import NotificacionModel, NotificacionTemplateModel  
 from marshmallow import pprint
@@ -95,7 +95,7 @@ class NotificacionList(Resource):
                 },200
     
     #Solo para el uso del admin del sistema 
-    # Es id de encuesta, no Template
+    # Es id de notificacion, no Template
     @classmethod
     def delete(self, id):
         notif_id = ObjectId(id)
@@ -161,7 +161,8 @@ class NotificacionesAdminList(Resource):
                     "tipo_notificacion"
                     ), many=True).dump(all_notifs),200
 
-    # Crea un template de notificaciones
+    # Crea un template de notificaciones y si no hay una segmentación esta se envia a todos
+    # la funcionalidad de segmentación no se implementa aun
     @classmethod
     def post(self):
         notificacion_json = request.get_json()
@@ -188,10 +189,21 @@ class NotificacionesAdminList(Resource):
             if "link" in n:
                 template.link=n["link"]
             template.save()
-            print("guardado")
+
+            # Enviar a todos los participantes
+            for p in ParticipanteModel.objects.all():
+                # part_id = ObjectId(id)
+                notif = NotificacionModel(
+                id_participante=p._id,
+                id_notificacion=template._id,
+                estado=0,
+                # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+                ).save()            
+                # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
+            return {"message": "Notificacion guardada con éxito."}
         except ValidationError as exc:
             print(exc.message)
-            return {"message": "No se pudo crear la notificacion."}
+            return {"message": "No se pudo crear o enviar la notificacion."}
         return {"message": "Notificacion guardada con éxito.",
                     "_id": str(template._id)}
 

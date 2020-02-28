@@ -76,7 +76,10 @@ class Encuesta(Resource):
                         "paginas",
                     ), many=True).dump(encuestas), 200
 
-    # Crear encuesta
+    # Crear encuesta 
+    # Tentativamente enviar encuesta a todos los participantes
+    # En un futuro añadir la segmentacion a este mmismo recurso dado que no se necesitan templates 
+    # o por lo menos aun no se encuentra razones para necesitarlos
     @classmethod
     def post(self):
         encuesta_json = request.get_json()
@@ -99,6 +102,19 @@ class Encuesta(Resource):
                 # for pagina in e.paginas:
                 #     print(1)
             e.save()
+            for participante in ParticipanteModel.objects.all():
+                try:
+                    # pprint(participante)
+                    # pprint(encuesta)
+                    encuestaParticipante = ParticipantesEncuestaModel(
+                        id_participante=participante._id,
+                        id_encuesta=e._id,
+                        estado="sin responder"
+                    ).save()
+                except ValidationError as exc:
+                    # eliminar los que fueron agregados
+                    print(exc.message, exc)
+                    return {"message": "No se pudo crear una nueva encuesta."}
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear una nueva encuesta."}   
@@ -156,7 +172,7 @@ class ControlEncuestas(Resource):
                             id_participante=participante._id,
                             id_encuesta=encuesta._id,
                             estado="sin responder",
-                            fecha_respuesta=dt.datetime.now()
+                            fecha_creacion=dt.datetime.now()
                         ).save()
                     except ValidationError as exc:
                         # eliminar los que fueron agregados

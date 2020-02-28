@@ -16,4 +16,12 @@ class PremioModel(MongoModel):
     fecha_vigencia = fields.DateTimeField()
     fecha_redencion = fields.DateTimeField()
     #id_producto = fields.ReferenceField(Producto)
+    # id_participante = fields.ReferenceField(ParticipanteModel) Quita al poner la segmentación: "ninguna"
+
+
+class PremioParticipanteModel(MongoModel):
+    id_promocion = fields.CharField() 
     id_participante = fields.ReferenceField(ParticipanteModel)
+    id_premio = fields.ReferenceField(PremioModel)
+    estado = fields.IntegerField()
+    # id_promocion = fields.CharField() # Valor tomado del punto de venta para obtener la relación de promociones 

@@ -1,7 +1,7 @@
 import json
 import datetime as dt
 import functools
-import uuid
+import uuid 
 from bson.objectid import ObjectId
 
 from flask import request
@@ -11,12 +11,12 @@ from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError
 
 
-from models.premio import PremioModel
+from models.premio import PremioModel, PremioParticipanteModel
 from models.participante import ParticipanteModel
 from models.producto import CatalogoModel
 
-from schemas.premio import PremioSchema
-from schemas.participante import ParticipanteSchema
+from schemas.premio import PremioSchema, PremioParticipanteSchema
+from schemas.participante import ParticipanteSchema 
 from schemas.producto import CatalogoSchema
 from marshmallow import pprint
 
@@ -38,8 +38,14 @@ class PremioList(Resource):
     def get(self, id):
         part_id = ObjectId(id)
         try:
-            participante_premios_id = PremioModel.objects.raw({'id_participante': part_id})
-            premios = participante_premios_id
+
+            participante_premios = PremioParticipanteModel.objects.raw({'id_participante': part_id})
+            pprint(participante_premios)
+            premios=[]
+            for premio in participante_premios: 
+                premios.append(premio.id_premio)
+                pprint(premio.id_premio)
+            # premios = participante_premios_id
             # for item in premios:
                 # pprint(item)
         except PremioModel.DoesNotExist:
@@ -71,21 +77,40 @@ class Premio(Resource):
         # print(premio_json)
         premio = premio_schema.load(premio_json )
         try:
-            p = PremioModel(
-                nombre=premio["nombre"],
-                puntos=premio["puntos"],
-                codigo_barras=premio["codigo_barras"],
-                codigo_qr=premio["codigo_qr"],
-                imagen_icon=premio["imagen_icon"],
-                imagen_display=premio["imagen_display"],
-                fecha_creacion=premio["fecha_creacion"],
-                fecha_vigencia=premio["fecha_vigencia"],
-                fecha_redencion=premio["fecha_redencion"],
-                id_participante=premio["id_participante"]
-            ).save()
+            p = PremioModel()
+            if "nombre" in premio:
+                p.nombre=premio["nombre"]
+            if "puntos" in premio:
+                p.puntos=premio["puntos"]
+            if "codigo_barras" in premio:
+                p.codigo_barras=premio["codigo_barras"]
+            if "codigo_qr" in premio:
+                p.codigo_qr=premio["codigo_qr"]
+            if "imagen_icon" in premio:
+                p.imagen_icon=premio["imagen_icon"]
+            if "imagen_display" in premio:
+                p.imagen_display=premio["imagen_display"]
+            if "fecha_creacion" in premio:
+                p.fecha_creacion=premio["fecha_creacion"]
+            if "fecha_vigencia" in premio:
+                p.fecha_vigencia=premio["fecha_vigencia"]
+            if "fecha_redencion" in premio:
+                p.fecha_redencion=premio["fecha_redencion"]
+            # if "id_participante" in premio:
+            #     p.id_participante=premio["id_participante"]
+            p.save()
+            # Enviar a todos los participantes
+            for participante in ParticipanteModel.objects.all():
+                premio = PremioParticipanteModel(
+                    id_premio = p._id,
+                    id_participante = participante._id,
+                    estado = 0
+                ).save()
+            
         except ValidationError as exc:
+            p.delete()
             print(exc.message)
-            return {"message": "No se pudo crear el nuevo premio."}   
+            return {"message": "No se pudo crear el nuevo premio o enviar a los participantes solicitados."}   
         return {'message': "Premio creado",
                 'ObjectId': PremioSchema(
                 only=(
