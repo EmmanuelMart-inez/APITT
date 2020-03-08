@@ -28,15 +28,9 @@ class EncuestaParticipante(Resource):
     # Encuesta completa lista para pintar el cuestionario en el app
     @classmethod
     def get(self, id_encuesta):
-        part_id = ObjectId(id_encuesta)
-        print(id_encuesta)
-        try:
-            participante_encuestas_id = EncuestaModel.objects.get({'_id': part_id})
-            encuesta = participante_encuestas_id
-            for item in encuesta:
-                pprint(item)
-        except EncuestaModel.DoesNotExist:
-            return {'message': f"No encuesta with participante with id{ id_encuesta }"}, 504
+        en = EncuestaModel.find_by_id(id_encuesta)
+        if not en:
+            return {"message": "No se encontro la encuesta"}, 404
         return EncuestaSchema(
                     only=(
                         "_id",
@@ -64,7 +58,7 @@ class Encuesta(Resource):
         try:
             encuestas = EncuestaModel.objects.all()
         except EncuestaModel.DoesNotExist:
-            return {"message": "Encontró ninguna encuesta."}, 200   
+            return {"message": "Encontró ninguna encuesta."}, 404 
         return EncuestaSchema(
                     only=(
                         "_id",
@@ -97,6 +91,7 @@ class Encuesta(Resource):
             if "puntos" in encuesta:
                 e.puntos=encuesta["puntos"]
             if "paginas" in encuesta:
+                
                 e.paginas=encuesta["paginas"]
                 pprint(e.paginas)
                 # for pagina in e.paginas:
@@ -114,10 +109,10 @@ class Encuesta(Resource):
                 except ValidationError as exc:
                     # eliminar los que fueron agregados
                     print(exc.message, exc)
-                    return {"message": "No se pudo crear una nueva encuesta."}
+                    return {"message": "No se pudo crear una nueva encuesta."}, 404
         except ValidationError as exc:
             print(exc.message)
-            return {"message": "No se pudo crear una nueva encuesta."}   
+            return {"message": "No se pudo crear una nueva encuesta."}, 404   
         return {'message': "Encuesta creada",
                 'ObjectId': EncuestaSchema(
                 only=(
@@ -135,7 +130,7 @@ class AdministradorEncuestas(Resource):
             # for index, pencuesta in enumerate(participantes_encuestas):
             #     pprint(str(pencuesta.id_encuesta))
         except ParticipantesEncuestaModel.DoesNotExist:
-            return {"message": "Encontró ningún registro de encuesta, primero debe crear una encuesta para despues ser asignada en POST /controlencuestas."}, 200   
+            return {"message": "Encontró ningún registro de encuesta, primero debe crear una encuesta para despues ser asignada en POST /controlencuestas."}, 400 
         return ParticipanteEncuestaSchema(
                     only=(
                         "_id",
@@ -158,7 +153,7 @@ class ControlEncuestas(Resource):
             # for item in encuesta:
             #     pprint(item)
         except EncuestaModel.DoesNotExist:
-            return {'message': f"No encuesta with participante with id{ id_participanteencuesta }"}, 504
+            return {'message': f"No encuesta with participante with id{ id_participanteencuesta }"}, 404
         segmentacion = request.get_json()
         print(segmentacion)
         if(segmentacion["filtro"] == "todos"):
@@ -177,10 +172,10 @@ class ControlEncuestas(Resource):
                     except ValidationError as exc:
                         # eliminar los que fueron agregados
                         print(exc.message, exc)
-                        return {"message": "No se pudo crear una nueva encuesta."}
+                        return {"message": "No se pudo crear una nueva encuesta."}, 404
             except ParticipanteModel.DoesNotExist as exc:
                 print(exc.message)
-                return {"message": "No se encontro participantes."}
+                return {"message": "No se encontro participantes."}, 404
             return {"message": "Operación exitosa, participantes agregados a la encuesta",
             'info': ParticipanteEncuestaSchema(
                 only=(
@@ -202,7 +197,7 @@ class ControlEncuestas(Resource):
             participante_encuesta = ParticipantesEncuestaModel.objects.get({'_id': e_id})
                 # pprint(item)
         except EncuestaModel.DoesNotExist:
-            return {'message': f"No ParticipanteEncuesta with id{ id_participanteencuesta }"}
+            return {'message': f"No ParticipanteEncuesta with id{ id_participanteencuesta }"}, 404
         
         respuesta_json = request.get_json()
         respuesta = ParticipanteEncuestaSchema().load(respuesta_json)
@@ -213,7 +208,7 @@ class ControlEncuestas(Resource):
             participante_encuesta.save()
         except ValidationError as exc:
             print(exc.message)
-            return {"message": "No se pudo crear la responder esta encuesta."}   
+            return {"message": "No se pudo crear la responder esta encuesta."}, 404 
         return {'message': "Encuesta respondida satisfactoriamente",
                 'info': ParticipanteEncuestaSchema(
                 only=(

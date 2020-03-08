@@ -14,12 +14,13 @@ from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
 from resources.upload import ImageUpload, ImageDownload
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
-from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin #Task:Desacoplar list
-from resources.premio import Premio, PremioList #Task:Desacoplar list
+from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
+from resources.premio import Premio, PremioList, PremioId #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
 from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas
 from resources.ayuda import  AyudaList
 from resources.producto import CatalogoList, Catalogo
+from resources.time import Time
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
@@ -62,8 +63,10 @@ api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
 api.add_resource(NotificacionesAdminList, "/notificaciones")
 api.add_resource(NotificacionesAdmin, "/admin/notificaciones/<string:id>")
+api.add_resource(NotificacionAcciones, "/admin/notificaciones/<string:id>/acciones/<string:accion>")
 api.add_resource(Catalogo, "/catalogo/<string:vartipo>")
 api.add_resource(CatalogoList, "/catalogo")
+api.add_resource(PremioId, "/premio/<string:id>")
 api.add_resource(Premio, "/premios")
 api.add_resource(PremioList, "/premios/<string:id>")
 api.add_resource(MovimientoList, "/movimientos/<string:id_participante>")
@@ -78,6 +81,7 @@ api.add_resource(ImageDownload, "/download/<string:filename>")
 api.add_resource(Autenticacion, "/autenticacion")
 api.add_resource(LoginSocialNetwork, "/autenticacion/<string:socialNetwork>")
 api.add_resource(RegistroSocialNetwork, "/registro/<string:socialNetwork>")
+api.add_resource(Time, "/time")
 # api.add_resource(SetPassword, "/user/password")
 
 if __name__ == "__main__":

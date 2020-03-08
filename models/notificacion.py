@@ -43,3 +43,4 @@ class NotificacionModel(MongoModel):
 class NotificacionesModel(MongoModel):
     nottts = fields.EmbeddedDocumentListField(
         NotificacionModel, default=[])
+

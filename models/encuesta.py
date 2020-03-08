@@ -6,7 +6,7 @@ connect('mongodb://localhost:27017/ej1')
 
 
 class EncuestaOpcionesModel(MongoModel):
-    descripcion = fields.CharField()
+    # descripcion = fields.CharField(default="")
     calificacion = fields.CharField()
     rubrica = fields.FloatField()
     icon = fields.URLField()
@@ -29,6 +29,17 @@ class EncuestaModel(MongoModel):
     puntos = fields.FloatField()
     paginas = fields.EmbeddedDocumentListField(
         EncuestaPaginaModel, default=[])
+
+    @classmethod
+    def find_by_id(cls, _Objectid: str) -> "EncuestaModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            print(notif)
+            return notif
+        except cls.DoesNotExist:
+            return None
+    
     
 class ParticipantesEncuestaModel(MongoModel):
     id_participante = fields.CharField()

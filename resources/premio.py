@@ -69,6 +69,63 @@ class PremioList(Resource):
                     ), many=True).dump(premios),
                 },200
 
+# Recurso del administrador
+class PremioId(Resource):
+    # Obtener un premio por id 
+    @classmethod 
+    def get(self, id):
+        p = PremioModel.find_by_id(id)
+        if not p:
+            return {"message": "No se encontro el premio"}, 404
+        return PremioSchema(
+                    only=(
+                        "_id",
+                        "nombre", 
+                        "puntos", 
+                        "codigo_barras", 
+                        "codigo_qr",
+                        "imagen_icon",
+                        "imagen_display",
+                        "fecha_creacion", 
+                        "fecha_vigencia", 
+                        "fecha_redencion",
+                        # "id_producto",
+                        "id_participante"
+                    )).dump(p)
+    # Test!
+    # Actualizar el premio con el id dado
+    @classmethod
+    def patch(self, id):
+        p = PremioModel.find_by_id(id)
+        if not p:
+            return {"message": "No se encontro la notificación asociada a este premio"}, 404
+        p_req = request.get_json()
+        premio = premio_schema.load(p_req["premio"])
+        try:
+            if "nombre" in premio:
+                p.nombre = premio["nombre"] 
+            if "puntos" in puntos:
+                p.puntos = puntos["puntos"] 
+            if "codigo_barras" in premio:
+                p.codigo_barras = puntos["codigo_barras"] 
+            if "codigo_qr" in premio:
+                p.codigo_barras = puntos["codigo_barras"] 
+            if "imagen_icon" in premio:
+                p.imagen_icon = puntos["imagen_icon"] 
+            if "imagen_display" in premio:
+                p.imagen_icon = premio["imagen_icon"] 
+            if "fecha_creacion" in premio:
+                p.imagen_icon = premio["imagen_icon"] 
+            if "fecha_vigencia" in premio:
+                p.fecha_vigencia = premio["fecha_vigencia"] 
+            if "fecha_redencion" in premio:
+                p.fecha_redencion = premio["fecha_redencion"] 
+            p.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo actualizar el premio."}, 400
+        return {p}, 200
+
 
 class Premio(Resource):
     @classmethod

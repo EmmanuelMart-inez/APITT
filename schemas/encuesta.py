@@ -4,10 +4,10 @@ from schemas.participante import ParticipanteSchema
 
 
 class EncuestaOpcionesSchema(ma.Schema):
-    descripcion = fields.Str()
-    calificacion = fields.Str()
-    rubrica = fields.Float()
-    icon = fields.URL()
+    descripcion = fields.Str(required=False)
+    calificacion = fields.Str(required=False)
+    rubrica = fields.Float(required=False)
+    icon = fields.URL(required=False)
 
     class Meta: 
         fields = (
@@ -19,10 +19,10 @@ class EncuestaOpcionesSchema(ma.Schema):
 
 
 class EncuestaPaginaSchema(ma.Schema):
-    titulo = fields.Str()
+    titulo = fields.Str(required=False)
     tipo = fields.Str()
-    metrica = fields.Str()
-    opciones = fields.List(fields.Nested(EncuestaOpcionesSchema))
+    metrica = fields.Str(required=False)
+    opciones = fields.List(fields.Nested(EncuestaOpcionesSchema), required=False)
 
     class Meta:
         fields = (
@@ -36,7 +36,7 @@ class EncuestaPaginaSchema(ma.Schema):
 class EncuestaSchema(ma.Schema):
     _id = fields.Str()
     titulo = fields.Str()
-    categoria = fields.Str()
+    categoria = fields.Str(required=False)
     fecha_creacion = fields.DateTime()
     fecha_respuesta = fields.DateTime()
     metrica = fields.Str()
