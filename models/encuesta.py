@@ -18,7 +18,8 @@ class EncuestaPaginaModel(MongoModel):
     tipo = fields.CharField()
     metrica = fields.CharField()
     opciones = fields.EmbeddedDocumentListField(
-        EncuestaOpcionesModel, default=[])
+        EncuestaOpcionesModel, blank=True)
+        # EncuestaOpcionesModel, default=[])
 
 
 class EncuestaModel(MongoModel):
@@ -28,7 +29,7 @@ class EncuestaModel(MongoModel):
     metrica = fields.CharField()
     puntos = fields.FloatField()
     paginas = fields.EmbeddedDocumentListField(
-        EncuestaPaginaModel, default=[])
+        EncuestaPaginaModel, default=[], required=False)
 
     @classmethod
     def find_by_id(cls, _Objectid: str) -> "EncuestaModel":
@@ -47,6 +48,7 @@ class ParticipantesEncuestaModel(MongoModel):
     fecha_respuesta = fields.DateTimeField()
     estado = fields.CharField()
     respuestas = fields.ListField(fields.CharField(), default=[], required=False)
+    # fecha_creacion = AFTER
 
     @classmethod
     def find_by_id(cls, _Objectid: str) -> "ParticipantesEncuestaModel":

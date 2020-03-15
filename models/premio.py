@@ -34,4 +34,5 @@ class PremioParticipanteModel(MongoModel):
     id_participante = fields.ReferenceField(ParticipanteModel)
     id_premio = fields.ReferenceField(PremioModel)
     estado = fields.IntegerField()
+    fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
     # id_promocion = fields.CharField() # Valor tomado del punto de venta para obtener la relación de promociones 

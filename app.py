@@ -12,7 +12,7 @@ from models.empleado import Usuario
 from resources.facebook_login import FacebookLogin, FacebookAuthorize
 from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
-from resources.upload import ImageUpload, ImageDownload
+from resources.upload import ImageUpload, ImageDownload, ImageList
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
 from resources.premio import Premio, PremioList, PremioId #Task:Desacoplar list
@@ -21,6 +21,8 @@ from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas,
 from resources.ayuda import  AyudaList
 from resources.producto import CatalogoList, Catalogo
 from resources.time import Time
+from resources.venta import ProductoList, Producto, PromocionList, Promocion, TicketList, Ticket
+from resources.metricas import FiltradoByMetrica
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
@@ -78,10 +80,19 @@ api.add_resource(AdministradorEncuestas, "/controlencuestas")
 api.add_resource(AyudaList, "/ayuda")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
+api.add_resource(ImageList, "/images")
 api.add_resource(Autenticacion, "/autenticacion")
 api.add_resource(LoginSocialNetwork, "/autenticacion/<string:socialNetwork>")
 api.add_resource(RegistroSocialNetwork, "/registro/<string:socialNetwork>")
 api.add_resource(Time, "/time")
+api.add_resource(ProductoList, "/productos")
+api.add_resource(Producto, "/productos/<string:id>")
+api.add_resource(PromocionList, "/promociones")
+api.add_resource(Promocion, "/promociones/<string:id>")
+api.add_resource(TicketList, "/tickets")
+api.add_resource(Ticket, "/tickets/<string:id>")
+api.add_resource(FiltradoByMetrica, "/filtrado/<string:idMetrica>")
+
 # api.add_resource(SetPassword, "/user/password")
 
 if __name__ == "__main__":

@@ -113,7 +113,7 @@ class PremioId(Resource):
             if "imagen_icon" in premio:
                 p.imagen_icon = puntos["imagen_icon"] 
             if "imagen_display" in premio:
-                p.imagen_icon = premio["imagen_icon"] 
+                p.imagen_display = premio["imagen_display"] 
             if "fecha_creacion" in premio:
                 p.imagen_icon = premio["imagen_icon"] 
             if "fecha_vigencia" in premio:

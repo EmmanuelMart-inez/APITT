@@ -366,6 +366,7 @@ class NotificacionAcciones(Resource):
                 "encuesta": EncuestaSchema(
                         only=(
                             "_id",
+                            "titulo",
                             "categoria",
                             "fecha_creacion",
                             "fecha_respuesta",
@@ -563,6 +564,7 @@ class NotificacionAcciones(Resource):
                 "encuesta": EncuestaSchema(
                         only=(
                             "_id",
+                            "titulo",
                             "categoria",
                             "fecha_creacion",
                             "fecha_respuesta",
@@ -579,6 +581,10 @@ class NotificacionAcciones(Resource):
             n = NotificacionTemplateModel.find_by_id(id)
             if not n:
                 return {"message": "No se encontro la notificación"}, 404
+            try:
+                n.delete()
+            except:
+                return {"message": "No se pudo efectuar esta operación"},404 
             return {"message": "Notificacion eliminada"}, 200
         elif accion == 'premio':
             n = NotificacionTemplateModel.find_by_id(id)
@@ -598,7 +604,7 @@ class NotificacionAcciones(Resource):
             n = NotificacionTemplateModel.find_by_id(id)
             pprint(n)
             if not n:
-                return {"message": "No se encontro el premio"}, 404
+                return {"message": "No se encontro la notificacion"}, 404
             en = EncuestaModel.find_by_id(n.link)
             if not en:
                 return {"message": "No se encontro la encuesta"}, 404
