@@ -4,7 +4,7 @@ import functools
 import uuid
 from bson.objectid import ObjectId
 
-from flask import request
+from flask import request, jsonify
 from flask_restful import Resource
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from pymodm.errors import ValidationError
@@ -34,24 +34,23 @@ class FiltradoByMetrica(Resource):
     def get(self, idMetrica):
         req = request.get_json()
         # ps = ParticipanteModel.filter_by_date_range(req["date_start"], req["date_end"])
-        ps = ParticipanteModel.filter_by_dateExample(req["date_start"])
-        return ParticipanteSchema(
-            only=(
-            "_id",
-            "nombre",
-            "paterno",
-            "password",
-            "email",
-            "foto",
-            "fecha_nacimiento",
-            "tarjeta_sellos", 
-            "tarjeta_puntos",
-            ), many=True).dump(ps), 200
-        # return {'m': 'good'}, 200
-        # # 1. Numero de participantes nuevos
-        # if( metricaId == 1 ):
-        #     if not "end_date" in req:
-        #         p_filter_fecha_antiguedad = ParticipanteModel.objects.filter(fecha_antiguedad__)
-        #     if "date2" in req:
-
+        # ps = ParticipanteModel.filter_by_dateExample(req["date_start"])
+        
+        # Número de participantes nuevos
+        if idMetrica == '1': 
+            try:
+                if 'date_end' in req:
+                    participantes_nuevos = ParticipanteModel.filter_by_date_range(req['date_start'], req['date_end'], req['field'])
+                else:
+                    participantes_nuevos = ParticipanteModel.filter_by_date(req['date_start'], req['tipo'], req['scale'], req['scale_value'], req['field'])
+                idList = []
+                for p in participantes_nuevos:
+                    idList.append(str(p._id))
+                return {
+                    "participantes" : idList,
+                    "total": len(idList),
+                    }, 200
+            except ParticipanteModel.DoesNotExist:
+                return {'message': 'Ocurrió un error al procesar su petición'}, 500
+        return {'message': 'Valor: IdMetrica invalido'}, 400
             
