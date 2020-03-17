@@ -21,7 +21,7 @@ from pymodm import MongoModel, EmbeddedMongoModel, fields, connect
 from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError
 
-from models.empleado import Empleado, Usuario, Cajero
+# from models.empleado import EmpleadoModel, UsuarioModel, CajeroModel
 from schemas.user import UserSchema, EmpSchema
 
 user_schema = UserSchema()

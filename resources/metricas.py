@@ -3,6 +3,7 @@ import datetime as dt
 import functools
 import uuid
 from bson.objectid import ObjectId
+import pymongo
 
 from flask import request, jsonify
 from flask_restful import Resource
@@ -12,6 +13,9 @@ from pymongo.errors import DuplicateKeyError
 
 
 from models.participante import ParticipanteModel
+from models.premio import PremioModel, PremioParticipanteModel
+from models.venta import VentaModel
+
 from schemas.participante import ParticipanteSchema
 from models.encuesta import EncuestaModel, EncuestaPaginaModel, EncuestaOpcionesModel, ParticipantesEncuestaModel
 from schemas.encuesta import EncuestaSchema, EncuestaPaginaSchema, EncuestaOpcionesSchema, ParticipanteEncuestaSchema
@@ -19,6 +23,411 @@ from marshmallow import pprint
 
 # Establish a connection to the database.
 connect("mongodb://localhost:27017/ej1")
+
+productos = [
+    {
+        "_id" : "1",
+        "nombre" : "bubbleTea",
+        "precio_venta" : 55,
+        "precio_compra" : 30,
+        "categoria" : "Bebidas"
+    },
+    {
+        "_id" : "2",
+        "nombre" : "Bolipán",
+        "precio_venta" : 20,
+        "precio_compra" : 10,
+        "categoria" : "Alimentos"
+    },
+    {
+        "_id" : "3",
+        "nombre" : "Café",
+        "precio_venta" : 25,
+        "precio_compra" : 10,
+        "categoria" : "Bebidas"
+    }
+]
+
+promociones = [
+	{
+		"_id": '1',
+		"titulo": "BubbleCombo",
+		"tipo": "gratis",
+		"valor": 100.0,
+		"productos_validos": ["1"],
+		"fecha_vigencia":  "2029-06-06T16:00:00Z",
+        "puntos": 0.0,
+        "sellos": 0
+	},
+	{
+		"_id": "2",
+		"titulo": "50% de descuento sobre tu compra",
+		"tipo": "porcentaje compra",
+		"valor": 50.0,
+		"productos_validos": ["1","3"],
+		"fecha_vigencia":  "2020-06-06T16:00:00Z",
+        "puntos": 0.0,
+        "sellos": 0
+	},
+    {
+		"_id": "3",
+		"titulo": "2x1 en bolipanes",
+		"tipo": "2", # --> 2x1  2
+		"valor": 1.0,  #          1
+		"productos_validos": ["2"],
+		"fecha_vigencia":  "2020-06-06T16:00:00Z",
+        "puntos": 0.0,
+        "sellos": 0
+	},
+    {
+		"_id": "4",
+		"titulo": "3x2 en café",
+		"tipo": "3", # --> 2x1  2
+		"valor": 2.0,  #          1
+		"productos_validos": ["3"],
+		"fecha_vigencia":  "2020-06-06T16:00:00Z",
+        "puntos": 0.0,
+        "sellos": 0
+	}
+]
+
+tickets = [
+    {
+		"_id": "1",
+		"total": 80.00,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2019-06-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17ae",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": ["1", "2"],
+		"detalle_venta": [
+						{
+							"cantidad": 2, 
+							"impuestos": 0.16,
+							"descuento_producto": 50.0,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 20
+					    },
+                        {
+							"cantidad": 2, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	
+                                        {
+                                            "_id" : "1",
+                                            "nombre" : "bubbleTea",
+                                            "precio_venta" : 55.0,
+                                            "precio_compra" : 30.0,
+                                            "categoria" : "Bebidas"
+                                        },
+							"importe": 0.0
+					    }
+					   ]
+    },
+    {
+		"_id": "2",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-06-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17ad",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    }
+					   ]
+    },
+    {
+		"_id": "3",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-06-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17ae",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [3,4],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    },
+                        {
+                            "cantidad": 3, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                                "_id" : "3",
+                                                "nombre" : "Café",
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
+                                                "categoria" : "Bebidas"
+                                            },
+							"importe": 50
+                        }
+					   ]
+    },
+    {
+		"_id": "4",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-07-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17af",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [3,4],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    },
+                        {
+                            "cantidad": 3, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                                "_id" : "3",
+                                                "nombre" : "Café",
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
+                                                "categoria" : "Bebidas"
+                                            },
+							"importe": 50
+                        }
+					   ]
+    },
+    {
+		"_id": "5",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-07-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17b0",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [3,4],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    },
+                        {
+                            "cantidad": 3, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                                "_id" : "3",
+                                                "nombre" : "Café",
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
+                                                "categoria" : "Bebidas"
+                                            },
+							"importe": 50
+                        }
+					   ]
+    },
+    {
+		"_id": "6",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-08-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17b1",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [3,4],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    },
+                        {
+                            "cantidad": 3, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                                "_id" : "3",
+                                                "nombre" : "Café",
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
+                                                "categoria" : "Bebidas"
+                                            },
+							"importe": 50
+                        }
+					   ]
+    },
+    {
+		"_id": "7",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-09-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17b2",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [3,4],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    },
+                        {
+                            "cantidad": 3, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                                "_id" : "3",
+                                                "nombre" : "Café",
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
+                                                "categoria" : "Bebidas"
+                                            },
+							"importe": 50
+                        }
+					   ]
+    },
+    {
+		"_id": "8",
+		"total": 80.0,
+        "descuento": 20.0, #porcentaje
+		"fecha": "2020-10-06T10:00:00Z",
+		"id_participante": "5e599aacf97a00a6036b17b3",
+		# forma_pago: {
+		# 			nombre: "efectivo", 
+		# 			otros_detalles: "Datos de la terminal importantes"
+		# 			},
+		# qr: "asdaqwke923jl4jql0jqeqeq",
+		# descuento_general: 15.5,
+		# usuario_id_usuario: usuario__id,
+        "promociones": [3,4],
+		"detalle_venta": [
+						{
+							"cantidad": 1, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                            "_id" : "2",
+                                            "nombre" : "Bolipán",
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
+                                            "categoria" : "Alimentos"
+                                        },
+							"importe": 80
+					    },
+                        {
+                            "cantidad": 3, 
+							"impuestos": 0.16,
+							"descuento_producto": 0.00,
+							"producto": 	{
+                                                "_id" : "3",
+                                                "nombre" : "Café",
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
+                                                "categoria" : "Bebidas"
+                                            },
+							"importe": 50
+                        }
+					   ]
+    }
+]
+
+
+
 
 simbols_number = ['> gt', '< lt', '!= .objects.exclude()', '<> range' '= exact']
 # simbols_date = ['>', '<', '!=', '<>' '=']
@@ -31,26 +440,160 @@ simbols_date_rango = [ 'entre range'] # fecha(s),
 class FiltradoByMetrica(Resource):
 # class ParticipanteFiltradoByMetrica(Resource):
     @classmethod
-    def get(self, idMetrica):
+    def get(self):
         req = request.get_json()
-        # ps = ParticipanteModel.filter_by_date_range(req["date_start"], req["date_end"])
-        # ps = ParticipanteModel.filter_by_dateExample(req["date_start"])
-        
-        # Número de participantes nuevos
-        if idMetrica == '1': 
-            try:
-                if 'date_end' in req:
-                    participantes_nuevos = ParticipanteModel.filter_by_date_range(req['date_start'], req['date_end'], req['field'])
-                else:
-                    participantes_nuevos = ParticipanteModel.filter_by_date(req['date_start'], req['tipo'], req['scale'], req['scale_value'], req['field'])
+        filtersList = []
+        try:
+            for fi in req:
                 idList = []
-                for p in participantes_nuevos:
-                    idList.append(str(p._id))
-                return {
-                    "participantes" : idList,
-                    "total": len(idList),
-                    }, 200
-            except ParticipanteModel.DoesNotExist:
-                return {'message': 'Ocurrió un error al procesar su petición'}, 500
+                if fi['document'] == 'participante_model':     
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = ParticipanteModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = ParticipanteModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = ParticipanteModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = ParticipanteModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = ParticipanteModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = ParticipanteModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = ParticipanteModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    if fi:
+                        for p in fi:
+                            idList.append(str(p._id))
+                    filtersList.append(  {
+                        "participantes" : idList,
+                        "total": len(idList),
+                    })
+                elif fi['document'] == 'participante_premio_model':  
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = PremioParticipanteModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = PremioParticipanteModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = PremioParticipanteModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = PremioParticipanteModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = PremioParticipanteModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = PremioParticipanteModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = PremioParticipanteModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    if fi:
+                        for p in fi:
+                            idList.append(str(p.id_participante))
+                    return  {
+                        "participantes" : idList,
+                        "total": len(idList),
+                        }, 200
+                elif fi['document'] == 'venta_model':  
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = VentaModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = VentaModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = VentaModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = VentaModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = VentaModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = VentaModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = VentaModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    if fi:
+                        cursor  = fi.aggregate(
+                            {'$group': {'_id': '$id_participante'}},
+                            allowDiskUse=True)
+                        cursorList = list(cursor)
+                        for item in cursorList:
+                                idList.append(str(item['_id']))
+                    filtersList.append({
+                        "participantes" : idList,
+                        "total": len(idList),
+                    })
+                elif fi['document'] == 'participantes_encuesta_model':  
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = ParticipantesEncuestaModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = ParticipantesEncuestaModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = ParticipantesEncuestaModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = ParticipantesEncuestaModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = ParticipantesEncuestaModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = ParticipantesEncuestaModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = ParticipantesEncuestaModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    if fi:
+                        cursor  = fi.aggregate(
+                            {'$group': {'_id': '$id_participante'}},
+                            allowDiskUse=True)
+                        cursorList = list(cursor)
+                        for item in cursorList:
+                                idList.append(str(item['_id']))
+                    filtersList.append({
+                        "participantes" : idList,
+                        "total": len(idList),
+                    })
+            return  filtersList, 200
+                # elif fi['document'] == 'encuesta_model':                             
+        except ParticipanteModel.DoesNotExist:
+            return {'message': 'Ocurrió un error al procesar su petición'}, 500
+        # # Número de participantes nuevos
+        # if idMetrica == '1': 
+        #     try:
+        #         if 'date_end' in req:
+        #             participantes_nuevos = ParticipanteModel.filter_by_date_range(req['date_start'], req['date_end'], req['field'])
+        #         else:
+        #             participantes_nuevos = ParticipanteModel.filter_by_date(req['date_start'], req['tipo'], req['scale'], req['scale_value'], req['field'])
+        #         # TODO: Si es necesario más tarde, Este bloque evita que se cometan errores sintacticos en las solicitudes
+        #         # if not participantes_nuevos:
+        #         #     return {"message": "Revise los parametros en la solicitud: Alguno(s) de los campos enviados en el formulario y/o su respectivo valor tienen un error sintáctico o no existen participantes con esos atributos en la base de datos"}, 404
+        #         if participantes_nuevos:
+        #             for p in participantes_nuevos:
+        #                 idList.append(str(p._id))
+        #         return {
+        #             "participantes" : idList,
+        #             "total": len(idList),
+        #             }, 200
+        #     except ParticipanteModel.DoesNotExist:
+        #         return {'message': 'Ocurrió un error al procesar su petición'}, 500
+        # # Numero de premios entregados
+        # elif idMetrica == '2': 
+        #     try:
+        #         if 'date_end' in req:
+        #             premios_entregados = PremioParticipanteModel.filter_by_date_range(req['date_start'], req['date_end'], req['field'])
+        #         else:
+        #             premios_entregados = PremioParticipanteModel.filter_by_date(req['date_start'], req['tipo'], req['scale'], req['scale_value'], req['field'])
+        #             cursor  = premios_entregados.aggregate(
+        #                 {'$group': {'_id': '$id_participante', 'count': {'$sum': 1}}},
+        #                 {'$sort': {'price': pymongo.DESCENDING}},
+        #                 allowDiskUse=True)
+        #             # print(list(cursor))
+        #             a = list(cursor)
+        #             print(a, "---", len(a), len(list(premios_entregados)))
+        #         if premios_entregados:
+        #             for p in a:
+        #                 # pprint("ele#mnt")
+        #                 idList.append({ '_id' : str(p['_id']), 'count' : p['count']})
+        #         # print(idList)
+        #         return {
+        #             "premios_entregados" : idList,
+        #             "total": len(list(premios_entregados)
+        #             )   
+        #         }
+        #         # {
+        #         #     "participantes" : idList,
+        #         #     "total": len(idList),
+        #         #     }, 200
+        #     except ParticipanteModel.DoesNotExist:
+        #         return {'message': 'Ocurrió un error al procesar su petición'}, 500
         return {'message': 'Valor: IdMetrica invalido'}, 400
             

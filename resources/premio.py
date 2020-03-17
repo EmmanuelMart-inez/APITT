@@ -104,18 +104,18 @@ class PremioId(Resource):
         try:
             if "nombre" in premio:
                 p.nombre = premio["nombre"] 
-            if "puntos" in puntos:
-                p.puntos = puntos["puntos"] 
+            if "puntos" in premio:
+                p.puntos = premio["puntos"] 
             if "codigo_barras" in premio:
-                p.codigo_barras = puntos["codigo_barras"] 
+                p.codigo_barras = premio["codigo_barras"] 
             if "codigo_qr" in premio:
-                p.codigo_barras = puntos["codigo_barras"] 
+                p.codigo_qr = premio["codigo_qr"] 
             if "imagen_icon" in premio:
-                p.imagen_icon = puntos["imagen_icon"] 
+                p.imagen_icon = premio["imagen_icon"] 
             if "imagen_display" in premio:
                 p.imagen_display = premio["imagen_display"] 
             if "fecha_creacion" in premio:
-                p.imagen_icon = premio["imagen_icon"] 
+                p.fecha_creacion = premio["fecha_creacion"] 
             if "fecha_vigencia" in premio:
                 p.fecha_vigencia = premio["fecha_vigencia"] 
             if "fecha_redencion" in premio:
@@ -149,6 +149,8 @@ class Premio(Resource):
                 p.imagen_display=premio["imagen_display"]
             if "fecha_creacion" in premio:
                 p.fecha_creacion=premio["fecha_creacion"]
+            else: 
+                p.fecha_creacion = dt.datetime.now()
             if "fecha_vigencia" in premio:
                 p.fecha_vigencia=premio["fecha_vigencia"]
             if "fecha_redencion" in premio:
@@ -161,6 +163,7 @@ class Premio(Resource):
                 premio = PremioParticipanteModel(
                     id_premio = p._id,
                     id_participante = participante._id,
+                    fecha_creacion = p.fecha_creacion,
                     estado = 0
                 ).save()
             

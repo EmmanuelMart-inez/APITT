@@ -1,13 +1,13 @@
 from pymodm import MongoModel, EmbeddedMongoModel, ReferenceField, fields, connect
 from models.producto import (
-    SubCategoria,
-    Categoria,
-    Proveedor,
+    SubCategoriaModel,
+    CategoriaModel,
+    ProveedorModel,
     AtributoDict,
     AtributoDictList,
     AtributoMagnitudDict,
     Atributos,
-    Producto,
+    ProductoModel,
 )
 #from schemas.empleado import Usuario
 # Establish a connection to the database.
@@ -33,7 +33,7 @@ class TarjetaSellosModel(MongoModel):
     descripcion = fields.CharField()
     icono_off = fields.URLField()
     icono_on = fields.URLField()
-    producto = fields.ReferenceField(Producto)
+    producto = fields.ReferenceField(ProductoModel)
 
 
 class HistorialTarjetaSellos(MongoModel):

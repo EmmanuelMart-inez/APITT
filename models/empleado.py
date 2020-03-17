@@ -7,11 +7,11 @@ connect('mongodb://localhost:27017/ej1')
 #user_schema = UserSchema()
 
 
-class EmpleadoPuesto(MongoModel):
+class EmpleadoPuestoModel(MongoModel):
     nombre = fields.CharField()
 
 
-class Empleado(MongoModel):
+class EmpleadoModel(MongoModel):
     nombre = fields.CharField()
     paterno = fields.CharField()
     materno = fields.CharField()
@@ -23,20 +23,20 @@ class Empleado(MongoModel):
     telefono_movil = fields.BigIntegerField()
     telefono_casa = fields.BigIntegerField()
     correo = fields.EmailField()
-    puesto = fields.EmbeddedDocumentField(EmpleadoPuesto)
+    puesto = fields.EmbeddedDocumentField(EmpleadoPuestoModel)
 
 
-class Cajero(MongoModel):
+class CajeroModel(MongoModel):
     alias = fields.CharField()
 
 
-class Usuario(MongoModel):
+class UsuarioModel(MongoModel):
     username = fields.CharField()
     password = fields.CharField()
     estatus = fields.BooleanField()
     fecha_alta = fields.DateTimeField()
     fecha_baja = fields.DateTimeField()
-    dbreferencia = fields.ReferenceField(Cajero)
+    dbreferencia = fields.ReferenceField(CajeroModel)
 
 
 """id_empleado = fields.ReferenceField(Empleado)

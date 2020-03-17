@@ -8,7 +8,7 @@ load_dotenv(".env")
 
 from ma import ma
 from oa import oauth
-from models.empleado import Usuario
+from models.empleado import UsuarioModel
 from resources.facebook_login import FacebookLogin, FacebookAuthorize
 from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
@@ -91,7 +91,7 @@ api.add_resource(PromocionList, "/promociones")
 api.add_resource(Promocion, "/promociones/<string:id>")
 api.add_resource(TicketList, "/tickets")
 api.add_resource(Ticket, "/tickets/<string:id>")
-api.add_resource(FiltradoByMetrica, "/filtrado/<string:idMetrica>")
+api.add_resource(FiltradoByMetrica, "/filtrado")
 
 # api.add_resource(SetPassword, "/user/password")
 

@@ -6,42 +6,39 @@ from bson.objectid import ObjectId
 
 from flask import request, jsonify
 from flask_restful import Resource
-from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
+
+from models.producto import *
+from models.venta import *
+from models.empleado import *
+from models.promocion import *
+
+from schemas.venta import *
+
 from pymodm.errors import ValidationError
 from pymongo.errors import DuplicateKeyError
-
-
-from models.premio import PremioModel, PremioParticipanteModel
-from models.participante import ParticipanteModel
-from models.producto import CatalogoModel
-
-from schemas.premio import PremioSchema, PremioParticipanteSchema
-from schemas.participante import ParticipanteSchema 
-from schemas.producto import CatalogoSchema
-from marshmallow import pprint
-
-participante_schema = ParticipanteSchema()
+# Establish a connection to the database.
+connect("mongodb://localhost:27017/ej1")
 
 productos = [
     {
         "_id" : "1",
         "nombre" : "bubbleTea",
-        "precio" : 55,
-        "costo" : 30,
+        "precio_venta" : 55,
+        "precio_compra" : 30,
         "categoria" : "Bebidas"
     },
     {
         "_id" : "2",
         "nombre" : "Bolipán",
-        "precio" : 20,
-        "costo" : 10,
+        "precio_venta" : 20,
+        "precio_compra" : 10,
         "categoria" : "Alimentos"
     },
     {
         "_id" : "3",
         "nombre" : "Café",
-        "precio" : 25,
-        "costo" : 10,
+        "precio_venta" : 25,
+        "precio_compra" : 10,
         "categoria" : "Bebidas"
     }
 ]
@@ -67,41 +64,41 @@ productos = [
 #       que acabas de crear
 promociones = [
 	{
-		"_id": '1',
+		"_id": '5e701fba1377db6386eb11da',
 		"titulo": "BubbleCombo",
 		"tipo": "gratis",
 		"valor": 100.0,
-		"productos_validos": ["1"],
+		"productos_validos": ["5e701e771377db6386eb11d5"],
 		"fecha_vigencia":  "2029-06-06T16:00:00Z",
         "puntos": 0.0,
         "sellos": 0
 	},
 	{
-		"_id": "2",
+		"_id": "5e701fc31377db6386eb11d",
 		"titulo": "50% de descuento sobre tu compra",
 		"tipo": "porcentaje compra",
 		"valor": 50.0,
-		"productos_validos": ["1","3"],
+		"productos_validos": ["5e701e771377db6386eb11d5","5e701e951377db6386eb11d7"],
 		"fecha_vigencia":  "2020-06-06T16:00:00Z",
         "puntos": 0.0,
         "sellos": 0
 	},
     {
-		"_id": "3",
+		"_id": "5e701fd11377db6386eb11dc",
 		"titulo": "2x1 en bolipanes",
 		"tipo": "2", # --> 2x1  2
 		"valor": 1.0,  #          1
-		"productos_validos": ["2"],
+		"productos_validos": ["5e701e8c1377db6386eb11d6"],
 		"fecha_vigencia":  "2020-06-06T16:00:00Z",
         "puntos": 0.0,
         "sellos": 0
 	},
     {
-		"_id": "4",
+		"_id": "5e701fe11377db6386eb11dd",
 		"titulo": "3x2 en café",
 		"tipo": "3", # --> 2x1  2
 		"valor": 2.0,  #          1
-		"productos_validos": ["3"],
+		"productos_validos": ["5e701e951377db6386eb11d7"],
 		"fecha_vigencia":  "2020-06-06T16:00:00Z",
         "puntos": 0.0,
         "sellos": 0
@@ -182,24 +179,17 @@ tickets = [
         "descuento": 20.0, #porcentaje
 		"fecha": "2020-06-06T10:00:00Z",
 		"id_participante": "5e462b2f174d02be8e6fabb0",
-		# forma_pago: {
-		# 			nombre: "efectivo", 
-		# 			otros_detalles: "Datos de la terminal importantes"
-		# 			},
-		# qr: "asdaqwke923jl4jql0jqeqeq",
-		# descuento_general: 15.5,
-		# usuario_id_usuario: usuario__id,
-        "promociones": ["1", "2"],
+        "promociones": ["5e701fba1377db6386eb11da", "5e701fc31377db6386eb11db"],
 		"detalle_venta": [
 						{
 							"cantidad": 2, 
 							"impuestos": 0.16,
 							"descuento_producto": 50.0,
 							"producto": 	{
-                                            "_id" : "2",
+                                            "_id" : "5e701e8c1377db6386eb11d6",
                                             "nombre" : "Bolipán",
-                                            "precio" : 20.0,
-                                            "costo" : 10.0,
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
                                             "categoria" : "Alimentos"
                                         },
 							"importe": 20
@@ -210,10 +200,10 @@ tickets = [
 							"descuento_producto": 0.00,
 							"producto": 	
                                         {
-                                            "_id" : "1",
+                                            "_id" : "5e701e771377db6386eb11d5",
                                             "nombre" : "bubbleTea",
-                                            "precio" : 55.0,
-                                            "costo" : 30.0,
+                                            "precio_venta" : 55.0,
+                                            "precio_compra" : 30.0,
                                             "categoria" : "Bebidas"
                                         },
 							"importe": 0.0
@@ -224,15 +214,8 @@ tickets = [
 		"_id": "2",
 		"total": 80.0,
         "descuento": 20.0, #porcentaje
-		"fecha": "2020-06-06T10:00:00Z",
+		"fecha": "2022-06-06T10:00:00Z",
 		"id_participante": "5e462b2f174d02be8e6fabb0",
-		# forma_pago: {
-		# 			nombre: "efectivo", 
-		# 			otros_detalles: "Datos de la terminal importantes"
-		# 			},
-		# qr: "asdaqwke923jl4jql0jqeqeq",
-		# descuento_general: 15.5,
-		# usuario_id_usuario: usuario__id,
         "promociones": [],
 		"detalle_venta": [
 						{
@@ -240,10 +223,10 @@ tickets = [
 							"impuestos": 0.16,
 							"descuento_producto": 0.00,
 							"producto": 	{
-                                            "_id" : "2",
+                                            "_id" : "5e701e8c1377db6386eb11d6",
                                             "nombre" : "Bolipán",
-                                            "precio" : 20.0,
-                                            "costo" : 10.0,
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
                                             "categoria" : "Alimentos"
                                         },
 							"importe": 80
@@ -254,26 +237,19 @@ tickets = [
 		"_id": "3",
 		"total": 80.0,
         "descuento": 20.0, #porcentaje
-		"fecha": "2020-06-06T10:00:00Z",
-		"id_participante": "5e462b2f174d02be8e6fabb0",
-		# forma_pago: {
-		# 			nombre: "efectivo", 
-		# 			otros_detalles: "Datos de la terminal importantes"
-		# 			},
-		# qr: "asdaqwke923jl4jql0jqeqeq",
-		# descuento_general: 15.5,
-		# usuario_id_usuario: usuario__id,
-        "promociones": [3,4],
+		"fecha": "2021-10-06T10:00:00Z",
+		"id_participante": "5e6f6e1a210261e9f3c2b15d",
+        "promociones": ["5e701fd11377db6386eb11dc", "5e701fe11377db6386eb11dd"],
 		"detalle_venta": [
 						{
 							"cantidad": 1, 
 							"impuestos": 0.16,
 							"descuento_producto": 0.00,
 							"producto": 	{
-                                            "_id" : "2",
+                                            "_id" : "5e701e8c1377db6386eb11d6",
                                             "nombre" : "Bolipán",
-                                            "precio" : 20.0,
-                                            "costo" : 10.0,
+                                            "precio_venta" : 20.0,
+                                            "precio_compra" : 10.0,
                                             "categoria" : "Alimentos"
                                         },
 							"importe": 80
@@ -283,10 +259,10 @@ tickets = [
 							"impuestos": 0.16,
 							"descuento_producto": 0.00,
 							"producto": 	{
-                                                "_id" : "3",
+                                                "_id" : "5e701e951377db6386eb11d7",
                                                 "nombre" : "Café",
-                                                "precio" : 25,
-                                                "costo" : 10,
+                                                "precio_venta" : 25,
+                                                "precio_compra" : 10,
                                                 "categoria" : "Bebidas"
                                             },
 							"importe": 50
@@ -304,6 +280,27 @@ class ProductoList(Resource):
         #     print(reques['hola'], type(reques['hola']))
         return productos, 200
 
+    @classmethod
+    def post(self):
+        req = request.get_json()
+        try:
+            p = ProductoModel()
+            if "nombre" in req:
+                p.nombre = req["nombre"]
+            if "precio_venta" in req:
+                p.precio_venta = req["precio_venta"]
+            if "precio_compra" in req:
+                p.precio_compra = req["precio_compra"]
+            if "categoria" in req:
+                p.categoria = req["categoria"]
+            p.save()
+            # if "" in req:
+            #     p. = req[""]
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear el nuevo movimiento."}   
+        return {'message': "Producto creado"}, 200
+
 
 class Producto(Resource):
     @classmethod
@@ -312,14 +309,38 @@ class Producto(Resource):
             print(item)
             if(item['_id'] ==  id):
                 return item, 200
-        return {'No existe un producto con ese _id'}, 404
-        
+        return {'No existe un producto con ese _id'}, 404        
 
 
 class PromocionList(Resource):
     @classmethod
     def get(self): 
         return promociones, 200
+
+    @classmethod
+    def post(self):
+        req = request.get_json()
+        try:
+            p = PromocionModel()
+            if "titulo" in req:
+                p.titulo = req["titulo"]
+            if "tipo" in req:
+                p.tipo = req["tipo"]
+            if "valor" in req:
+                p.valor = req["valor"]
+            if "productos_validos" in req:
+                p.productos_validos = req["productos_validos"]
+            if "puntos" in req:
+                p.puntos = req["puntos"]
+            if "sellos" in req:
+                p.sellos = req["sellos"]
+            p.save()
+            # if "" in req:
+            #     p. = req[""]
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear el nuevo movimiento."}   
+        return {'message': "Promocion creada"}, 200
 
 
 class Promocion(Resource):
@@ -336,6 +357,34 @@ class TicketList(Resource):
     @classmethod
     def get(self):
         return tickets, 200
+
+    @classmethod
+    def post(self):
+        req_json = request.get_json()
+        req = VentaSchema().load(req_json)
+        try:
+            p = VentaModel()
+            if "total" in req:
+                p.total = req["total"]
+            if "descuento" in req:
+                p.descuento = req["descuento"]
+            if "fecha" in req:
+                p.fecha = req["fecha"]
+            if "id_participante" in req:
+                p.id_participante = req["id_participante"]
+            if "promociones" in req:
+                p.promociones = req["promociones"]
+            if "detalle_venta" in req:
+                p.detalle_venta = req["detalle_venta"]
+            if "sellos" in req:
+                p.sellos = req["sellos"]
+            p.save()
+            # if "" in req:
+            #     p. = req[""]
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear el nuevo movimiento."}   
+        return {'message': "Venta (Ticket) creada"}, 200
 
 class Ticket(Resource):
     @classmethod
