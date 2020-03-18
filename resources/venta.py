@@ -314,7 +314,7 @@ class Producto(Resource):
 
 class PromocionList(Resource):
     @classmethod
-    def get(self): 
+    def get(self):
         return promociones, 200
 
     @classmethod
@@ -346,6 +346,7 @@ class PromocionList(Resource):
 class Promocion(Resource):
     @classmethod
     def get(self, id):
+        print(promociones)
         for index, item in enumerate(promociones):
             print(item)
             if(item['_id'] ==  id):

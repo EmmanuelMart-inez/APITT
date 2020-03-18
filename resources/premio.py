@@ -247,6 +247,7 @@ class PremioParticipante(Resource):
         try:
             participante_premios = PremioParticipanteModel.objects.get({'_id': pp_id})
             participante_premios.id_participante =  str(participante_premios.id_participante._id)
+            participante_premios.id_premio =  str(participante_premios.id_premio._id)
         except PremioParticipanteModel.DoesNotExist:
             return {'message': f"No premios_participante._id with id:{ id }"}
         # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion

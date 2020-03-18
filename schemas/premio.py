@@ -1,6 +1,7 @@
 from ma import ma
 from marshmallow import Schema, fields, ValidationError
 from schemas.notificacion import NotificacionSchema
+from schemas.participante import ParticipanteSchema
 
 
 class PremioSchema(ma.Schema):
@@ -33,8 +34,8 @@ class PremioSchema(ma.Schema):
 
 class PremioParticipanteSchema(ma.Schema):
     _id = fields.Str()
-    id_participante = fields.Str()
-    id_premio = fields.Str()
+    id_participante = fields.Nested(ParticipanteSchema)
+    id_premio = fields.Nested(PremioSchema)
     id_promocion = fields.Str()
     estado = fields.Integer()
     fecha_creacion = fields.DateTime()
