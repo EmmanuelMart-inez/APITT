@@ -206,10 +206,12 @@ class EncuestaModel(MongoModel):
                 users = cls.objects.raw({field : { "$ne" : str1} })
                 return users
             elif tipo == 'contiene':
-                users = cls.objects.raw({field : {"$regex": str1} })
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : {"$regex": str2} })
                 return users
             elif tipo == 'no contiene': 
-                users = cls.objects.raw({field : { "$not" : {"$regex": str1 }}})  
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : { "$not" : {"$regex": str2 }}})  
                 return users
             return {'message': 'Tipo de filtro de String invalido'}, 400     
         except cls.DoesNotExist:
@@ -591,10 +593,12 @@ class ParticipantesEncuestaModel(MongoModel):
                 users = cls.objects.raw({field : { "$ne" : str1 }})
                 return users
             elif tipo == 'contiene':
-                users = cls.objects.raw({field : {"$regex": str1} })
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : {"$regex": str2} })
                 return users
             elif tipo == 'no contiene': 
-                users = cls.objects.raw({field : { "$not" : {"$regex": str1} }})  
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : { "$not" : {"$regex": str2} }})  
                 return users
             return {'message': 'Tipo de filtro de flotante invalido'}, 400     
         except cls.DoesNotExist:
@@ -746,18 +750,21 @@ class ParticipantesEncuestaModel(MongoModel):
             return None
     
     @classmethod
-    def filter_by_string_in_array(cls, field: str, tipo: str, str1: str) -> "ParticipanteModel":
+    def filter_by_string_in_array(cls, field: str, tipo: list, str1: str) -> "ParticipanteModel":
         try:
             if tipo == 'es':
-                users = cls.objects.raw({field : { "$elemMatch" : str1 } })
-            elif tipo == 'no es':
+                users = cls.objects.raw({field : str1 })
                 return users
+            elif tipo == 'no es':
                 users = cls.objects.raw({field : { "$elemMatch" : { "$ne" : str1 } } })
+                return users
             elif tipo == 'contiene':
-                users = cls.objects.raw({field : { "$elemMatch" : {"$regex": str1 } } })
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : { "$elemMatch" : {"$regex": str2 } } })
                 return users
             elif tipo == 'no contiene': 
-                users = cls.objects.raw({field : { "$elemMatch" : { "$not" : {"$regex": str1} } }})  
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : { "$elemMatch" : { "$not" : {"$regex": str2} } }})  
                 return users
             return {'message': 'Tipo de filtro de flotante invalido'}, 400     
         except cls.DoesNotExist:

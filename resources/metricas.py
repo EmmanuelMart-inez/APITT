@@ -702,8 +702,8 @@ class FiltradoByMetrica(Resource):
                         fi = ParticipantesEncuestaModel.filter_by_integer_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
                     elif fi['method'] == 'filter_by_integer_in_array':
                         fi = ParticipantesEncuestaModel.filter_by_integer_in_array(fi['tipo'], fi['int1'], fi['field'])
-                    # elif fi['method'] == 'filter_by_string_in_array':
-                    #     fi = ParticipantesEncuestaModel.filter_by_string_in_array(fi['field'],fi['tipo'], fi['str1'])
+                    elif fi['method'] == 'filter_by_string_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_string_in_array(fi['field'],fi['tipo'], fi['str1'])
                     elif fi['method'] == 'filter_by_elements_range_in_array':
                         fi = ParticipantesEncuestaModel.filter_by_elements_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
                     elif fi['method'] == 'filter_by_elements_in_array':
@@ -713,6 +713,7 @@ class FiltradoByMetrica(Resource):
                     if type(fi) == tuple:
                         filtersList.append( fi )
                     elif fi:
+                        print(type(fi))
                         cursor  = fi.aggregate(
                             {'$group': {'_id': '$id_participante'}},
                             allowDiskUse=True)
