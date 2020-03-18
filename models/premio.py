@@ -360,22 +360,22 @@ class PremioParticipanteModel(MongoModel):
                 return None
 
     @classmethod
-    def filter_by_integer(cls, tipo: str, int1: int) -> "ParticipanteModel":
+    def filter_by_integer(cls, tipo: str, int1: int, field: str) -> "ParticipanteModel":
         try:
             if tipo == '=':
-                users = cls.objects.raw({field : float1})
+                users = cls.objects.raw({field : int1})
                 return users
             elif tipo == '>':
-                users = cls.objects.raw({field : { "$gt" : float1}})
+                users = cls.objects.raw({field : { "$gt" : int1}})
                 return users
             elif tipo == '=>':
-                users = cls.objects.raw({field : { "$gte" : float1}})
+                users = cls.objects.raw({field : { "$gte" : int1}})
                 return users
             elif tipo == '<':
-                users = cls.objects.raw({field : { "$lt" : float1}})
+                users = cls.objects.raw({field : { "$lt" : int1}})
                 return users
             elif tipo == '<=':
-                users = cls.objects.raw({field : { "$lte" : float1}})
+                users = cls.objects.raw({field : { "$lte" : int1}})
                 return users
             return {'message': 'Tipo de filtro de flotante invalido'}, 400
         except cls.DoesNotExist:
@@ -483,3 +483,116 @@ class PremioParticipanteModel(MongoModel):
             return {'message': 'Tipo de filtro de fecha invalido'}, 400
         except cls.DoesNotExist:
             return None
+
+    @classmethod
+    def filter_by_float_range_in_array(cls, tipo: str, field: str, float1: float, float2: float) -> "ParticipanteModel":
+        if tipo == '<>':
+            try:
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : float1, "$lte" : float2} } })
+                return users
+            except cls.DoesNotExist:
+                return None
+
+    @classmethod
+    def filter_by_float_in_array(cls, tipo: str, float1: float, field: str) -> "ParticipanteModel":
+        try:
+            if tipo == '=':
+                users = cls.objects.raw({field : { "$elemMatch" : float1 } } )
+                return users
+            elif tipo == '>':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gt " : float1 } }})
+                return users
+            elif tipo == '=>':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : float1 } }})
+                return users
+            elif tipo == '<':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$lt" : float1 } }})
+                return users
+            elif tipo == '<=':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$lte" : float1 } }})
+                return users
+            return {'message': 'Tipo de filtro de flotante invalido'}, 400
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def filter_by_integer_range_in_array(cls, tipo: str, field: str, int1: int, int2: int) -> "ParticipanteModel":
+        if tipo == '<>':
+            try:
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : int1, "$lte" : int2 } }})
+                return users
+            except cls.DoesNotExist:
+                return None
+
+    @classmethod
+    def filter_by_integer_in_array(cls,  tipo: str,  int1: int, field: str) -> "ParticipanteModel":
+        try:
+            if tipo == '=':
+                users = cls.objects.raw({field : { "$elemMatch" : int1 } })
+                return users
+            elif tipo == '>':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gt" : int1 } }})
+                return users
+            elif tipo == '=>':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : int1 } }})
+                return users
+            elif tipo == '<':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$lt" : int1 } }})
+                return users
+            elif tipo == '<=':
+                users = cls.objects.raw({field : { "$elemMatch" : { "$lte" : float1 } }})
+                return users
+            return {'message': 'Tipo de filtro de flotante invalido'}, 400
+        except cls.DoesNotExist:
+            return None
+    
+    @classmethod
+    def filter_by_string_in_array(cls, field: str, tipo: str, str1: str) -> "ParticipanteModel":
+        try:
+            if tipo == 'es':
+                users = cls.objects.raw({field : { "$elemMatch" : str1 } })
+            elif tipo == 'no es':
+                return users
+                users = cls.objects.raw({field : { "$elemMatch" : { "$ne" : str2 } } })
+            elif tipo == 'contiene':
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : { "$elemMatch" : str2 } })
+                return users
+            elif tipo == 'no contiene': 
+                str2 = "/^{}$".format(str1)
+                users = cls.objects.raw({field : { "$elemMatch" : { "$not" : str2 } }})  
+                return users
+            return {'message': 'Tipo de filtro de flotante invalido'}, 400     
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def filter_by_elements_in_array(cls, tipo: str, int1: int, field: str) -> "ParticipanteModel":
+        try:
+            if tipo == '=':
+                users = cls.objects.raw({field : {"$size": int1 } })
+                return users
+            elif tipo == '>':
+                users = cls.objects.raw({field : {"$size": { "$gt" : int1 } }})
+                return users
+            elif tipo == '=>':
+                users = cls.objects.raw({field : {"$size": { "$gte" : int1 } }})
+                return users
+            elif tipo == '<':
+                users = cls.objects.raw({field : {"$size": { "$lt" : int1 } }})
+                return users
+            elif tipo == '<=':
+                users = cls.objects.raw({field : {"$size": { "$lte" : int1 } }})
+                return users
+            return {'message': 'Tipo de filtro de flotante invalido'}, 400
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def filter_by_elements_range_in_array(cls, tipo: str, field: str, int1: int, int2: int) -> "ParticipanteModel":
+        if tipo == '<>':
+            try:
+                users = cls.objects.raw({field : {"$size": { "$gte" : int1, "$lte" : int2 } }})
+                return users
+            except cls.DoesNotExist:
+                return None
