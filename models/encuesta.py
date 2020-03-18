@@ -699,7 +699,7 @@ class ParticipantesEncuestaModel(MongoModel):
                 users = cls.objects.raw({field : { "$elemMatch" : float1 } } )
                 return users
             elif tipo == '>':
-                users = cls.objects.raw({field : { "$elemMatch" : { "$gt " : float1 } }})
+                users = cls.objects.raw({field : { "$elemMatch" : { "$gt" : float1 } }})
                 return users
             elif tipo == '=>':
                 users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : float1 } }})

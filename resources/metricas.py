@@ -16,6 +16,7 @@ from models.participante import ParticipanteModel
 from models.premio import PremioModel, PremioParticipanteModel
 from models.venta import VentaModel
 from models.encuesta import EncuestaModel, ParticipantesEncuestaModel
+from models.tarjeta import TarjetaPuntosModel, TarjetaSellosModel
 
 from schemas.participante import ParticipanteSchema
 from models.encuesta import EncuestaModel, EncuestaPaginaModel, EncuestaOpcionesModel, ParticipantesEncuestaModel
@@ -447,7 +448,81 @@ class FiltradoByMetrica(Resource):
         try:
             for fi in req:
                 idList = []
-                if fi['document'] == 'participante_model':     
+                if fi['document'] == 'participante_model_tarjeta_sellos':     
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = TarjetaSellosModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = TarjetaSellosModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = TarjetaSellosModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = TarjetaSellosModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = TarjetaSellosModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = TarjetaSellosModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = TarjetaSellosModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
+                        # Hardcoded Match relationship between two collections
+                        encuestas = list(fi.only("_id").values())
+                        # print("\n\n", encuestas)
+                        encuesta_ids_list = []
+                        for e in encuestas:
+                            encuesta_ids_list.append({'tarjeta_sellos' : e['_id']})
+                        if encuestas:
+                            fi = ParticipanteModel.objects.raw({ "$or" : encuesta_ids_list})
+                        # print(list(fi))
+                        cursor  = fi.aggregate(
+                            {'$group': {'_id': '$_id'}},
+                            allowDiskUse=True)
+                        cursorList = list(cursor)
+                        for item in cursorList:
+                                idList.append(str(item['_id']))
+                    filtersList.append({
+                        "participantes" : idList,
+                        "total": len(idList),
+                    })
+                elif fi['document'] == 'participante_model_tarjeta_puntos':     
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = TarjetaPuntosModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = TarjetaPuntosModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = TarjetaPuntosModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = TarjetaPuntosModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = TarjetaPuntosModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = TarjetaPuntosModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = TarjetaPuntosModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
+                        # Hardcoded Match relationship between two collections
+                        encuestas = list(fi.only("_id").values())
+                        # print("\n\n", encuestas)
+                        encuesta_ids_list = []
+                        for e in encuestas:
+                            encuesta_ids_list.append({'tarjeta_puntos' : e['_id']})
+                        if encuestas:
+                            fi = ParticipanteModel.objects.raw({ "$or" : encuesta_ids_list})
+                        # print(list(fi))
+                        cursor  = fi.aggregate(
+                            {'$group': {'_id': '$_id'}},
+                            allowDiskUse=True)
+                        cursorList = list(cursor)
+                        for item in cursorList:
+                                idList.append(str(item['_id']))
+                    filtersList.append({
+                        "participantes" : idList,
+                        "total": len(idList),
+                    })
+                elif fi['document'] == 'participante_model':     
                     if fi['method'] == 'filter_by_date_range':
                         fi = ParticipanteModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
                     elif fi['method'] == 'filter_by_date':
@@ -588,8 +663,8 @@ class FiltradoByMetrica(Resource):
                         encuesta_ids_list = []
                         for e in encuestas:
                             encuesta_ids_list.append({'id_encuesta' : str(e['_id'])})
-                        print(encuesta_ids_list)
-                        print("len:",len(encuesta_ids_list))
+                        # print(encuesta_ids_list)
+                        # print("len:",len(encuesta_ids_list))
                         if len(encuesta_ids_list):
                             fi = ParticipantesEncuestaModel.objects.raw({ "$or" : encuesta_ids_list})
                         cursor  = fi.aggregate(
