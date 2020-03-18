@@ -13,8 +13,7 @@ class PremioSchema(ma.Schema):
     imagen_display = fields.URL()
     fecha_creacion = fields.DateTime()
     fecha_vigencia = fields.DateTime()
-    fecha_redencion = fields.DateTime()
-    #id_producto = fields.ReferenceField(default=None)
+    #  = fields.ReferenceField(default=None)
     id_participante = fields.Str()
 
     class Meta:
@@ -28,7 +27,6 @@ class PremioSchema(ma.Schema):
             "imagen_display",
             "fecha_creacion", 
             "fecha_vigencia", 
-            "fecha_redencion",
             "id_producto",
             "id_participante"
         )
@@ -39,6 +37,8 @@ class PremioParticipanteSchema(ma.Schema):
     id_premio = fields.Str()
     id_promocion = fields.Str()
     estado = fields.Integer()
+    fecha_creacion = fields.DateTime()
+    fechas_redencion = fields.List(fields.DateTime)
 
     class Meta:
         fields = (
@@ -46,5 +46,7 @@ class PremioParticipanteSchema(ma.Schema):
             "id_participante",
             "id_premio",
             "id_promocion",
-            "estado"
+            "estado",
+            "fecha_creacion",
+            "fechas_redencion"
         )

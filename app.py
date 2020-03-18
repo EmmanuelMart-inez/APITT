@@ -15,7 +15,7 @@ from resources.participante import Participante, ParticipanteList, WelcomePartic
 from resources.upload import ImageUpload, ImageDownload, ImageList
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos
 from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
-from resources.premio import Premio, PremioList, PremioId #Task:Desacoplar list
+from resources.premio import Premio, PremioList, PremioId, PremioParticipante #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
 from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas
 from resources.ayuda import  AyudaList
@@ -71,6 +71,7 @@ api.add_resource(CatalogoList, "/catalogo")
 api.add_resource(PremioId, "/premio/<string:id>")
 api.add_resource(Premio, "/premios")
 api.add_resource(PremioList, "/premios/<string:id>")
+api.add_resource(PremioParticipante, "/admin/premio/<string:id>")
 api.add_resource(MovimientoList, "/movimientos/<string:id_participante>")
 api.add_resource(Movimiento, "/movimiento/<string:id_movimiento>")
 api.add_resource(Encuesta, "/encuesta")

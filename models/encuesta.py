@@ -51,7 +51,17 @@ class ParticipantesEncuestaModel(MongoModel):
     # fecha_creacion = AFTER
 
     @classmethod
-    def filter_by_date_range(cls, date_start: str, date_end: str, field: str) -> "ParticipanteModel":
+    def find_by_id(cls, _Objectid: str) -> "ParticipantesEncuestaModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            print(notif)
+            return notif
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def filter_by_date_range(cls, date_start: str, date_end: str, field: str) -> "ParticipantesEncuestaModel":
         date_s = dateutil.parser.parse(date_start)
         date_e = dateutil.parser.parse(date_end)
         # print(type(date_s))
@@ -66,7 +76,7 @@ class ParticipantesEncuestaModel(MongoModel):
             return None
             
     @classmethod
-    def filter_by_date(cls, date_start: str, tipo: str, scale: str, scale_value: int, field: str) -> "ParticipanteModel":
+    def filter_by_date(cls, date_start: str, tipo: str, scale: str, scale_value: int, field: str) -> "ParticipantesEncuestaModel":
         date_s = dateutil.parser.parse(date_start)
         # print(type(date_s))
         # date_s = dt.datetime.fromisoformat(date_start)
@@ -134,7 +144,7 @@ class ParticipantesEncuestaModel(MongoModel):
             return None
 
     @classmethod
-    def filter_by_float_range(cls, tipo: str, field: str, float1: float, float2: float) -> "ParticipanteModel":
+    def filter_by_float_range(cls, tipo: str, field: str, float1: float, float2: float) -> "ParticipantesEncuestaModel":
         if tipo == '<>':
             try:
                 users = cls.objects.raw({field : { "$gte" : float1, "$lte" : float2}})
@@ -143,7 +153,7 @@ class ParticipantesEncuestaModel(MongoModel):
                 return None
 
     @classmethod
-    def filter_by_float(cls, tipo: str, float1: float, field: str) -> "ParticipanteModel":
+    def filter_by_float(cls, tipo: str, float1: float, field: str) -> "ParticipantesEncuestaModel":
         try:
             if tipo == '=':
                 users = cls.objects.raw({field : float1})
@@ -165,7 +175,7 @@ class ParticipantesEncuestaModel(MongoModel):
             return None
 
     @classmethod
-    def filter_by_integer_range(cls, tipo: str, field: str, int1: int, int2: int) -> "ParticipanteModel":
+    def filter_by_integer_range(cls, tipo: str, field: str, int1: int, int2: int) -> "ParticipantesEncuestaModel":
         if tipo == '<>':
             try:
                 users = cls.objects.raw({field : { "$gte" : int1, "$lte" : int2}})
@@ -174,7 +184,7 @@ class ParticipantesEncuestaModel(MongoModel):
                 return None
 
     @classmethod
-    def filter_by_integer(cls, tipo: str, int1: int, field: str) -> "ParticipanteModel":
+    def filter_by_integer(cls, tipo: str, int1: int, field: str) -> "ParticipantesEncuestaModel":
         try:
             if tipo == '=':
                 users = cls.objects.raw({field : int1})
@@ -196,7 +206,7 @@ class ParticipantesEncuestaModel(MongoModel):
             return None
     
     @classmethod
-    def filter_by_string(cls, field: str, tipo: str, str1: str) -> "ParticipanteModel":
+    def filter_by_string(cls, field: str, tipo: str, str1: str) -> "ParticipantesEncuestaModel":
         try:
             if tipo == 'es':
                 users = cls.objects.raw({field : str1})
@@ -205,14 +215,10 @@ class ParticipantesEncuestaModel(MongoModel):
                 users = cls.objects.raw({field : { "$ne" : str1 }})
                 return users
             elif tipo == 'contiene':
-                str2 = "/^{}/".format(str1)
-                print(str2)
                 users = cls.objects.raw({field : {"$regex": str1} })
                 return users
             elif tipo == 'no contiene': 
-                str2 = "/^{}/".format(str1)
-                print(str2)
-                users = cls.objects.raw({field : { "$not" : str2 }})  
+                users = cls.objects.raw({field : { "$not" : {"$regex": str1} }})  
                 return users
             return {'message': 'Tipo de filtro de flotante invalido'}, 400     
         except cls.DoesNotExist:

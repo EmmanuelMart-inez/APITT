@@ -40,7 +40,7 @@ class EncuestaParticipante(Resource):
                         "metrica",
                         "puntos",
                         "paginas",
-                    )).dump(encuesta), 200
+                    )).dump(en), 200
 
 
     # Quemar o eliminar encuesta, por caducidad, segun sea el envio en el body
@@ -122,7 +122,7 @@ class Encuesta(Resource):
 
 class AdministradorEncuestas(Resource):
     # Obtener el registro de todas las encuestas
-    # responidadas
+    #   responidadas
     @classmethod
     def get(self):
         try:
