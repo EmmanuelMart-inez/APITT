@@ -141,9 +141,9 @@ class VentaModel(MongoModel):
                 users = cls.objects.raw({field : float1})
                 return users
             elif tipo == '>':
-                users = cls.objects.raw({field : { "$gt " : float1}})
+                users = cls.objects.raw({field : { "$gt" : float1}})
                 return users
-            elif tipo == '=>':
+            elif tipo == '>=':
                 users = cls.objects.raw({field : { "$gte" : float1}})
                 return users
             elif tipo == '<':

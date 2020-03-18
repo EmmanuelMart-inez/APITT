@@ -15,6 +15,7 @@ from pymongo.errors import DuplicateKeyError
 from models.participante import ParticipanteModel
 from models.premio import PremioModel, PremioParticipanteModel
 from models.venta import VentaModel
+from models.encuesta import EncuestaModel, ParticipantesEncuestaModel
 
 from schemas.participante import ParticipanteSchema
 from models.encuesta import EncuestaModel, EncuestaPaginaModel, EncuestaOpcionesModel, ParticipantesEncuestaModel
@@ -461,7 +462,9 @@ class FiltradoByMetrica(Resource):
                         fi = ParticipanteModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
                     elif fi['method'] == 'filter_by_string':
                         fi = ParticipanteModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
-                    if fi:
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
                         for p in fi:
                             idList.append(str(p._id))
                     filtersList.append(  {
@@ -487,7 +490,23 @@ class FiltradoByMetrica(Resource):
                         fi = PremioParticipanteModel.filter_by_date_range_in_array(fi['date_start'], fi['date_end'], fi['field'])
                     elif fi['method'] == 'filter_by_date_in_array':
                         fi = PremioParticipanteModel.filter_by_date_in_array(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
-                    if fi:
+                    elif fi['method'] == 'filter_by_float_in_array':
+                        fi = PremioParticipanteModel.filter_by_float_in_array(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range_in_array':
+                        fi = PremioParticipanteModel.filter_by_integer_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer_in_array':
+                        fi = PremioParticipanteModel.filter_by_integer_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string_in_array':
+                        fi = PremioParticipanteModel.filter_by_string_in_array(fi['field'],fi['tipo'], fi['str1'])
+                    elif fi['method'] == 'filter_by_elements_range_in_array':
+                        fi = PremioParticipanteModel.filter_by_elements_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_elements_in_array':
+                        fi = PremioParticipanteModel.filter_by_elements_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_elements_in_array':
+                        fi = PremioParticipanteModel.filter_by_elements_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
                         cursor  = fi.aggregate(
                             {'$group': {'_id': '$id_participante'}},
                             allowDiskUse=True)
@@ -498,15 +517,6 @@ class FiltradoByMetrica(Resource):
                         "participantes" : idList,
                         "total": len(idList),
                     })
-                    # if fi:
-                    #     for p in fi:
-                    #         idList.append(str(p.id_participante._id))
-                    # pprint(list(fi))
-                    # # print(fi.id_premio)
-                    # return  {
-                    #     "participantes" : idList,
-                    #     "total": len(idList),
-                    #     }, 200
                 elif fi['document'] == 'venta_model':  
                     if fi['method'] == 'filter_by_date_range':
                         fi = VentaModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
@@ -522,7 +532,66 @@ class FiltradoByMetrica(Resource):
                         fi = VentaModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
                     elif fi['method'] == 'filter_by_string':
                         fi = VentaModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
-                    if fi:
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
+                        cursor  = fi.aggregate(
+                            {'$group': {'_id': '$id_participante'}},
+                            allowDiskUse=True)
+                        cursorList = list(cursor)
+                        for item in cursorList:
+                                idList.append(str(item['_id']))
+                    filtersList.append({
+                        "participantes" : idList,
+                        "total": len(idList),
+                    })
+                elif fi['document'] == 'encuesta_model':  
+                    if fi['method'] == 'filter_by_date_range':
+                        fi = EncuestaModel.filter_by_date_range(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date':
+                        fi = EncuestaModel.filter_by_date(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_range':
+                        fi = EncuestaModel.filter_by_float_range(fi['tipo'], fi['field'], fi['float1'], fi['float2'])
+                    elif fi['method'] == 'filter_by_float':
+                        fi = EncuestaModel.filter_by_float(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range':
+                        fi = EncuestaModel.filter_by_integer_range(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer':
+                        fi = EncuestaModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string':
+                        fi = EncuestaModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
+                    elif fi['method'] == 'filter_by_date_range_in_array':
+                        fi = EncuestaModel.filter_by_date_range_in_array(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date_in_array':
+                        fi = EncuestaModel.filter_by_date_in_array(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_in_array':
+                        fi = EncuestaModel.filter_by_float_in_array(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range_in_array':
+                        fi = EncuestaModel.filter_by_integer_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer_in_array':
+                        fi = EncuestaModel.filter_by_integer_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_string_in_array':
+                        fi = EncuestaModel.filter_by_string_in_array(fi['field'],fi['tipo'], fi['str1'])
+                    elif fi['method'] == 'filter_by_elements_range_in_array':
+                        fi = EncuestaModel.filter_by_elements_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_elements_in_array':
+                        fi = EncuestaModel.filter_by_elements_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_elements_in_array':
+                        fi = EncuestaModel.filter_by_elements_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
+                        # Hardcoded Match relationship between two collections
+                        # print(list(fi))
+                        encuestas = fi.only("_id").values()
+                        # print(list(encuestas))
+                        encuesta_ids_list = []
+                        for e in encuestas:
+                            encuesta_ids_list.append({'id_encuesta' : str(e['_id'])})
+                        print(encuesta_ids_list)
+                        print("len:",len(encuesta_ids_list))
+                        if len(encuesta_ids_list):
+                            fi = ParticipantesEncuestaModel.objects.raw({ "$or" : encuesta_ids_list})
                         cursor  = fi.aggregate(
                             {'$group': {'_id': '$id_participante'}},
                             allowDiskUse=True)
@@ -548,7 +617,27 @@ class FiltradoByMetrica(Resource):
                         fi = ParticipantesEncuestaModel.filter_by_integer(fi['tipo'], fi['int1'], fi['field'])
                     elif fi['method'] == 'filter_by_string':
                         fi = ParticipantesEncuestaModel.filter_by_string(fi['field'],fi['tipo'], fi['str1'])
-                    if fi:
+                    elif fi['method'] == 'filter_by_date_range_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_date_range_in_array(fi['date_start'], fi['date_end'], fi['field'])
+                    elif fi['method'] == 'filter_by_date_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_date_in_array(fi['date_start'], fi['tipo'], fi['scale'], fi['scale_value'], fi['field'])
+                    elif fi['method'] == 'filter_by_float_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_float_in_array(fi['tipo'], fi['float1'], fi['field'])
+                    elif fi['method'] == 'filter_by_integer_range_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_integer_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_integer_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_integer_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    # elif fi['method'] == 'filter_by_string_in_array':
+                    #     fi = ParticipantesEncuestaModel.filter_by_string_in_array(fi['field'],fi['tipo'], fi['str1'])
+                    elif fi['method'] == 'filter_by_elements_range_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_elements_range_in_array(fi['tipo'], fi['field'], fi['int1'], fi['int2'])
+                    elif fi['method'] == 'filter_by_elements_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_elements_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    elif fi['method'] == 'filter_by_elements_in_array':
+                        fi = ParticipantesEncuestaModel.filter_by_elements_in_array(fi['tipo'], fi['int1'], fi['field'])
+                    if type(fi) == tuple:
+                        filtersList.append( fi )
+                    elif fi:
                         cursor  = fi.aggregate(
                             {'$group': {'_id': '$id_participante'}},
                             allowDiskUse=True)

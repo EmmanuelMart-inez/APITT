@@ -572,27 +572,36 @@ class PremioParticipanteModel(MongoModel):
             if tipo == '=':
                 users = cls.objects.raw({field : {"$size": int1 } })
                 return users
-            elif tipo == '>':
-                users = cls.objects.raw({field : {"$size": { "$gt" : int1 } }})
-                return users
-            elif tipo == '=>':
-                users = cls.objects.raw({field : {"$size": { "$gte" : int1 } }})
-                return users
-            elif tipo == '<':
-                users = cls.objects.raw({field : {"$size": { "$lt" : int1 } }})
-                return users
-            elif tipo == '<=':
-                users = cls.objects.raw({field : {"$size": { "$lte" : int1 } }})
-                return users
+            #NOTE: $size does not accept ranges of values. To select documents based on fields with different numbers of elements, create a counter field that you increment when you add elements to a field.
+            #   Queries cannot use indexes for the $size portion of a query, although the other portions of a query can use indexes if applicable.
+            # elif tipo == '>':
+            #     users = cls.objects.raw({field : {"$size": { "$gt" : int1 } }})
+            #     return users
+            # elif tipo == '=>':
+            #     users = cls.objects.raw({field : {"$size": { "$gte" : int1 } }})
+            #     return users
+            # elif tipo == '<':
+            #     users = cls.objects.raw({field : {"$size": { "$lt" : int1 } }})
+            #     return users
+            # elif tipo == '<=':
+            #     users = cls.objects.raw({field : {"$size": { "$lte" : int1 } }})
+            #     return users
             return {'message': 'Tipo de filtro de flotante invalido'}, 400
         except cls.DoesNotExist:
             return None
 
-    @classmethod
-    def filter_by_elements_range_in_array(cls, tipo: str, field: str, int1: int, int2: int) -> "ParticipanteModel":
-        if tipo == '<>':
-            try:
-                users = cls.objects.raw({field : {"$size": { "$gte" : int1, "$lte" : int2 } }})
-                return users
-            except cls.DoesNotExist:
-                return None
+    #NOTE: $size does not accept ranges of values. To select documents based on fields with different numbers of elements, create a counter field that you increment when you add elements to a field.
+    #   Queries cannot use indexes for the $size portion of a query, although the other portions of a query can use indexes if applicable.
+    #
+    # @classmethod
+    # def filter_by_elements_range_in_array(cls, tipo: str, field: str, int1: int, int2: int) -> "ParticipanteModel":
+    #     if tipo == '<>':
+    #         try:
+    #             users = cls.objects.only("fechas_redencion").count()
+    #             print(users)
+    #             # users = cls.objects.raw({field : { "$gte" : {"$size": int1 }, "$lte" : {"$size": int2 } }})
+    #             return users
+    #         except cls.DoesNotEx ist:
+    #             return None
+
+    
