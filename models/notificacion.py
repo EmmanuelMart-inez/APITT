@@ -17,6 +17,7 @@ class NotificacionTemplateModel(MongoModel):
     bar_text = fields.CharField()
     tipo_notificacion = fields.CharField()
     link = fields.CharField(default="null")
+    filtros = fields.ListField(fields.CharField(), default=[])
     # tags = fields.ListField(default=[])
 
     @classmethod

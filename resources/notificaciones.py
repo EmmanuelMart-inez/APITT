@@ -166,18 +166,18 @@ class NotificacionesAdminList(Resource):
                     "_id",
                     "titulo",
                     "fecha",
-                    "tipo_notificacion"
+                    "tipo_notificacion",
+                    "filtros"
                     ), many=True).dump(all_notifs),200
 
-    # Crea un template de notificaciones y si no hay una segmentación esta se envia a todos
-    # la funcionalidad de segmentación no se implementa aun
+    # Crea un template de notificaciones y se envia a todos en la lista de filtros
     @classmethod
     def post(self):
         notificacion_json = request.get_json()
-        print(notificacion_json)
+        # print(notificacion_json)
         n = not_schema_template.load(notificacion_json)
         pprint(n)
-        print("loaded")
+        # print("loaded")
         try:
             template = NotificacionTemplateModel()
             if "titulo" in n:
@@ -196,10 +196,16 @@ class NotificacionesAdminList(Resource):
                 template.tipo_notificacion=n["tipo_notificacion"]
             if "link" in n:
                 template.link=n["link"]
+            if "filtros" in n:
+                template.filtros = n["filtros"]
+            else: 
+                template.filtros = []
             template.save()
-
+            filtersObids=[]
+            for fil in n["filtros"]:
+                filtersObids.append(ObjectId(fil))
             # Enviar a todos los participantes
-            for p in ParticipanteModel.objects.all():
+            for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
                 # part_id = ObjectId(id)
                 notif = NotificacionModel(
                 id_participante=p._id,
@@ -213,7 +219,8 @@ class NotificacionesAdminList(Resource):
             print(exc.message)
             return {"message": "No se pudo crear o enviar la notificacion."}, 404
         return {"message": "Notificacion guardada con éxito.",
-                    "_id": str(template._id)}
+                    "_id": str(template._id),
+                "Número de destinatarios:": len(template.filtros)}
 
 
 class NotificacionesAdmin(Resource):
@@ -235,6 +242,7 @@ class NotificacionesAdmin(Resource):
             "bar_text",
             "tipo_notificacion",
             "link",
+            "filtros"
             )).dump(n), 200
 
     @classmethod
@@ -307,6 +315,7 @@ class NotificacionAcciones(Resource):
                 "bar_text",
                 "tipo_notificacion",
                 "link",
+                "filtros"
                 )).dump(n)}, 200
         elif accion == 'premio':
             n = NotificacionTemplateModel.find_by_id(id)
@@ -326,6 +335,7 @@ class NotificacionAcciones(Resource):
                 "bar_text",
                 "tipo_notificacion",
                 "link",
+                "filtros"
                 )).dump(n),
              "premio":  PremioSchema(
                     only=(
@@ -338,7 +348,7 @@ class NotificacionAcciones(Resource):
                         "imagen_display",
                         "fecha_creacion", 
                         "fecha_vigencia", 
-                        "fecha_redencion",
+                        # "fecha_redencion",
                         # "id_producto",
                         "id_participante"
                     )).dump(p)
@@ -362,6 +372,7 @@ class NotificacionAcciones(Resource):
                     "bar_text",
                     "tipo_notificacion",
                     "link",
+                    "filtros"
                     )).dump(n),
                 "encuesta": EncuestaSchema(
                         only=(
@@ -498,7 +509,7 @@ class NotificacionAcciones(Resource):
                         "imagen_display",
                         "fecha_creacion", 
                         "fecha_vigencia", 
-                        "fecha_redencion",
+                        # "fecha_redencion",
                         # "id_producto",
                         "id_participante"
                     )).dump(p)
@@ -559,7 +570,7 @@ class NotificacionAcciones(Resource):
                     "imagenIcon",
                     "bar_text",
                     "tipo_notificacion",
-                    "link",
+                    "link"
                     )).dump(n),
                 "encuesta": EncuestaSchema(
                         only=(
@@ -582,6 +593,8 @@ class NotificacionAcciones(Resource):
             if not n:
                 return {"message": "No se encontro la notificación"}, 404
             try:
+                for p in NotificacionModel.objects.raw({"id_notificacion": n._id}):
+                    p.delete()
                 n.delete()
             except:
                 return {"message": "No se pudo efectuar esta operación"},404 
@@ -595,6 +608,11 @@ class NotificacionAcciones(Resource):
             if not p:
                 return {"message": "No se encontro el premio"}, 404
             try:
+                for np in NotificacionModel.objects.raw({"id_notificacion": n._id}):
+                    np.delete()
+                for pp in PremioParticipanteModel.objects.raw({"id_premio": p._id}):
+                    pp.delete()
+                n.delete()
                 p.delete()
                 n.delete()
             except:
@@ -609,38 +627,171 @@ class NotificacionAcciones(Resource):
             if not en:
                 return {"message": "No se encontro la encuesta"}, 404
             try:
+                for np in NotificacionModel.objects.raw({"id_notificacion": n._id}):
+                    np.delete()
+                for ep in PremioParticipanteModel.objects.raw({"id_premio": en._id}):
+                    ep.delete()
                 n.delete()
                 en.delete()
             except:
                 return {"message": "No se pudo efectuar esta operación"},404 
             return {"message": "Notificación y encuesta eliminados"}, 200   
 
-    # Enviar de nuevo notificación y su especialización si es que tiene
-    # El id es necesario para recuperar la notificación y entonces re-enviarla
-    # <accion>: No sirve para nada en este endpoint
-    # TODO: Implementar filtros / segmentación : <accion> se puede utilizar para realizar filtrados y segms
-    @classmethod
-    def post(self, id, accion):
-        try:
-            oid = ObjectId(id)
-            # Enviar a todos los participantes
-            for p in ParticipanteModel.objects.all():
-                # part_id = ObjectId(id)
-                notif = NotificacionModel(
-                id_participante=p._id,
-                id_notificacion=oid,
-                estado=0,
-                # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
-                ).save()            
-                # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
-        except ValidationError as exc:
-            print(exc.message)
-            return {"message": "No se pudo reenviar la notificacion."}
-        return {"message": "Notificacion reenviada con éxito.",
-                    "_id": str(id)}
-
-    # # Marcar como eliminada notificación
+    # # Enviar de nuevo notificación y su especialización si es que tiene
+    # # El id es necesario para recuperar la notificación y entonces re-enviarla
+    # # <accion>: No sirve para nada en este endpoint
+    # # TODO: Implementar filtros / segmentación : <accion> se puede utilizar para realizar filtrados y segms
     # @classmethod
-    # def patch(self, id, accion):
-    #     pass
+    # def post(self, id, accion):
+    #     if accion == 'ninguna':
+    #         n = NotificacionTemplateModel.find_by_id(id)
+    #         if not n:
+    #             return {"message": "No se encontro la notificación"}, 404
+    #         try:
+    #             filtersObids=[]
+    #             if not "filtros" in n:
+    #                 return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+    #             for fil in n["filtros"]:
+    #                 filtersObids.append(ObjectId(fil))
+    #             # Enviar a todos los participantes
+    #             for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+    #                 # part_id = ObjectId(id)
+    #                 notif = NotificacionModel(
+    #                 id_participante=p._id,
+    #                 id_notificacion=n._id,
+    #                 estado=0,
+    #                 # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+    #                 ).save()            
+    #                 # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
+    #         # return {"message": "Notificacion guardada con éxito."}
+    #         except ValidationError as exc:
+    #             print(exc.message)
+    #             return {"message": "No se pudo crear o enviar la notificacion."}, 404
+    #         return {"message": "Notificacion reenviada con éxito.",
+    #                 "Número de destinatarios:": len(filtersObids)}
+    #     elif accion == 'premio':
+    #         n = NotificacionTemplateModel.find_by_id(id)
+    #         pprint(n)
+    #         if not n:
+    #             return {"message": "No se encontro el premio"}, 404
+    #         p = PremioModel.find_by_id(n.link)
+    #         if not p:
+    #             return {"message": "No se encontro el premio"}, 404
+    #         try:
+    #             filtersObids=[]
+    #             if not "filtros" in n:
+    #                 return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+    #             for fil in n["filtros"]:
+    #                 filtersObids.append(ObjectId(fil))
+    #             # Enviar a todos los participantes
+    #             for par in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+    #                 # part_id = ObjectId(id)
+    #                 notif = PremioParticipanteModel(
+    #                 id_participante=par._id,
+    #                 # id_notificacion=n._id,
+    #                 fecha_creacion=dt.datetime.now(),
+    #                 estado=0,
+    #                 # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+    #                 ).save()        
+    #             filtersObids=[]
+    #             if not "filtros" in n:
+    #                 return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+    #             for fil in n["filtros"]:
+    #                 filtersObids.append(ObjectId(fil))
+    #             # Enviar a todos los participantes
+    #             for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+    #                 # part_id = ObjectId(id)
+    #                 notif = NotificacionModel(
+    #                 id_participante=p._id,
+    #                 id_notificacion=n._id,
+    #                 estado=0,
+    #                 # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+    #             ).save()            
+    #             # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
+    #     # return {"message": "Notificacion guardada con éxito."}
+    #         except ValidationError as exc:
+    #             print(exc.message)
+    #             return {"message": "No se pudo crear o enviar la notificacion."}, 404
+    #         return {"message": "Notificacion reenviada con éxito.",
+    #                 "Número de destinatarios:": len(filtersObids)}               
+    #     elif accion == 'encuesta':
+    #         n = NotificacionTemplateModel.find_by_id(id)
+    #         pprint(n)
+    #         if not n:
+    #             return {"message": "No se encontro la notificacion"}, 404
+    #         en = EncuestaModel.find_by_id(n.link)
+    #         if not en:
+    #             return {"message": "No se encontro la encuesta"}, 404
+    #         try:
+    #              filtersObids=[]
+    #             if not "filtros" in n:
+    #                 return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+    #             for fil in n["filtros"]:
+    #                 filtersObids.append(ObjectId(fil))
+    #             # Enviar a todos los participantes
+    #             for par in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+    #                 # part_id = ObjectId(id)
+    #                 notif = PremioParticipanteModel(
+    #                 id_participante=par._id,
+    #                 # id_notificacion=n._id,
+    #                 fecha_creacion=dt.datetime.now(),
+    #                 estado=0,
+    #                 # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+    #                 ).save()        
+    #             filtersObids=[]
+    #             if not "filtros" in n:
+    #                 return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+    #             for fil in n["filtros"]:
+    #                 filtersObids.append(ObjectId(fil))
+    #             # Enviar a todos los participantes
+    #             for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+    #                 # part_id = ObjectId(id)
+    #                 notif = NotificacionModel(
+    #                 id_participante=p._id,
+    #                 id_notificacion=n._id,
+    #                 estado=0,
+    #                 # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+    #             ).save()         
+               
+    #         except:
+    #             return {"message": "No se pudo efectuar esta operación"},404 
+    #         return {"message": "Notificación y encuesta eliminados"}, 200  
+
+
+
+
+    #         notificacion_json = request.get_json()
+    #         # print(notificacion_json)
+    #         n = not_schema_template.load(notificacion_json)
+    #         oid = ObjectId(id)
+    #         # Enviar a todos los participantes en la lista de flitros
+    #         filtersObids=[]
+    #         if not "filtros" in n:
+    #             return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+    #         for fil in n["filtros"]:
+    #             filtersObids.append(ObjectId(fil))
+    #         # Enviar a todos los participantes
+    #         if accion == "encuesta":
+    #             en = 
+    #         elif accion == "premio":
+    #         for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+    #             # part_id = ObjectId(id)
+    #             notif = NotificacionModel(
+    #             id_participante=p._id,
+    #             id_notificacion=oid,
+    #             estado=0,
+    #             # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+    #             ).save()            
+    #             # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
+    #         # return {"message": "Notificacion guardada con éxito."}
+    #     except ValidationError as exc:
+    #         print(exc.message)
+    #         return {"message": "No se pudo crear o enviar la notificacion."}, 404
+    #     return {"message": "Notificacion reenviada con éxito.",
+    #             "Número de destinatarios:": len(filtersObids)}
+
+    # # # Marcar como eliminada notificación
+    # # @classmethod
+    # # def patch(self, id, accion):
+    # #     pass
             

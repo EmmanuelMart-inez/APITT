@@ -63,11 +63,13 @@ class EncuestaModel(MongoModel):
     @classmethod
     def filter_by_date(cls, date_start: str, tipo: str, scale: str, scale_value: int, field: str) -> "ParticipanteModel":
         date_s = dateutil.parser.parse(date_start)
+        current_date = dt.datetime.now()
         # print(type(date_s))
         # date_s = dt.datetime.fromisoformat(date_start)
         try: 
             # Relative Dates
             if tipo == 'anterior':
+                date_s = current_date
                 if scale == 'dias':
                     rdate = date_s.replace(hour=0, minute=0, second=0, microsecond=0)-relativedelta(days=+scale_value)
                 elif scale == 'semanas':
@@ -83,6 +85,7 @@ class EncuestaModel(MongoModel):
                 users = cls.objects.raw({field : {"$gte" : rdate, "$lt": date_s}})
                 return users
             elif tipo == 'siguiente':
+                date_s = current_date
                 if scale == 'dias':
                     rdate = date_s.replace(hour=23, minute=59, second=59, microsecond=59)+relativedelta(days=+scale_value)
                 elif scale == 'semanas':

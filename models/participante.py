@@ -227,7 +227,7 @@ class ParticipanteModel(MongoModel):
                 users = cls.objects.raw({"tarjeta_puntos.balance" : { "$gt" : float1}})
                 # print(list(users))
                 return users
-            elif tipo == '=>':
+            elif tipo == '>=':
                 users = cls.objects.raw({field : { "$gte" : float1}})
                 return users
             elif tipo == '<':
@@ -258,7 +258,7 @@ class ParticipanteModel(MongoModel):
             elif tipo == '>':
                 users = cls.objects.raw({field : { "$gt" : int1}})
                 return users
-            elif tipo == '=>':
+            elif tipo == '>=':
                 users = cls.objects.raw({field : { "$gte" : int1}})
                 return users
             elif tipo == '<':
@@ -391,7 +391,7 @@ class ParticipanteModel(MongoModel):
             elif tipo == '>':
                 users = cls.objects.raw({field : { "$elemMatch" : { "$gt " : float1 } }})
                 return users
-            elif tipo == '=>':
+            elif tipo == '>=':
                 users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : float1 } }})
                 return users
             elif tipo == '<':
@@ -422,7 +422,7 @@ class ParticipanteModel(MongoModel):
             elif tipo == '>':
                 users = cls.objects.raw({field : { "$elemMatch" : { "$gt" : int1 } }})
                 return users
-            elif tipo == '=>':
+            elif tipo == '>=':
                 users = cls.objects.raw({field : { "$elemMatch" : { "$gte" : int1 } }})
                 return users
             elif tipo == '<':
@@ -464,7 +464,7 @@ class ParticipanteModel(MongoModel):
             # elif tipo == '>':
             #     users = cls.objects.raw({field : {"$size": { "$gt" : int1 } }})
             #     return users
-            # elif tipo == '=>':
+            # elif tipo == '>=':
             #     users = cls.objects.raw({field : {"$size": { "$gte" : int1 } }})
             #     return users
             # elif tipo == '<':

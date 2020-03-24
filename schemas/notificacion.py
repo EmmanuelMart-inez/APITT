@@ -10,6 +10,7 @@ class NotificacionTemplateSchema(ma.Schema):
     bar_text = fields.Str()
     tipo_notificacion = fields.Str()
     link = fields.Str()
+    filtros = fields.List(fields.Str())
     # tags = fields.List(fields.Str())
 
     class Meta:
@@ -21,7 +22,8 @@ class NotificacionTemplateSchema(ma.Schema):
             "imagenIcon",
             "bar_text",
             "tipo_notificacion",
-            "link"
+            "link",
+            "filtros"
         )
 
 
