@@ -4,6 +4,22 @@ import calendar
 import dateutil.parser
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 
+def formatResponseFilterByField(fi, filtersList: list, groupBy: str):
+    idList = []
+    if type(fi) == tuple:
+        filtersList.append( fi )
+    elif fi:
+        cursor  = fi.aggregate(
+            {'$group': {'_id': groupBy}},
+            allowDiskUse=True)
+        cursorList = list(cursor)
+        for item in cursorList:
+            idList.append(str(item['_id']))
+    filtersList.append({
+        "participantes" : idList,
+        "total": len(idList),
+    })
+    return filtersList
 
 def formatResponseFilter(fi, filtersList: list):
     idList = []
@@ -19,7 +35,7 @@ def formatResponseFilter(fi, filtersList: list):
     return filtersList
 
 # Match relationship between two collections
-def joinCollectionToParticipanteModel(cls, CollectionMongoName: str, fi, filtersList: list, IsObjectId: bool):
+def joinCollectionToParticipanteModel(cls, CollectionMongoName: str, fi, filtersList: list, IsObjectId: bool, groupBy: str):
     idList = []
     if type(fi) == tuple:
         filtersList.append( fi )
@@ -34,7 +50,7 @@ def joinCollectionToParticipanteModel(cls, CollectionMongoName: str, fi, filters
         if collectionObjectIdList:
             fi = cls.objects.raw({ "$or" : queryIdList})
         cursor  = fi.aggregate(
-            {'$group': {'_id': '$_id'}},
+            {'$group': {'_id': groupBy}},
             allowDiskUse=True)
         cursorList = list(cursor)
         for item in cursorList:

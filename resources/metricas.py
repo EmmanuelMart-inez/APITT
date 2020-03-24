@@ -47,38 +47,25 @@ class FiltradoByMetrica(Resource):
                 idList = []
                 if fi['document'] == 'participante_model_tarjeta_sellos':     
                     fi = switchFilter(TarjetaSellosModel, fi)
-                    filterList = joinCollectionToParticipanteModel(ParticipanteModel, 'tarjeta_sellos', fi, filtersList, True)
+                    filterList = joinCollectionToParticipanteModel(ParticipanteModel, 'tarjeta_sellos', fi, filtersList, True, '$_id')
                 elif fi['document'] == 'participante_model_tarjeta_puntos':     
                     fi = switchFilter(TarjetaPuntosModel, fi)
-                    filterList = joinCollectionToParticipanteModel(ParticipanteModel, 'tarjeta_puntos', fi, filtersList, True)
+                    filterList = joinCollectionToParticipanteModel(ParticipanteModel, 'tarjeta_puntos', fi, filtersList, True, '$_id')
                 elif fi['document'] == 'participante_model':         
                     fi = switchFilter(ParticipanteModel, fi) 
                     filtersList = formatResponseFilter(fi, filtersList)
                 elif fi['document'] == 'participante_premio_model':         
                     fi = switchFilter(PremioParticipanteModel, fi)  
-                    filtersList = formatResponseFilter(fi, filtersList)
+                    filtersList = formatResponseFilterByField(fi, filtersList, '$id_participante')
                 elif fi['document'] == 'venta_model':        
                     fi = switchFilter(VentaModel, fi)  
-                    filtersList = formatResponseFilter(fi, filtersList)
+                    filtersList = formatResponseFilterByField(fi, filtersList, '$id_participante')
                 elif fi['document'] == 'encuesta_model':          
                     fi = switchFilter(EncuestaModel, fi)  
-                    filterList = joinCollectionToParticipanteModel(ParticipantesEncuestaModel, 'id_encuesta', fi, filtersList, False)
-                elif fi['document'] == 'participantes_encuesta_model':          
-                    fi = switchFilter(ParticipantesEncuestaModel, fi)  
-                    if type(fi) == tuple:
-                        filtersList.append( fi )
-                    elif fi:
-                        print(type(fi))
-                        cursor  = fi.aggregate(
-                            {'$group': {'_id': '$id_participante'}},
-                            allowDiskUse=True)
-                        cursorList = list(cursor)
-                        for item in cursorList:
-                                idList.append(str(item['_id']))
-                    filtersList.append({
-                        "participantes" : idList,
-                        "total": len(idList),
-                    })
+                    filterList = joinCollectionToParticipanteModel(ParticipantesEncuestaModel, 'id_encuesta', fi, filtersList, False, "$id_participante")
+                elif fi['document'] == 'participantes_encuesta_model':       
+                    fi = switchFilter(ParticipantesEncuestaModel, fi)            
+                    filtersList = formatResponseFilterByField(fi, filtersList, "$id_participante")
             return  filtersList, 200
                 # elif fi['document'] == 'encuesta_model':                             
         except ParticipanteModel.DoesNotExist:
