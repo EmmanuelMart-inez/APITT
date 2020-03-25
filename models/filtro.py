@@ -2,7 +2,6 @@ from datetime import *
 from dateutil.relativedelta import *
 import calendar
 import dateutil.parser
-from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 
 def formatResponseFilterByField(fi, filtersList: list, groupBy: str):
     idList = []

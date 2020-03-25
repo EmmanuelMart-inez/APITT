@@ -1,5 +1,6 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from models.participante import ParticipanteModel
+from pymodm.errors import ValidationError
 
 from bson.objectid import ObjectId
 #from encuesta import Encuesta
@@ -30,6 +31,32 @@ class NotificacionTemplateModel(MongoModel):
         except cls.DoesNotExist:
             return None
 
+    # Filtros es una lista de ids de participantes a los cuales se les enviara la notificacion
+    @classmethod
+    def send_to_participantes(cls, n):
+        try:
+            filtersObids=[]
+            if not "filtros" in n:
+                return {"message": "Error: Sin destinatarios, debe haber al menos un participante a quien enviarle esta acción"}
+            for fil in n.filtros:
+                filtersObids.append(ObjectId(fil))
+            # Enviar a todos los participantes
+            for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+                # part_id = ObjectId(id)
+                notif = NotificacionModel(
+                id_participante=p._id,
+                id_notificacion=n._id,
+                estado=0,
+                # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+                ).save()            
+            return {"status": 200, 
+                    "total": len(filtersObids)}
+                # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
+        # return {"message": "Notificacion guardada con éxito."}
+        except ValidationError as exc:
+            print(exc.message)
+            return {"status": 404}
+
 class NotificacionModel(MongoModel):
     id_participante = fields.ReferenceField(ParticipanteModel)
     id_notificacion = fields.ReferenceField(NotificacionTemplateModel)
@@ -40,6 +67,7 @@ class NotificacionModel(MongoModel):
     #    Premio, default=[])
     #link_promocion = fields.EmbeddedDocumentListField(
     #    Promocion, default=[])
+
 
 class NotificacionesModel(MongoModel):
     nottts = fields.EmbeddedDocumentListField(

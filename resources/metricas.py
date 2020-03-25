@@ -24,17 +24,8 @@ from models.encuesta import EncuestaModel, EncuestaPaginaModel, EncuestaOpciones
 from schemas.encuesta import EncuestaSchema, EncuestaPaginaSchema, EncuestaOpcionesSchema, ParticipanteEncuestaSchema
 from marshmallow import pprint
 
-
- 
 # Establish a connection to the database.
 connect("mongodb://localhost:27017/ej1")
-
-simbols_number = ['> gt', '< lt', '!= .objects.exclude()', '<> range' '= exact']
-# simbols_date = ['>', '<', '!=', '<>' '=']
-simbols_date_input = ['anterior lt', 'siguiente gt', 'actual exact'] # fecha, simbolo
-simbols_date_chunk = ['antes !!', 'despues !!', 'dia day', 'dias range day', 'semana', 'semanas week', 'mes', 'meses month', 'año year', 'años'] # simbolo_fecha, simbolo, escala
-simbols_date_rango = [ 'entre range'] # fecha(s),
-    # fecha(s), unidad_tiempo (si es '' default: día), cantidad, operador
 
 # Filtrado de participantes para los que va dirigido el contenido (premio, encuesta, notificación)
 class FiltradoByMetrica(Resource):
@@ -67,7 +58,15 @@ class FiltradoByMetrica(Resource):
                     fi = switchFilter(ParticipantesEncuestaModel, fi)            
                     filtersList = formatResponseFilterByField(fi, filtersList, "$id_participante")
             return  filtersList, 200
-                # elif fi['document'] == 'encuesta_model':                             
         except ParticipanteModel.DoesNotExist:
             return {'message': 'Ocurrió un error al procesar su petición'}, 500
         return {'message': 'Valor: IdMetrica invalido'}, 400
+
+
+
+# simbols_number = ['> gt', '< lt', '!= .objects.exclude()', '<> range' '= exact']
+# simbols_date = ['>', '<', '!=', '<>' '=']
+# simbols_date_input = ['anterior lt', 'siguiente gt', 'actual exact'] # fecha, simbolo
+# simbols_date_chunk = ['antes !!', 'despues !!', 'dia day', 'dias range day', 'semana', 'semanas week', 'mes', 'meses month', 'año year', 'años'] # simbolo_fecha, simbolo, escala
+# simbols_date_rango = [ 'entre range'] # fecha(s),
+# fecha(s), unidad_tiempo (si es '' default: día), cantidad, operador
