@@ -92,6 +92,7 @@ class ProductoModel(MongoModel):
     porcentaje_ganancia = fields.FloatField()
     categoria = fields.CharField()
     proveedor = fields.CharField()
+    imagen = fields.URLField()
     atributos = fields.CharField()
     # categoria = fields.EmbeddedDocumentListField(
     #     CategoriaModel, default=[])

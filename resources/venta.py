@@ -66,43 +66,97 @@ promociones = [
 	{
 		"_id": '5e701fba1377db6386eb11da',
 		"titulo": "BubbleCombo",
-		"tipo": "gratis",
-		"valor": 100.0,
-		"productos_validos": ["5e701e771377db6386eb11d5"],
-		"fecha_vigencia":  "2029-06-06T16:00:00Z",
-        "puntos": 0.0,
-        "sellos": 0
+        "descripcion": "por la compra de un blbla..",
+        # "imagen": "https://bubbletown.com/download/promo1.png", 
+        "imagen": "http://127.0.0.1:5001/download/promo1.png", 
+		"precio_venta": 100.0,
+        "costo_venta": 50.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
-	{
-		"_id": "5e701fc31377db6386eb11d",
+    {
+		"_id": '5e701fba1377db6386eb11da',
 		"titulo": "50% de descuento sobre tu compra",
-		"tipo": "porcentaje compra",
-		"valor": 50.0,
-		"productos_validos": ["5e701e771377db6386eb11d5","5e701e951377db6386eb11d7"],
-		"fecha_vigencia":  "2020-06-06T16:00:00Z",
-        "puntos": 0.0,
-        "sellos": 0
+        "descripcion": "por la compra de un...",
+        # "imagen": "https://bubbletown.com/download/promo2.png", 
+        "imagen": "http://127.0.0.1:5001/download/promo2.png", 
+		"precio_venta": 100.0,
+        "costo_venta": 50.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
-		"_id": "5e701fd11377db6386eb11dc",
+		"_id": '5e701fba1377db6386eb11da',
 		"titulo": "2x1 en bolipanes",
-		"tipo": "2", # --> 2x1  2
-		"valor": 1.0,  #          1
-		"productos_validos": ["5e701e8c1377db6386eb11d6"],
-		"fecha_vigencia":  "2020-06-06T16:00:00Z",
-        "puntos": 0.0,
-        "sellos": 0
+        "descripcion": "por la compra de un...",
+        # "imagen": "https://bubbletown.com/download/promo3.png", 
+        "imagen": "http://127.0.0.1:5001/download/promo3.png", 
+		"precio_venta": 100.0,
+        "costo_venta": 50.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
-		"_id": "5e701fe11377db6386eb11dd",
+		"_id": '5e701fba1377db6386eb11da',
 		"titulo": "3x2 en café",
-		"tipo": "3", # --> 2x1  2
-		"valor": 2.0,  #          1
-		"productos_validos": ["5e701e951377db6386eb11d7"],
-		"fecha_vigencia":  "2020-06-06T16:00:00Z",
-        "puntos": 0.0,
-        "sellos": 0
+        "descripcion": "por la compra de un...",
+        # "imagen": "https://bubbletown.com/download/promo3.png", 
+        "imagen": "http://127.0.0.1:5001/download/promo3.png", 
+		"precio_venta": 100.0,
+        "costo_venta": 50.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
+	},
+    {
+		"_id": '5e701fba1377db6386eb11da',
+		"titulo": "Combo: 3 bolipanes + 1 bubbleFreezze mediano por $179",
+        "descripcion": "por la compra de un...",
+        "imagen": "http://127.0.0.1:5001/download/promo4.jpg", 
+		"precio_venta": 100.0,
+        "costo_venta": 50.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	}
+	# {
+	# 	"_id": "5e701fc31377db6386eb11d",
+	# 	"titulo": "50% de descuento sobre tu compra",
+	# 	"tipo": "porcentaje compra",
+	# 	"valor": 50.0,
+	# 	"productos_validos": ["5e701e771377db6386eb11d5","5e701e951377db6386eb11d7"],
+	# 	"fecha_vigencia":  "2020-06-06T16:00:00Z",
+    #     "puntos": 0.0,
+    #     "sellos": 0
+	# },
+    # {
+	# 	"_id": "5e701fd11377db6386eb11dc",
+	# 	"titulo": "2x1 en bolipanes",
+	# 	"tipo": "2", 
+	# 	"valor": 1.0,  
+	# 	"productos_validos": ["5e701e8c1377db6386eb11d6"],
+	# 	"fecha_vigencia":  "2020-06-06T16:00:00Z",
+    #     "puntos": 0.0,
+    #     "sellos": 0
+	# },
+    # {
+	# 	"_id": "5e701fe11377db6386eb11dd",
+	# 	"titulo": "3x2 en café",
+	# 	"tipo": "3", 
+	# 	"valor": 2.0, 
+	# 	"productos_validos": ["5e701e951377db6386eb11d7"],
+	# 	"fecha_vigencia":  "2020-06-06T16:00:00Z",
+    #     "puntos": 0.0,
+    #     "sellos": 0
+	# },
+    # {
+	# 	"_id": "5e701fe11377db6386eb11dd",
+	# 	"titulo": "Combo",
+	# 	"tipo": "3", 
+	# 	"valor": 2.0, 
+	# 	"productos_validos": ["5e701e951377db6386eb11d7"],
+	# 	"fecha_vigencia":  "2020-06-06T16:00:00Z",
+    #     "puntos": 0.0,
+    #     "sellos": 0
+	# }
         # Ejemplo de la estructura en la siguiente version! v/2
 #    {
 # 		"_id": "1",
@@ -172,19 +226,54 @@ promociones = [
 	# },
 ]
 
+# ticket = {
+#     "_id": "1",
+#     "total_pesos": 80.00,
+#     "descuento_pesos": 20.0,
+#     "fecha": "2020-06-06T10:00:00Z",
+#     "id_participante": "5e462b2f174d02be8e6fabb0",
+#     "promociones": ["5e701fba1377db6386eb11da", "5e701fc31377db6386eb11db"],
+#     "detalle_venta": [
+#         {
+#             "cantidad": 2, 
+#             "descuento_pesos": 50.0,
+#             "producto": 	{
+#                             "_id" : "5e701e8c1377db6386eb11d6",
+#                             "nombre" : "Bolipán",
+#                             "precio_venta" : 20.0,
+#                             "precio_compra" : 10.0,
+#                             "categoria" : "Alimentos"
+#                         },
+#             "importe": 20
+#         },
+#         {
+#             "cantidad": 2, 
+#             "descuento_pesos": 55.00,
+#             "producto": 	
+#                         {
+#                             "_id" : "5e701e771377db6386eb11d5",
+#                             "nombre" : "bubbleTea",
+#                             "precio_venta" : 55.0,
+#                             "precio_compra" : 30.0,
+#                             "categoria" : "Bebidas"
+#                         },
+#             "importe": 55.0
+#         }
+#     ]
+# }
+
 tickets = [
     {
 		"_id": "1",
-		"total": 80.00,
-        "descuento": 20.0, #porcentaje
+		"total_pesos": 80.00,
+        "descuento_pesos": 20.0,
 		"fecha": "2020-06-06T10:00:00Z",
 		"id_participante": "5e462b2f174d02be8e6fabb0",
         "promociones": ["5e701fba1377db6386eb11da", "5e701fc31377db6386eb11db"],
 		"detalle_venta": [
 						{
 							"cantidad": 2, 
-							"impuestos": 0.16,
-							"descuento_producto": 50.0,
+							"descuento_pesos": 50.0,
 							"producto": 	{
                                             "_id" : "5e701e8c1377db6386eb11d6",
                                             "nombre" : "Bolipán",
@@ -278,7 +367,9 @@ class ProductoList(Resource):
         # reques = request.get_json()
         # if "hola" in reques:
         #     print(reques['hola'], type(reques['hola']))
-        return productos, 200
+        # return productos, 200
+        ps = ProductoModel.objects.all()
+        return ProductoSchema(many=True).dump(ps), 200
 
     @classmethod
     def post(self):
@@ -293,6 +384,8 @@ class ProductoList(Resource):
                 p.precio_compra = req["precio_compra"]
             if "categoria" in req:
                 p.categoria = req["categoria"]
+            if "imagen" in req:
+                p.imagen = req["imagen"]
             p.save()
             # if "" in req:
             #     p. = req[""]
@@ -334,6 +427,8 @@ class PromocionList(Resource):
                 p.puntos = req["puntos"]
             if "sellos" in req:
                 p.sellos = req["sellos"]
+            if "imagen" in req:
+                p.imagen = req["imagen"]
             p.save()
             # if "" in req:
             #     p. = req[""]
@@ -377,8 +472,6 @@ class TicketList(Resource):
                 p.promociones = req["promociones"]
             if "detalle_venta" in req:
                 p.detalle_venta = req["detalle_venta"]
-            if "sellos" in req:
-                p.sellos = req["sellos"]
             p.save()
             # if "" in req:
             #     p. = req[""]

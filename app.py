@@ -23,6 +23,7 @@ from resources.producto import CatalogoList, Catalogo
 from resources.time import Time
 from resources.venta import ProductoList, Producto, PromocionList, Promocion, TicketList, Ticket
 from resources.metricas import FiltradoByMetrica
+from resources.birthday import Birthday, BirthdaySetter
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
@@ -93,6 +94,8 @@ api.add_resource(Promocion, "/promociones/<string:id>")
 api.add_resource(TicketList, "/tickets")
 api.add_resource(Ticket, "/tickets/<string:id>")
 api.add_resource(FiltradoByMetrica, "/filtrado")
+api.add_resource(Birthday, "/birthday")
+api.add_resource(BirthdaySetter, "/birthday/<string:id>")
 
 # api.add_resource(SetPassword, "/user/password")
 

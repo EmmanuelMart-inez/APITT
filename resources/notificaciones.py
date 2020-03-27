@@ -133,8 +133,11 @@ class NotificacionesAdminList(Resource):
                     only=(
                     "_id",
                     "titulo",
+                    "mensaje",
                     "fecha",
                     "tipo_notificacion",
+                    "imagenIcon",
+                    "bar_text",
                     "filtros"
                     ), many=True).dump(all_notifs),200
 
