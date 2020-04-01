@@ -23,7 +23,7 @@ from resources.notificaciones import NotificacionList, NotificacionesAdminList, 
 from resources.premio import Premio, PremioList, PremioId, PremioParticipante #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
 from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas
-from resources.ayuda import  AyudaList
+from resources.ayuda import  AyudaList, Ayuda
 from resources.producto import CatalogoList, Catalogo
 from resources.time import Time
 from resources.venta import ProductoList, Producto, PromocionList, Promocion, TicketList, Ticket
@@ -85,6 +85,7 @@ api.add_resource(EncuestaParticipante, "/encuesta/<string:id_encuesta>")
 api.add_resource(ControlEncuestas, "/controlencuestas/<string:id_participanteencuesta>")
 api.add_resource(AdministradorEncuestas, "/controlencuestas")
 api.add_resource(AyudaList, "/ayuda")
+api.add_resource(Ayuda, "/ayuda/<string:id>")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
 api.add_resource(ImageList, "/images")

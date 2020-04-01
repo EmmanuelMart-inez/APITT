@@ -60,3 +60,16 @@ class AyudaList(Resource):
                 "_id",
                 )).dump(item)
         }, 200
+
+class Ayuda(Resource):
+    @classmethod
+    def delete(self, id):
+        item = AyudaModel.find_by_id(id)
+        if not item:
+            return {"message": "No existe el elemento que desea eliminar"}, 404
+        try:
+            item.delete()
+        except:
+            return {"message":"Error: No se pudo eliminar"}, 500
+        return {"message": "Eliminado satisfactoriamente"}, 200
+        
