@@ -75,7 +75,7 @@ promociones = [
 		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
-		"_id": '5e701fba1377db6386eb11da',
+		"_id": '5e701fba1377db6386eb11db',
 		"titulo": "50% de descuento sobre tu compra",
         "descripcion": "por la compra de un...",
         # "imagen": "https://bubbletown.com/download/promo2.png", 
@@ -86,7 +86,7 @@ promociones = [
 		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
-		"_id": '5e701fba1377db6386eb11da',
+		"_id": '5e701fba1377db6386eb11dc',
 		"titulo": "2x1 en bolipanes",
         "descripcion": "por la compra de un...",
         # "imagen": "https://bubbletown.com/download/promo3.png", 
@@ -97,7 +97,7 @@ promociones = [
 		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
-		"_id": '5e701fba1377db6386eb11da',
+		"_id": '5e701fba1377db6386eb11dd',
 		"titulo": "3x2 en café",
         "descripcion": "por la compra de un...",
         # "imagen": "https://bubbletown.com/download/promo3.png", 
@@ -108,7 +108,7 @@ promociones = [
 		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
-		"_id": '5e701fba1377db6386eb11da',
+		"_id": '5e701fba1377db6386eb11df',
 		"titulo": "Combo: 3 bolipanes + 1 bubbleFreezze mediano por $179",
         "descripcion": "por la compra de un...",
         "imagen": "http://127.0.0.1:5001/download/promo4.jpg", 

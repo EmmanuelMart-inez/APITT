@@ -6,6 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
+from datetime import datetime
+import os
+# from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from ma import ma
 from oa import oauth
 from models.empleado import UsuarioModel
@@ -99,10 +104,23 @@ api.add_resource(BirthdaySetter, "/birthday/<string:id>")
 
 # api.add_resource(SetPassword, "/user/password")
 
+def giveBirthdayGifts():
+    pass
+        # print('Tick! The time is: %s' % datetime.now())
+    # Ejecutar metodo post de SetBirthday
+    # Ejecutar la eliminacion de premios caducados
+
+
 if __name__ == "__main__":
     ma.init_app(app)
     # oauth.init_app(app)
     #app.run(ssl_context="adhoc")
+    ## SecondPlane task process
+    # scheduler = BackgroundScheduler()
+    # # scheduler.add_executor('processpool')
+    # scheduler.add_job(giveBirthdayGifts, 'interval', seconds=3)
+    # scheduler.start()
+    # 
     app.run(port=5000)
 
 

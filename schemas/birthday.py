@@ -9,6 +9,7 @@ class BirthdaySchema(ma.Schema):
     id_notificacion = fields.Str( required=False)
     id_promocion = fields.Str( required=False)   
     trigger = fields.Integer()
+    antiguedad = fields.Integer()
     vigencia = fields.Str()
     fecha_creación = fields.DateTime()
 
@@ -19,6 +20,7 @@ class BirthdaySchema(ma.Schema):
             "id_notificacion",
             "id_promocion",
             "trigger",
+            "antiguedad",
             "vigencia",
             "fecha_creacion"
         )

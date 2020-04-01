@@ -18,6 +18,7 @@ class BirthdayModel(MongoModel):
     id_promocion = fields.CharField()   
     # id_notificacion = fields.EmbeddedDocumentListField(NotificacionModel)
     # id_promocion = fields.EmbeddedDocumentListField(PromocionModel)   
+    antiguedad = fields.IntegerField()
     trigger = fields.IntegerField()
     vigencia = fields.CharField()
     # Antiguedad_necesaria = fields.IntegerField() Días de antiguedad
