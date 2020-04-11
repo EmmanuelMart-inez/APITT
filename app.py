@@ -18,7 +18,7 @@ from resources.facebook_login import FacebookLogin, FacebookAuthorize
 from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
 from resources.upload import ImageUpload, ImageDownload, ImageList
-from resources.tarjeta import TarjetaSellos, TarjetaPuntos
+from resources.tarjeta import TarjetaSellos, TarjetaPuntos, TarjetaSellosTemplate, SistemaPuntos, SistemaPuntosId
 from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
 from resources.premio import Premio, PremioList, PremioId, PremioParticipante #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
@@ -29,6 +29,8 @@ from resources.time import Time
 from resources.venta import ProductoList, Producto, PromocionList, Promocion, TicketList, Ticket
 from resources.metricas import FiltradoByMetrica
 from resources.birthday import Birthday, BirthdaySetter
+from resources.config import Config
+
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
@@ -67,13 +69,17 @@ api.add_resource(Participante, "/participante/<string:id>")
 api.add_resource(WelcomeParticipante, "/wparticipante/<string:id>")
 api.add_resource(ParticipanteList, "/participante")
 api.add_resource(TarjetaSellos, "/tarjetasellos/<string:id>")
+api.add_resource(TarjetaSellosTemplate, "/tarjetasellos")
 api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")
+api.add_resource(SistemaPuntos, "/niveles")
+api.add_resource(SistemaPuntosId, "/niveles/<string:id>")
 api.add_resource(NotificacionList, "/notificaciones/<string:id>")
 api.add_resource(NotificacionesAdminList, "/notificaciones")
 api.add_resource(NotificacionesAdmin, "/admin/notificaciones/<string:id>")
 api.add_resource(NotificacionAcciones, "/admin/notificaciones/<string:id>/acciones/<string:accion>")
 api.add_resource(Catalogo, "/catalogo/<string:vartipo>")
 api.add_resource(CatalogoList, "/catalogo")
+api.add_resource(Config, "/config")
 api.add_resource(PremioId, "/premio/<string:id>")
 api.add_resource(Premio, "/premios")
 api.add_resource(PremioList, "/premios/<string:id>")
