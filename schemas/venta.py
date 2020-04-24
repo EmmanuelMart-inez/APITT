@@ -94,6 +94,7 @@ class VentaSchema(ma.Schema):
         fields.Nested(detalleVentaSchema), default=[])
     id_vendedor = fields.Str()
     id_participante = fields.Str()
+    id_ticket_punto_venta = fields.Str()
 
     class Meta:
         fields = (
@@ -103,5 +104,6 @@ class VentaSchema(ma.Schema):
 		"fecha",
 		"id_participante",
         "promociones",
-		"detalle_venta"
+		"detalle_venta",
+        "id_ticket_punto_venta"
         )

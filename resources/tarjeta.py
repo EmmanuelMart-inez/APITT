@@ -34,10 +34,14 @@ class SistemaPuntos(Resource):
         tarjeta = puntoscard_template_schema.load(tarjeta_json)
         try:
             new_tarjeta = TarjetaPuntosTemplateModel()
+            if "titulo" in tarjeta:
+                new_tarjeta.titulo = tarjeta["titulo"]
             if "num_puntos" in tarjeta:
                 new_tarjeta.num_puntos = tarjeta["num_puntos"]
             if "dias_vigencia" in tarjeta:
                 new_tarjeta.dias_vigencia = tarjeta["dias_vigencia"]
+            if "max_canjeos" in tarjeta:
+                new_tarjeta.max_canjeos = tarjeta["max_canjeos"]
             if "id_notificacion" in tarjeta:
                 new_tarjeta.id_notificacion = tarjeta["id_notificacion"]
             if "id_promocion" in tarjeta:

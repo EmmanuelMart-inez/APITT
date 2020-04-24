@@ -24,9 +24,11 @@ class TarjetaPuntosSchema(ma.Schema):
 
 class TarjetaPuntosTemplateSchema(ma.Schema):
     _id = fields.Str()
+    titulo = fields.Str()
     num_puntos = fields.Float()
     fecha_creacion = fields.DateTime()
     dias_vigencia = fields.Integer()
+    max_canjeos = fields.Integer()
     id_notificacion = fields.Str()
     id_promocion = fields.Str()
 

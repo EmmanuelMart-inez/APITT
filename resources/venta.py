@@ -11,6 +11,11 @@ from models.producto import *
 from models.venta import *
 from models.empleado import *
 from models.promocion import *
+from models.config import ConfigModel
+from models.tarjeta import TarjetaSellosModel, TarjetaPuntosTemplateModel, HistorialTarjetaSellos
+from models.notificacion import NotificacionModel
+from models.premio import PremioParticipanteModel
+from models.participante import ParticipanteModel
 
 from schemas.venta import *
 
@@ -480,6 +485,8 @@ class TicketList(Resource):
             return {"message": "No se pudo crear el nuevo movimiento."}   
         return {'message': "Venta (Ticket) creada"}, 200
 
+    
+
 class Ticket(Resource):
     @classmethod
     def get(self, id):
@@ -488,3 +495,111 @@ class Ticket(Resource):
             if(item['_id'] ==  id):
                 return item, 200
         return {'No existe un ticket con ese _id'}, 404
+
+    """
+     Sistema autonomo para el Punto de Venta: Guardar  y Canjear un ticket proveniente del PV y convertirlo 
+     en algun movimiento y sus efectos secundarios: 
+        promociones, premios, puntos, sellos. disparar disparadores.
+
+        id <String> = id del ticket generado por el Punto de venta
+    """
+
+    @classmethod
+    def post(self, id):
+        def diff(first, second):
+            second = set(second)
+            return [item for item in first if item not in second]
+            
+        ticket = VentaModel.find_by_field('id_ticket_punto_venta', id)
+        if ticket:
+            return {"message": "El ticket que desea ingresar ya ha sido registrado antes"}, 400
+        req_json = request.get_json()
+        req = VentaSchema().load(req_json)
+        try:
+            ticket = VentaModel()
+            ticket.id_ticket_punto_venta = id
+            if "total" in req:
+                ticket.total = req["total"]
+            if "descuento" in req:
+                ticket.descuento = req["descuento"]
+            if "fecha" in req:
+                ticket.fecha = req["fecha"]
+            if "id_participante" in req:
+                ticket.id_participante = req["id_participante"]
+            if "promociones" in req:
+                ticket.promociones = req["promociones"]
+            if "detalle_venta" in req:
+                ticket.detalle_venta = req["detalle_venta"]
+            ticket.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo registrar el ticket."}, 504   
+        # Buscar al participante
+        p = ParticipanteModel.find_by_id(ticket.id_participante)
+        if not p:
+            return {'message': f"No participante with id{ str(ticket.id_participante) }"}, 404 
+        card_id = TarjetaSellosModel.get_tarjeta_sellos_actual()
+        # Transaccion de sellos
+        bonificacion_sellos = TarjetaSellosModel.calcular_sellos(ticket.detalle_venta)
+        if bonificacion_sellos:
+            p.sellos += bonificacion_sellos
+            # resetear sellos, liberar premio
+            tarjeta_sellos_actual = TarjetaSellosModel.get_tarjeta_sellos_actual()
+            if p.sellos >= tarjeta_sellos_actual.num_sellos:
+                p.sellos %= tarjeta_sellos_actual
+                HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
+        # Puntos: 1. Verificar si el participante llego a un nuevo nivel
+        bonificacion_puntos = ConfigModel.calcular_puntos(ticket.total) 
+        nivel_actual = TarjetaPuntosTemplateModel.get_level(p.saldo)
+        nivel_sig = TarjetaPuntosTemplateModel.get_level(p.saldo + bonificacion_puntos)
+        bonificacion_niveles = diff(nivel_sig, nivel_actual)
+        print(bonificacion_niveles)
+        print(len(bonificacion_niveles))
+        if len(bonificacion_niveles): 
+            notificaciones_enviadas = 0
+            for nivel in bonificacion_niveles:
+                new_nivel = TarjetaPuntosTemplateModel.find_by_id(nivel)
+                if new_nivel.id_notificacion:
+        # Puntos: 2. Habilitado de niveles: Notificacion y premio
+                    trigger_notificacion = NotificacionModel.add_notificacion(new_nivel.id_notificacion, p._id)
+                    if trigger_notificacion:
+                        notificaciones_enviadas += 1 
+        # Puntos: 3. Transaccion de puntos
+        if bonificacion_puntos:
+            p.saldo += bonificacion_puntos
+        try:    
+            p.save()
+        except e:
+            print(e)
+            return {"message": "No se pudieron agregar los puntos al participante"}, 504
+        print("saldo del participante:", p.saldo)
+        print("bonificacion_puntos:", bonificacion_puntos)
+        # Transaccion de movimientos
+        # Affter!!!
+        return {
+            'message': "Ticket aceptado con éxito",
+            'captura del ticket': 'Exitosa',
+            'Busqueda del participante': 'Exitosa',
+            'Bonificacion de sellos': '{} sello(s)'.format(bonificacion_sellos),
+            'Habilitación de un nuevo nivel': '{} nivel(es) desbloqueados'.format(len(bonificacion_niveles)),
+            'Notificaciones enviadas': notificaciones_enviadas,
+            'Bonificación de puntos': '{} puntos bonificados'.format(bonificacion_puntos),
+            'Registro del movimiento del participante': 'Pendiente (AFTER!)'
+        }, 200
+
+
+    """
+   Para Cancelación de ticket al realizar una cancelación que revierta todos
+   efectos secundarios lo que nos obliga a tener una 
+   tabla que relacione todos estos efectos secundarios
+    """
+    @classmethod
+    def delete(self, id):
+        ticket = VentaModel.find_by_id(id)
+        if not ticket:
+            return {"message": "No se encontro el elemento que desea eliminar"}, 404
+        try:
+            ticket.remove()
+        except e:
+            return {"message": "No se pudo eliminar el elemento solicitado"}, 504
+        return {"message": "Ticket de venta eliminado satisfactoriamente"}, 200

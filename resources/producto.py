@@ -22,9 +22,7 @@ cats_schema = CatalogoSchema(many=True)
 # Establish a connection to the database.
 connect("mongodb://localhost:27017/ej1")
 
-#TODO: Añadir Encuestas link
 class CatalogoList(Resource):
-    
     #TODO: Refactorizar llamando a metodos DAO de la clase modelo
     @classmethod
     def get(self):
@@ -91,3 +89,20 @@ class Catalogo(Resource):
                     "fecha_vigencia",
                     ), many=True).dump(catalogo),
                 },200
+
+    # Eliminar un producto del catalogo, donde vartipo = _id del producto    
+    @classmethod
+    def delete(self, vartipo):
+        product = CatalogoModel.find_by_id(vartipo)
+        if not product:
+            return {"message": "No se encontró el producto"}, 404
+        try:
+            product.delete()
+        except e:
+            return {"message": "No se pudo eliminar este elemento"}, 504
+        return {"message": "Elemento eliminado"}, 200
+
+    # Actualizar un producto del catalogo, donde vartipo = _id del producto    
+    @classmethod
+    def patch(self, vartipo):
+        pass

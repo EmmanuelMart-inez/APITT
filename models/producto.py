@@ -1,4 +1,7 @@
 from pymodm import MongoModel, EmbeddedMongoModel, ReferenceField, fields, connect
+from pymodm.errors import ValidationError
+
+from bson.objectid import ObjectId
 
 connect('mongodb://localhost:27017/ej1')
 
@@ -109,4 +112,11 @@ class CatalogoModel(MongoModel):
     fecha_vigencia = fields.DateTimeField()
     #id_producto = fields.ReferenceField(Producto)
 
-    #TODO: Agregar metodos DAO
+    @classmethod
+    def find_by_id(cls, _Objectid: str) -> "AyudaModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            return notif
+        except cls.DoesNotExist:
+            return None

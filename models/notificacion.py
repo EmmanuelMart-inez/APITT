@@ -68,6 +68,18 @@ class NotificacionModel(MongoModel):
     #link_promocion = fields.EmbeddedDocumentListField(
     #    Promocion, default=[])
 
+    @classmethod
+    def add_notificacion(cls, id_not, id_par) -> "NotificacionModel":
+        try:
+            notif = cls(
+                id_participante=id_par,
+                id_notificacion=id_not,
+                estado=0,
+            ).save()            
+        except ValidationError as exc:   
+            return None
+        return notif 
+
 
 class NotificacionesModel(MongoModel):
     nottts = fields.EmbeddedDocumentListField(

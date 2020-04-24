@@ -1,4 +1,5 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
+import pymongo
 # from participante import Participante
 from models.producto import ProductoModel
 from models.empleado import UsuarioModel
@@ -41,6 +42,24 @@ class VentaModel(MongoModel):
         detalleVentaModel, default=[])
     id_vendedor = fields.CharField()
     id_participante = fields.CharField()
+    id_ticket_punto_venta = fields.CharField()
+
+    @classmethod
+    def find_by_id(cls, _Objectid: str, isString: bool) -> "VentaModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            return notif
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def find_by_field(cls, field: str, value: str) -> "VentaModel":
+        try:
+            notif = cls.objects.get({ field: value })
+            return notif
+        except cls.DoesNotExist:
+            return None
 
     @classmethod
     def filter_by_date_range(cls, date_start: str, date_end: str, field: str) -> "ParticipanteModel":
