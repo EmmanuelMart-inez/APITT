@@ -1,4 +1,5 @@
 from pymodm import MongoModel, EmbeddedMongoModel, ReferenceField, fields, connect
+from pymodm.errors import ValidationError
 import pymongo
 from models.producto import (
     SubCategoriaModel,
@@ -12,7 +13,7 @@ from models.producto import (
 )
 from bson.objectid import ObjectId
 
-from datetime import *
+import datetime as dt
 from dateutil.relativedelta import *
 import calendar
 import dateutil.parser
@@ -24,7 +25,7 @@ connect('mongodb://localhost:27017/ej1')
 class TarjetaPuntosModel(MongoModel):
     codigo_qr = fields.CharField()
     codigo_barras = fields.CharField()
-    qr_imagen = fields.URLField()
+    qr_imagen = fields.CharField()
     balance = fields.FloatField()
     fecha_creacion = fields.DateTimeField()
     fecha_vigencia = fields.DateTimeField()
@@ -76,8 +77,8 @@ class TarjetaSellosModel(MongoModel):
     num_sellos = fields.IntegerField()
     titulo = fields.CharField()
     descripcion = fields.CharField()
-    icono_off = fields.URLField()
-    icono_on = fields.URLField()
+    icono_off = fields.CharField()
+    icono_on = fields.CharField()
     producto = fields.ListField(fields.CharField())
     cantidad_trigger = fields.FloatField()
 

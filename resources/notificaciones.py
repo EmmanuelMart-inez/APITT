@@ -36,6 +36,8 @@ connect("mongodb://localhost:27017/ej1")
 
 class NotificacionList(Resource):
     #Devolver aquellas en el estado sin eliminar
+    # 30/04/04 Modificacion para enviar el _id de la notificacion
+    #   en lugar de el del template
     @classmethod
     def get(self, id):
     #Participante id = part_id
@@ -44,13 +46,13 @@ class NotificacionList(Resource):
             participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id, 'estado': 0})
             notifsList=[]
             for n in participante_notifs_id:
-                pprint(n.id_notificacion)
+                # pprint(n.id_notificacion)
                 notifsList.append(n.id_notificacion)
             #for item in notifs:
             #    pprint(item)
             total_notifs = len(notifsList)
         except NotificacionModel.DoesNotExist:
-            return {'message': f"No sellos_card in participante with id{ id }"}, 404
+            return {'message': f"No notificaciones in participante with id{ id }"}, 404
         # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
         # TODO: Buscar en Google TODO Python vsCode
         return {"Notificaciones":
@@ -84,7 +86,8 @@ class NotificacionList(Resource):
             return {"message": "No se pudo eliminar la notificacion, porque no existe."}, 400 
         return {"message": "Eliminado"}, 200
     
-    ## Historial notificaciones
+    # Elimina una notificacion de el APP
+    ## Marcar como  "eliminada" notificacion para eliminar notificaciones de la app
     @classmethod
     def patch(self, id):
         notif_id = ObjectId(id)
@@ -190,7 +193,7 @@ class NotificacionesAdminList(Resource):
             print(exc.message)
             return {"message": "No se pudo crear o enviar la notificacion."}, 404
         return {"message": "Notificacion guardada con éxito.",
-                    "_id": str(template._id),
+                    "id_notificacion": str(template._id),
                 "Número de destinatarios:": len(template.filtros)}
 
 

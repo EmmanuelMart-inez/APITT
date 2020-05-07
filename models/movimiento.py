@@ -1,5 +1,6 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from models.participante import ParticipanteModel
+from pymodm.errors import ValidationError
 # from venta import Venta
 import datetime as dt
 # Establish a connection to the database.
@@ -13,7 +14,7 @@ class MovimientoAppModel(MongoModel):
     tipo = fields.CharField()
     total = fields.FloatField()
     fecha = fields.DateTimeField()
-    imagen_icon = fields.URLField()
+    imagen_icon = fields.CharField()
 
     @classmethod
     def add_movimiento(cls, id_par, nombre, tipo, total, imagen_icon) -> "NotificacionModel":

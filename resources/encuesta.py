@@ -113,10 +113,10 @@ class Encuesta(Resource):
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear una nueva encuesta."}, 404   
-        return {'message': "Encuesta creada",
+        return {'message': "Encuesta creada y enviada a todos",
                 'ObjectId': EncuestaSchema(
                 only=(
-                "_id",
+                "EncuestaModel: _id",
                 )).dump(e)
         }, 200
 
@@ -142,7 +142,6 @@ class AdministradorEncuestas(Resource):
                     ), many=True).dump(participantes_encuestas), 200
 
 class ControlEncuestas(Resource):
-    
     # Enviar nuevas encuestas a participantes
     # NOTE: id_participanteencuesta = id_encuesta ___ Ojo: fix later!
     @classmethod
@@ -248,3 +247,30 @@ class Respuestas(Resource):
     @classmethod
     def get(self, id_encuesta, id_participante):
         pass
+
+    # Responder encuesta
+    @classmethod
+    def patch(self, id_encuesta, id_participante):
+        participante_encuesta = ParticipantesEncuestaModel.find_by_two_fields('id_encuesta', id_encuesta, 'id_participante', id_participante)
+        if not participante_encuesta:
+            return {'message': f"No ParticipanteEncuesta with id_encuesta{ id_encuesta } and id_participante { id_participante }"}, 404
+        respuesta_json = request.get_json()
+        respuesta = ParticipanteEncuestaSchema().load(respuesta_json)
+        try:
+            participante_encuesta.fecha_respuesta = dt.datetime.now()
+            participante_encuesta.estado = respuesta["estado"]
+            participante_encuesta.respuestas = respuesta["respuestas"]
+            participante_encuesta.fecha_respuesta = dt.datetime.now()
+            participante_encuesta.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo crear la responder esta encuesta."}, 404 
+        return {'message': "Encuesta respondida satisfactoriamente",
+                'info': ParticipanteEncuestaSchema(
+                only=(
+                "_id",
+                # "id_encuesta",
+                # "id_participante",
+                "estado"
+                )).dump(participante_encuesta)
+        }, 200

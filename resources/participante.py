@@ -16,8 +16,8 @@ from models.tarjeta import TarjetaSellosModel
 from schemas.notificacion import NotificacionSchema
 from models.notificacion import NotificacionModel 
 from schemas.participante import ParticipanteSchema
-from schemas.tarjeta import TarjetaSellosSchema
-from marshmallow import pprint
+from schemas.tarjeta import TarjetaSellosSchema, TarjetaPuntosTemplateSchema, TarjetaSellosTemplateSchema
+import pymongo
 
 participante_schema = ParticipanteSchema()
 selloscard_schema = TarjetaSellosSchema()
@@ -138,6 +138,8 @@ class ParticipanteList(Resource):
             if "fecha_nacimiento" in user_json:
                 p.fecha_nacimiento=user["fecha_nacimiento"]
             p.fecha_antiguedad=dt.datetime.now()
+            p.sellos=0
+            p.saldo=0
             if "foto" in user_json:
                 p.foto=user["foto"]
             p.save()
@@ -210,6 +212,8 @@ class RegistroSocialNetwork(Resource):
             if "fecha_nacimiento" in user_json:
                 p.fecha_nacimiento=user["fecha_nacimiento"]
             p.fecha_antiguedad=dt.datetime.now()
+            p.sellos=0
+            p.saldo=0
             if "foto" in user_json:
                 p.foto=user["foto"]
             p.save()
@@ -251,6 +255,10 @@ class WelcomeParticipante(Resource):
             #for item in notifs:
                 # pprint(item)
             total_notifs = notifs.count()
+            # Obtener el template de la tarjeta de sellos
+            allcards = TarjetaSellosModel.objects.all()
+            allconfig_ordered_by_latest = allcards.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_config = allconfig_ordered_by_latest.first()
         except NotificacionModel.DoesNotExist:
             return {'message': f"No sellos_card in participante with id{ id }"}
         return {
@@ -259,8 +267,9 @@ class WelcomeParticipante(Resource):
             "_id",
             "nombre",
             "sexo",
-            "tarjeta_sellos", 
-            "tarjeta_puntos",
             )).dump(p),
+            "tarjeta_sellos": TarjetaSellosTemplateSchema().dump(last_config),
+            "num_sellos": p.sellos, 
+            "num_puntos": p.saldo,
             "total_notificaciones": total_notifs,
             }, 200

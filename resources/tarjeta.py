@@ -79,6 +79,15 @@ class SistemaPuntosId(Resource):
 
 class TarjetaSellosTemplate(Resource):
     @classmethod
+    def get(self):
+        allcards = TarjetaSellosModel.objects.all()
+        allconfig_ordered_by_latest = allcards.order_by([("fecha_creacion", pymongo.DESCENDING)])
+        last_config = allconfig_ordered_by_latest.first()
+        if not last_config:
+            return {"Message": "No existe ninguna tarjeta de sellos activa"}, 404
+        return TarjetaSellosTemplateSchema().dump(last_config), 200
+
+    @classmethod
     def post(self):
         tarjeta_json = request.get_json()
         tarjeta = selloscard_template_schema.load(tarjeta_json)
@@ -152,8 +161,6 @@ class TarjetaSellosTemplate(Resource):
                 "_id",
                 )).dump(last_card)
         }, 200
-
-        return 200
 
 # Los siguentes endpoints crean tarjetas únicas para cada participante, no una general
 class TarjetaSellos(Resource):

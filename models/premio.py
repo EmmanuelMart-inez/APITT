@@ -16,8 +16,8 @@ class PremioModel(MongoModel):
     puntos = fields.IntegerField()
     codigo_barras = fields.BigIntegerField()
     codigo_qr = fields.CharField()
-    imagen_icon = fields.URLField()
-    imagen_display = fields.URLField()
+    imagen_icon = fields.CharField()
+    imagen_display = fields.CharField()
     fecha_creacion = fields.DateTimeField()
     fecha_vigencia = fields.DateTimeField()
     # fecha_redencion = fields.DateTimeField()
@@ -78,3 +78,11 @@ class PremioParticipanteModel(MongoModel):
             return notif
         except cls.DoesNotExist:
             return None 
+    
+    @classmethod
+    def find_by_field(cls, field: str, _Objectid: str) -> "PremioParticipanteModel":
+        try:
+            premios = cls.objects.raw({field: _Objectid})
+        except cls.DoesNotExist:
+            return None 
+        return premios

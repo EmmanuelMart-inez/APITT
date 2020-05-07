@@ -16,6 +16,7 @@ from models.tarjeta import TarjetaSellosModel, TarjetaPuntosTemplateModel, Histo
 from models.notificacion import NotificacionModel
 from models.premio import PremioParticipanteModel
 from models.participante import ParticipanteModel
+from models.movimiento import MovimientoAppModel
 
 from schemas.venta import *
 
@@ -541,13 +542,17 @@ class Ticket(Resource):
         card_id = TarjetaSellosModel.get_tarjeta_sellos_actual()
         # Transaccion de sellos
         bonificacion_sellos = TarjetaSellosModel.calcular_sellos(ticket.detalle_venta)
+        is_historial_sellos_new_element = 0
         if bonificacion_sellos:
             p.sellos += bonificacion_sellos
+            print("participante sellos: ", p.sellos)
             # resetear sellos, liberar premio
             tarjeta_sellos_actual = TarjetaSellosModel.get_tarjeta_sellos_actual()
             if p.sellos >= tarjeta_sellos_actual.num_sellos:
-                p.sellos %= tarjeta_sellos_actual
-                HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
+                p.sellos %= tarjeta_sellos_actual.num_sellos
+                new_sello_historial = HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
+                if new_sello_historial:
+                    is_historial_sellos_new_element = 1
         # Puntos: 1. Verificar si el participante llego a un nuevo nivel
         bonificacion_puntos = ConfigModel.calcular_puntos(ticket.total) 
         nivel_actual = TarjetaPuntosTemplateModel.get_level(p.saldo)
@@ -555,8 +560,8 @@ class Ticket(Resource):
         bonificacion_niveles = diff(nivel_sig, nivel_actual)
         print(bonificacion_niveles)
         print(len(bonificacion_niveles))
+        notificaciones_enviadas = 0
         if len(bonificacion_niveles): 
-            notificaciones_enviadas = 0
             for nivel in bonificacion_niveles:
                 new_nivel = TarjetaPuntosTemplateModel.find_by_id(nivel)
                 if new_nivel.id_notificacion:
@@ -574,8 +579,11 @@ class Ticket(Resource):
             return {"message": "No se pudieron agregar los puntos al participante"}, 504
         print("saldo del participante:", p.saldo)
         print("bonificacion_puntos:", bonificacion_puntos)
-        # Transaccion de movimientos
-        # Affter!!!
+        # Transaccion de movimientos y quema de cupones
+        new_movimiento = MovimientoAppModel.add_movimiento(str(p._id), "Compra", "entrada", ticket.total, "http://127.0.0.1:5001/download/ayuda4.png")
+        if new_movimiento:
+            movimientos_enviados = 1
+        # TODO: Añadir los diferentes tipos de movimientos existentes! !
         return {
             'message': "Ticket aceptado con éxito",
             'captura del ticket': 'Exitosa',
@@ -583,8 +591,9 @@ class Ticket(Resource):
             'Bonificacion de sellos': '{} sello(s)'.format(bonificacion_sellos),
             'Habilitación de un nuevo nivel': '{} nivel(es) desbloqueados'.format(len(bonificacion_niveles)),
             'Notificaciones enviadas': notificaciones_enviadas,
+            'Movimientos enviados': movimientos_enviados,
+            'Nuevos premios por sellos': is_historial_sellos_new_element,
             'Bonificación de puntos': '{} puntos bonificados'.format(bonificacion_puntos),
-            'Registro del movimiento del participante': 'Pendiente (AFTER!)'
         }, 200
 
 

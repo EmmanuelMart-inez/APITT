@@ -15,6 +15,8 @@ import dateutil.parser
 from models.premio import PremioModel, PremioParticipanteModel
 from models.participante import ParticipanteModel
 from models.producto import CatalogoModel
+from models.tarjeta import TarjetaPuntosTemplateModel
+from models.notificacion import NotificacionTemplateModel
 
 from schemas.premio import PremioSchema, PremioParticipanteSchema
 from schemas.participante import ParticipanteSchema 
@@ -34,40 +36,95 @@ connect("mongodb://localhost:27017/ej1")
 #       que reciben la notificacion y la fecha de quemado
 # TODO: Aplicar metodos de segmentación
 # TODO: Puntos variables, diversos tipos de bonificación
+# # ANTIGUO 
+    # class PremioList(Resource):
+    #     @classmethod
+    #     def get(self, id):
+    #         part_id = ObjectId(id)
+    #         try:
+    #             participante_premios = PremioParticipanteModel.objects.raw({'id_participante': part_id})
+    #             pprint(participante_premios)
+    #             premios=[]
+    #             for premio in participante_premios: 
+    #                 premios.append(premio.id_premio)
+    #                 pprint(premio.id_premio)
+    #             # premios = participante_premios_id
+    #             # for item in premios:
+    #                 # pprint(item)
+    #         except PremioParticipanteModel.DoesNotExist:
+    #             return {'message': f"No premios in participante with id{ id }"}
+    #         # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
+    #         return {"Premios":
+    #                     PremioSchema(
+    #                     only=(
+    #                         "_id",
+    #                         "nombre", 
+    #                         "puntos", 
+    #                         "codigo_barras", 
+    #                         "codigo_qr",
+    #                         "imagen_icon",
+    #                         "imagen_display",
+    #                         "fecha_creacion", 
+    #                         "fecha_vigencia", 
+    #                         "fechas_redencion",
+    #                         # "id_producto",
+    #                         "id_participante"
+    #                     ), many=True).dump(premios),
+    #                 },200
+"""
+    Obtiene los premios que le corresponden a un participante 
+    de acuerdo su posición en el sistema de niveles más los 
+    premios que no forman parte del sistema de niveles.
+"""
 class PremioList(Resource):
-    @classmethod
-    def get(self, id):
-        part_id = ObjectId(id)
-        try:
-            participante_premios = PremioParticipanteModel.objects.raw({'id_participante': part_id})
-            pprint(participante_premios)
+        @classmethod
+        def get(self, id):
+            # Obtener los ids de los templates de los premios que poseé un participante
+            participante_premios = PremioParticipanteModel.find_by_field('id_participante', id)
+            if not participante_premios:
+                return {'message': f"El participante con el id: { id }, no poseé ningún premio"}, 404
             premios=[]
             for premio in participante_premios: 
-                premios.append(premio.id_premio)
-                pprint(premio.id_premio)
-            # premios = participante_premios_id
-            # for item in premios:
-                # pprint(item)
-        except PremioParticipanteModel.DoesNotExist:
-            return {'message': f"No premios in participante with id{ id }"}
-        # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
-        return {"Premios":
-                    PremioSchema(
-                    only=(
-                        "_id",
-                        "nombre", 
-                        "puntos", 
-                        "codigo_barras", 
-                        "codigo_qr",
-                        "imagen_icon",
-                        "imagen_display",
-                        "fecha_creacion", 
-                        "fecha_vigencia", 
-                        "fechas_redencion",
-                        # "id_producto",
-                        "id_participante"
-                    ), many=True).dump(premios),
-                },200
+            # Obtener el template de cada premio 
+                if premio.id_premio and premio.id_premio != 'null':
+                    premio_template = PremioModel.find_by_id(premio.id_premio)
+                    if premio_template:
+                        premios.append(premio_template)
+            # Obtener el participante
+            p = ParticipanteModel.find_by_id(id)
+            if not p:
+                return {"message": "No se encontro el participante buscado"}, 404
+            # Obtener los premios correspondientes al sistema de niveles
+            premios_nivel = TarjetaPuntosTemplateModel.get_level(p.saldo)
+            for nivel_id in premios_nivel:
+            # Obtener el template de cada premio 
+                nivel = TarjetaPuntosTemplateModel.find_by_id(nivel_id)
+                if nivel:
+                    print(nivel_id)
+                    print(len(premios_nivel))
+                    notif = NotificacionTemplateModel.find_by_id(nivel.id_notificacion)
+                    if notif:
+                        if notif.link and notif.link != "null":
+                            # print(type(notif.link))
+                            premio_template = PremioModel.find_by_id(notif.link)
+                            if premio_template:
+                                premios.append(premio_template)
+            return {"Premios":
+                        PremioSchema(
+                        only=(
+                            "_id",
+                            "nombre", 
+                            "puntos", 
+                            "codigo_barras", 
+                            "codigo_qr",
+                            "imagen_icon",
+                            "imagen_display",
+                            "fecha_creacion", 
+                            "fecha_vigencia", 
+                            # "id_producto",
+                            "id_participante"
+                        ), many=True).dump(premios),
+                    },200
 
 # Recurso del administrador
 class PremioId(Resource):

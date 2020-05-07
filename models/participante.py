@@ -47,7 +47,7 @@ class ParticipanteModel(MongoModel):
     sexo = fields.CharField()
     fecha_nacimiento = fields.DateTimeField()
     fecha_antiguedad = fields.DateTimeField()
-    foto = fields.URLField()
+    foto = fields.CharField()
     direccion = fields.CharField()
     intentos = fields.IntegerField()
     ultimo_inicio_sesion = fields.DateTimeField()

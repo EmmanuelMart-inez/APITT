@@ -7,7 +7,7 @@ class EncuestaOpcionesSchema(ma.Schema):
     descripcion = fields.Str(required=False)
     calificacion = fields.Str(required=False)
     rubrica = fields.Float(required=False)
-    icon = fields.URL(required=False)
+    icon = fields.Str(required=False)
 
     class Meta: 
         fields = (

@@ -2,8 +2,8 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 load_dotenv(".env")
 
 from datetime import datetime
@@ -12,17 +12,17 @@ import os
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from ma import ma
-from oa import oauth
+# from oa import oauth
 from models.empleado import UsuarioModel
-from resources.facebook_login import FacebookLogin, FacebookAuthorize
-from resources.google_login import GoogleLogin, GoogleCallback
+# from resources.facebook_login import FacebookLogin, FacebookAuthorize
+# from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
 from resources.upload import ImageUpload, ImageDownload, ImageList
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos, TarjetaSellosTemplate, SistemaPuntos, SistemaPuntosId
 from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
 from resources.premio import Premio, PremioList, PremioId, PremioParticipante #Task:Desacoplar list
 from resources.movimiento import MovimientoList, Movimiento
-from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas
+from resources.encuesta import Encuesta, EncuestaParticipante, ControlEncuestas, AdministradorEncuestas, Respuestas
 from resources.ayuda import  AyudaList, Ayuda
 from resources.producto import CatalogoList, Catalogo
 from resources.time import Time
@@ -59,12 +59,12 @@ def handle_marshmallow_validation(err):
 # api.add_resource(UserRegister, "/register")
 # api.add_resource(User, "/user/<int:user_id>")
 # api.add_resource(UserLogin, "/login")
-api.add_resource(FacebookLogin, "/login/facebook")
-api.add_resource(
-    FacebookAuthorize, "/login/facebook/authorized", endpoint="facebook.authorize"
-)
-api.add_resource(GoogleLogin, "/login/google")
-api.add_resource(GoogleCallback, "/login/google/callback")
+#api.add_resource(FacebookLogin, "/login/facebook")
+#api.add_resource(
+#    FacebookAuthorize, "/login/facebook/authorized", endpoint="facebook.authorize"
+#)
+#api.add_resource(GoogleLogin, "/login/google")
+#api.add_resource(GoogleCallback, "/login/google/callback")
 api.add_resource(Participante, "/participante/<string:id>")
 api.add_resource(WelcomeParticipante, "/wparticipante/<string:id>")
 api.add_resource(ParticipanteList, "/participante")
@@ -90,6 +90,7 @@ api.add_resource(Encuesta, "/encuesta")
 api.add_resource(EncuestaParticipante, "/encuesta/<string:id_encuesta>")
 api.add_resource(ControlEncuestas, "/controlencuestas/<string:id_participanteencuesta>")
 api.add_resource(AdministradorEncuestas, "/controlencuestas")
+api.add_resource(Respuestas, "/participantes/<string:id_participante>/encuestas/<string:id_encuesta>")
 api.add_resource(AyudaList, "/ayuda")
 api.add_resource(Ayuda, "/ayuda/<string:id>")
 api.add_resource(ImageUpload, "/upload")

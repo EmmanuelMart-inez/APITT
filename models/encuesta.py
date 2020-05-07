@@ -11,7 +11,7 @@ class EncuestaOpcionesModel(MongoModel):
     # descripcion = fields.CharField(default="")
     calificacion = fields.CharField()
     rubrica = fields.FloatField()
-    icon = fields.URLField()
+    icon = fields.CharField()
     # Icono sirve para las encuestas del tipo
     # emogie y puede ser un gif animado
 
@@ -87,5 +87,13 @@ class ParticipantesEncuestaModel(MongoModel):
             notif = cls.objects.get({'_id': oid})
             print(notif)
             return notif
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod 
+    def find_by_two_fields(cls, field1: str, value1: str, field2: str, value2: str) -> "ParticipantesEncuestaModel":
+        try:
+            pencuesta = cls.objects.get({field1: value1, field2: value2})
+            return pencuesta
         except cls.DoesNotExist:
             return None

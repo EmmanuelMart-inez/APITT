@@ -10,7 +10,7 @@ class SubCategoriaModel(EmbeddedMongoModel):
     codigo = fields.CharField()
     nombre = fields.CharField()
     descripcion = fields.CharField()
-    imagen = fields.URLField()
+    imagen = fields.CharField()
 
 
 class CategoriaModel(EmbeddedMongoModel):
@@ -19,7 +19,7 @@ class CategoriaModel(EmbeddedMongoModel):
     descripcion = fields.CharField()
     subcategoria = fields.EmbeddedDocumentListField(
         SubCategoriaModel, default=[])
-    imagen = fields.URLField()
+    imagen = fields.CharField()
 
 
 class ProveedorModel(MongoModel):
@@ -31,7 +31,7 @@ class ProveedorModel(MongoModel):
     codigo_postal = fields.IntegerField()
     pais = fields.CharField()
     telefono = fields.BigIntegerField()
-    imagen = fields.URLField()
+    imagen = fields.CharField()
 
 
 """Descripción de los tipos de atributos 
@@ -95,7 +95,7 @@ class ProductoModel(MongoModel):
     porcentaje_ganancia = fields.FloatField()
     categoria = fields.CharField()
     proveedor = fields.CharField()
-    imagen = fields.URLField()
+    imagen = fields.CharField()
     atributos = fields.CharField()
     # categoria = fields.EmbeddedDocumentListField(
     #     CategoriaModel, default=[])
@@ -106,7 +106,7 @@ class ProductoModel(MongoModel):
 
 class CatalogoModel(MongoModel):
     tipo = fields.CharField()
-    imagen = fields.URLField()
+    imagen = fields.CharField()
     titulo = fields.CharField()
     descripcion = fields.CharField()
     fecha_vigencia = fields.DateTimeField()
