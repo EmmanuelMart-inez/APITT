@@ -45,3 +45,23 @@ class NotificacionSchema(ma.Schema):
             "id_participante",
             "estado"
         )
+
+class NotificacionSchemaExtended(ma.Schema):
+    _id = fields.Str()
+    id_notificacion = fields.Nested(NotificacionTemplateSchema())
+    id_participante = fields.Str()
+    estado = fields.Integer()
+    #link_encuesta = fields.Nested(EncuestaSchema)
+    #link_premio = fields.EmbeddedDocumentListField(
+    #    Premio, default=[])
+    #link_promocion = fields.EmbeddedDocumentListField(
+    #    Promocion, default=[])
+
+    class Meta:
+        fields = (
+            "_id",
+            "id_notificacion",
+            "id_participante",
+            "estado"
+        )
+        exclude = ["id_notificacion.filtros", "id_participante", "estado"]

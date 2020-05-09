@@ -162,6 +162,7 @@ class Autenticacion(Resource):
     @classmethod
     def post(self):
         user_json = request.get_json()
+        print(user_json)
         user = participante_schema.load(user_json)
         p = ParticipanteModel.find_by_credentials(user["email"], user["password"])
         if not p:

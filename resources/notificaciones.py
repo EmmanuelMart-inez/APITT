@@ -19,7 +19,7 @@ from models.premio import PremioModel, PremioParticipanteModel
 from models.encuesta import EncuestaModel, EncuestaPaginaModel, EncuestaOpcionesModel, ParticipantesEncuestaModel
 from schemas.encuesta import EncuestaSchema, EncuestaPaginaSchema, EncuestaOpcionesSchema, ParticipanteEncuestaSchema
 
-from schemas.notificacion import NotificacionSchema, NotificacionTemplateSchema
+from schemas.notificacion import NotificacionSchema, NotificacionSchemaExtended, NotificacionTemplateSchema
 from schemas.premio import PremioSchema, PremioParticipanteSchema
 from models.notificacion import NotificacionModel, NotificacionTemplateModel  
 from marshmallow import pprint
@@ -45,9 +45,9 @@ class NotificacionList(Resource):
             part_id = ObjectId(id)
             participante_notifs_id = NotificacionModel.objects.raw({'id_participante': part_id, 'estado': 0})
             notifsList=[]
-            for n in participante_notifs_id:
-                # pprint(n.id_notificacion)
-                notifsList.append(n.id_notificacion)
+            # for n in participante_notifs_id:
+            #     # pprint(n.id_notificacion)
+            #     notifsList.append(n.id_notificacion)
             #for item in notifs:
             #    pprint(item)
             total_notifs = len(notifsList)
@@ -56,19 +56,8 @@ class NotificacionList(Resource):
         # TODO: Agregar el URL para la solicitud al API de la notificacion, el link a la notificacion
         # TODO: Buscar en Google TODO Python vsCode
         return {"Notificaciones":
-                    NotificacionTemplateSchema(
-                    only=(
-                    "_id",
-                    "titulo",
-                    # "id_participante"
-                    "mensaje",
-                    "fecha",
-                    "imagenIcon",
-                    "bar_text",
-                    "tipo_notificacion",
-                    "link",
-                    # "estado"
-                    ), many=True).dump(notifsList),
+                    NotificacionSchemaExtended(
+                     many=True).dump(participante_notifs_id),
                 "Total": total_notifs    
                 },200
     

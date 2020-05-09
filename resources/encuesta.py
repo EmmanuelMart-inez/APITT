@@ -114,9 +114,9 @@ class Encuesta(Resource):
             print(exc.message)
             return {"message": "No se pudo crear una nueva encuesta."}, 404   
         return {'message': "Encuesta creada y enviada a todos",
-                'ObjectId': EncuestaSchema(
+                'EncuestaModel: _id': EncuestaSchema(
                 only=(
-                "EncuestaModel: _id",
+                "_id",
                 )).dump(e)
         }, 200
 
@@ -257,6 +257,13 @@ class Respuestas(Resource):
         respuesta_json = request.get_json()
         respuesta = ParticipanteEncuestaSchema().load(respuesta_json)
         try:
+            if participante_encuesta.estado == "sin responder":
+                participante = ParticipanteModel.find_by_id(id_participante)
+                if participante and participante.saldo:
+                    encuesta = EncuestaModel.find_by_id(id_encuesta)
+                    if encuesta and encuesta.puntos:
+                        participante.saldo +=  encuesta.puntos
+                        participante.save()
             participante_encuesta.fecha_respuesta = dt.datetime.now()
             participante_encuesta.estado = respuesta["estado"]
             participante_encuesta.respuestas = respuesta["respuestas"]
