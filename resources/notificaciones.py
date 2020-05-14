@@ -129,6 +129,7 @@ class NotificacionesAdminList(Resource):
                     "fecha",
                     "tipo_notificacion",
                     "imagenIcon",
+                    "imagenDisplay",
                     "bar_text",
                     "filtros"
                     ), many=True).dump(all_notifs),200
@@ -149,6 +150,10 @@ class NotificacionesAdminList(Resource):
                 template.mensaje=n["mensaje"]
             if "imagenIcon" in n:
                 template.imagenIcon=n["imagenIcon"]
+            if "imagenDisplay" in n:
+                template.imagenDisplay=n["imagenDisplay"]
+            if "ImagenDisplay" in n:
+                template.ImagenDisplay=n["ImagenDisplay"]
             if "bar_text" in n:
                 template.bar_text=n["bar_text"]
             if "fecha" in n:
@@ -202,6 +207,7 @@ class NotificacionesAdmin(Resource):
             "mensaje",
             "fecha",
             "imagenIcon",
+            "imagenDisplay",
             "bar_text",
             "tipo_notificacion",
             "link",
@@ -234,6 +240,8 @@ class NotificacionesAdmin(Resource):
                 n.tipo_notificacion=noti["tipo_notificacion"]
             if "imagenIcon" in noti:
                 n.imagenIcon=noti["imagenIcon"]
+            if "imagenDisplay" in noti:
+                n.imagenDisplay=noti["imagenDisplay"]
             if "titulo" in noti:
                 n.titulo=noti["titulo"]
             if "fecha" in noti:
@@ -255,6 +263,7 @@ class NotificacionesAdmin(Resource):
             "mensaje",
             "fecha",
             "imagenIcon",
+            "imagenDisplay",
             "bar_text",
             "tipo_notificacion",
             "link",
@@ -275,6 +284,7 @@ class NotificacionAcciones(Resource):
                 "mensaje",
                 "fecha",
                 "imagenIcon",
+                "imagenDisplay",
                 "bar_text",
                 "tipo_notificacion",
                 "link",
@@ -295,6 +305,7 @@ class NotificacionAcciones(Resource):
                 "mensaje",
                 "fecha",
                 "imagenIcon",
+                "imagenDisplay",
                 "bar_text",
                 "tipo_notificacion",
                 "link",
@@ -332,6 +343,7 @@ class NotificacionAcciones(Resource):
                     "mensaje",
                     "fecha",
                     "imagenIcon",
+                    "imagenDisplay",
                     "bar_text",
                     "tipo_notificacion",
                     "link",
@@ -364,6 +376,8 @@ class NotificacionAcciones(Resource):
                 n.tipo_notificacion=noti["tipo_notificacion"]
             if "imagenIcon" in noti:
                 n.imagenIcon=noti["imagenIcon"]
+            if "imagenDisplay" in noti:
+                n.imagenDisplay=noti["imagenDisplay"]
             if "titulo" in noti:
                 n.titulo=noti["titulo"]
             if "fecha" in noti:
@@ -388,6 +402,7 @@ class NotificacionAcciones(Resource):
                 "mensaje",
                 "fecha",
                 "imagenIcon",
+                "imagenDisplay",
                 "bar_text",
                 "tipo_notificacion",
                 "link",
@@ -432,6 +447,7 @@ class NotificacionAcciones(Resource):
                 "mensaje",
                 "fecha",
                 "imagenIcon",
+                "imagenDisplay",
                 "bar_text",
                 "tipo_notificacion",
                 "link",
@@ -487,6 +503,7 @@ class NotificacionAcciones(Resource):
                     "mensaje",
                     "fecha",
                     "imagenIcon",
+                    "imagenDisplay",
                     "bar_text",
                     "tipo_notificacion",
                     "link"

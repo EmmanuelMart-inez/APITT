@@ -15,10 +15,11 @@ class NotificacionTemplateModel(MongoModel):
     mensaje = fields.CharField()
     fecha = fields.DateTimeField()
     imagenIcon = fields.CharField()
+    imagenDisplay = fields.CharField()
     bar_text = fields.CharField()
     tipo_notificacion = fields.CharField()
     link = fields.CharField(default="null")
-    filtros = fields.ListField(fields.CharField(), default=[])
+    filtros = fields.ListField(fields.CharField(), blank=True, default=[])
     # tags = fields.ListField(default=[])
 
     @classmethod

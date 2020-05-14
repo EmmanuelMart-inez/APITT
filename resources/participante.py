@@ -94,6 +94,14 @@ class Participante(Resource):
                 p.foto=user["foto"]
             if "sexo" in user:
                 p.sexo=user["sexo"]
+            if "saldo" in user:
+                p.saldo=user["saldo"]
+            if "sellos" in user:
+                p.sellos=user["sellos"]
+            if "fecha_nacimiento" in user:
+                p.fecha_nacimiento=user["fecha_nacimiento"]
+            if "fecha_antiguedad" in user:
+                p.fecha_antiguedad=user["fecha_antiguedad"]
             p.save()
         except ValidationError as exc:
             print(exc.message)

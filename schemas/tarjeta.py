@@ -77,7 +77,10 @@ class TarjetaSellosTemplateSchema(ma.Schema):
     descripcion = fields.Str()
     icono_off = fields.Str()
     icono_on = fields.Str()
-    producto = fields.List(fields.Str())
+    id_notificacion = fields.Str()
+    id_promocion = fields.Str(required=False) 
+    trigger = fields.Str()
+    producto = fields.List(fields.Str(required=False, allow_none=True), required=False, allow_none=True)
     cantidad_trigger = fields.Float()
 
     class Meta:
@@ -92,6 +95,9 @@ class TarjetaSellosTemplateSchema(ma.Schema):
             "descripcion", 
             "icono_off", 
             "icono_on", 
+            "id_notificacion",
+            "id_promocion",
+            "trigger",
             "producto",
             "cantidad_trigger"  
         )

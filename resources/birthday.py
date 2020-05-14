@@ -10,7 +10,7 @@ from pymongo.errors import DuplicateKeyError
 from models.birthday import BirthdayModel
 from models.participante import ParticipanteModel
 from models.premio import PremioParticipanteModel
-from models.notificacion import NotificacionTemplateModel
+from models.notificacion import NotificacionTemplateModel, NotificacionModel
 from schemas.birthday import BirthdaySchema
 from marshmallow import pprint
 
@@ -83,6 +83,7 @@ class BirthdaySetter(Resource):
     # No se ocupa el id en este metodo, solo
     # Se envia a todos los participantes que cumplan 
     # años y las restricciones. (Envio de premio a participantes)
+    # Si ya se le envió un premio al participante, no se vuelve a enviar hasta el proximo cumpleaños (año)
     @classmethod
     def post(self, id):
         # Get premios
@@ -98,6 +99,8 @@ class BirthdaySetter(Resource):
         notificacion = NotificacionTemplateModel.find_by_id(bir.id_notificacion)
         if not notificacion:
             return {"message": "No se encontró la notificacion"}, 404
+        # Enviar notificaciones
+        # Enviar premio
         notificacion_id_premio = notificacion.link
         current_date = datetime.now()
         print("current_date", current_date)
@@ -122,6 +125,11 @@ class BirthdaySetter(Resource):
                         estado = 0,
                         fecha_creacion = datetime.now(),
                         id_promocion = bir.id_promocion
+                    ).save()
+                    notif = NotificacionModel(
+                        id_participante = str(p._id),
+                        id_notificacion = str(notificacion._id),
+                        estado = 0
                     ).save()
                     # print("Envio", list(premio), str(premio._id))
                     if premio:

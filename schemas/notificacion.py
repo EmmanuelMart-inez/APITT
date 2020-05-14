@@ -6,7 +6,8 @@ class NotificacionTemplateSchema(ma.Schema):
     titulo = fields.Str()
     mensaje = fields.Str()
     fecha = fields.DateTime()
-    imagenicon = fields.URL()
+    imagenicon = fields.Str()
+    imagenDisplay = fields.Str()
     bar_text = fields.Str()
     tipo_notificacion = fields.Str()
     link = fields.Str()
@@ -20,6 +21,7 @@ class NotificacionTemplateSchema(ma.Schema):
             "mensaje",
             "fecha",
             "imagenIcon",
+            "imagenDisplay",
             "bar_text",
             "tipo_notificacion",
             "link",

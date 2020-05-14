@@ -62,7 +62,7 @@ class PremioModel(MongoModel):
             return {"status": 404}
 
 class PremioParticipanteModel(MongoModel):
-    id_promocion = fields.CharField() # Valor tomado del punto de venta para obtener la relación de promociones
+    id_promocion = fields.CharField() # Valor tomado del punto de venta para obtener la relación de promociones ##ESTE VA EN EL MODELO SUPERIOR
     id_participante = fields.CharField()
     id_premio = fields.CharField()
     estado = fields.IntegerField()

@@ -79,7 +79,10 @@ class TarjetaSellosModel(MongoModel):
     descripcion = fields.CharField()
     icono_off = fields.CharField()
     icono_on = fields.CharField()
-    producto = fields.ListField(fields.CharField())
+    id_notificacion = fields.CharField()
+    id_promocion = fields.CharField()
+    trigger = fields.CharField()
+    producto = fields.ListField(fields.CharField(), required=False, blank=True)
     cantidad_trigger = fields.FloatField()
 
     @classmethod

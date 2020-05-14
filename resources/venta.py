@@ -13,10 +13,11 @@ from models.empleado import *
 from models.promocion import *
 from models.config import ConfigModel
 from models.tarjeta import TarjetaSellosModel, TarjetaPuntosTemplateModel, HistorialTarjetaSellos
-from models.notificacion import NotificacionModel
+from models.notificacion import NotificacionModel, NotificacionTemplateModel
 from models.premio import PremioParticipanteModel
 from models.participante import ParticipanteModel
 from models.movimiento import MovimientoAppModel
+from models.encuesta import ParticipantesEncuestaModel
 
 from schemas.venta import *
 
@@ -484,7 +485,9 @@ class TicketList(Resource):
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear el nuevo movimiento."}   
-        return {'message': "Venta (Ticket) creada"}, 200
+        return {'message': "Venta (Ticket) creada",
+                'id_ticket': str(p._id)
+        }, 200
 
     
 
@@ -549,6 +552,34 @@ class Ticket(Resource):
             # resetear sellos, liberar premio
             tarjeta_sellos_actual = TarjetaSellosModel.get_tarjeta_sellos_actual()
             if p.sellos >= tarjeta_sellos_actual.num_sellos:
+                # Verificar el número de premios que se obtienen con los sellos obtenidos en la compra efectuada
+                total_sellos_obtenidos = int(p.sellos // tarjeta_sellos_actual.num_sellos) 
+                # Enviar premio y notificacion si se amerita
+                for prem in range(total_sellos_obtenidos): 
+                    new_notificacion_sello = NotificacionModel(
+                        id_participante = str(p._id),
+                        id_notificacion = str(tarjeta_sellos_actual.id_notificacion),
+                        estado = 0
+                    ).save() 
+                    # Buscar el esquema de la notificación de la tarjeta de sellos
+                    tarjeta_sellos_notificacion = NotificacionTemplateModel.find_by_id(tarjeta_sellos_actual.id_notificacion)
+                    if tarjeta_sellos_notificacion and tarjeta_sellos_notificacion.link and tarjeta_sellos_notificacion.link != "null":
+                        # Envio de premio o encuesta
+                        if tarjeta_sellos_notificacion.tipo_notificacion == "premio":
+                            new_bonificacion_link = PremioParticipanteModel(
+                            # TODO: Modificación en id_promoción
+                                id_participante = str(p._id),
+                                id_premio = tarjeta_sellos_notificacion.link,
+                                estado = 0,
+                                fecha_creacion = dt.datetime.now()
+                            ).save()
+                        if tarjeta_sellos_notificacion.tipo_notificacion == "encuesta":
+                            new_bonificacion_link = ParticipantesEncuestaModel(
+                                id_participante = str(p._id),
+                                id_encuesta = tarjeta_sellos_notificacion.link,
+                                estado = 0, 
+                                fecha_creacion = dt.datetime.now() 
+                            ).save()
                 p.sellos %= tarjeta_sellos_actual.num_sellos
                 new_sello_historial = HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
                 if new_sello_historial:

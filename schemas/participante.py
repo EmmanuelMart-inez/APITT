@@ -109,6 +109,8 @@ class ParticipanteSchema(ma.Schema):
     google_id = fields.Str()
     tarjeta_sellos = fields.Nested(TarjetaSellosSchema)
     tarjeta_puntos = fields.Nested(TarjetaPuntosSchema)
+    saldo = fields.Float()
+    sellos = fields.Integer()
     #total_notificaciones = fields.Nested(NotificacionSchema)
 
     class Meta:
@@ -135,6 +137,8 @@ class ParticipanteSchema(ma.Schema):
             "google_fields",
             "tarjeta_sellos",
             "tarjeta_puntos",
+            "saldo",
+            "sellos",
         )
 
 

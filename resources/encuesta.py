@@ -34,6 +34,7 @@ class EncuestaParticipante(Resource):
         return EncuestaSchema(
                     only=(
                         "_id",
+                        "titulo",
                         "categoria",
                         "fecha_creacion",
                         "fecha_respuesta",

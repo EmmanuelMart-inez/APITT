@@ -109,6 +109,10 @@ class TarjetaSellosTemplate(Resource):
                 new_tarjeta.icono_on = tarjeta["icono_on"]
             if "producto" in tarjeta:
                 new_tarjeta.producto = tarjeta["producto"]
+            if "id_notificacion" in tarjeta:
+                new_tarjeta.id_notificacion = tarjeta["id_notificacion"]
+            if "id_promocion" in tarjeta:
+                new_tarjeta.id_promocion = tarjeta["id_promocion"]
             if "cantidad_trigger" in tarjeta:
                 new_tarjeta.cantidad_trigger = tarjeta["cantidad_trigger"]
             new_tarjeta.fecha_creacion = dt.datetime.now()
@@ -148,6 +152,10 @@ class TarjetaSellosTemplate(Resource):
                 last_card.icono_on = tarjeta["icono_on"]
             if "producto" in tarjeta:
                 last_card.producto = tarjeta["producto"]
+            if "id_notificacion" in tarjeta:
+                last_card.id_notificacion = tarjeta["id_notificacion"]
+            if "id_promocion" in tarjeta:
+                last_card.id_promocion = tarjeta["id_promocion"]
             if "cantidad_trigger" in tarjeta:
                 last_card.cantidad_trigger = tarjeta["cantidad_trigger"]
             last_card.fecha_creacion = dt.datetime.now()
