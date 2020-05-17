@@ -6,7 +6,7 @@ from schemas.participante import ParticipanteSchema
 class EncuestaOpcionesSchema(ma.Schema):
     descripcion = fields.Str(required=False)
     calificacion = fields.Str(required=False)
-    rubrica = fields.Float(required=False)
+    rubrica = fields.Float(required=False, allow_none=True)
     icon = fields.Str(required=False)
 
     class Meta: 

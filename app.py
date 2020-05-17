@@ -8,8 +8,10 @@ load_dotenv(".env")
 
 from datetime import datetime
 import os
+os.environ['TZ']= 'America/Mexico_City'
 # from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
+import requests
 
 from ma import ma
 # from oa import oauth
@@ -31,6 +33,7 @@ from resources.metricas import FiltradoByMetrica
 from resources.birthday import Birthday, BirthdaySetter
 from resources.config import Config
 
+from globals.constants import APIURL
 
 from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
@@ -112,8 +115,18 @@ api.add_resource(BirthdaySetter, "/birthday/<string:id>")
 
 # api.add_resource(SetPassword, "/user/password")
 
+# Proceso autónomo 'giveBirthdayGifts': Ejecuta automáticamente cada  
+# 24 hrs la función que otorga los premios y notificaciones por cumpleaños.
 def giveBirthdayGifts():
-    pass
+    r = requests.post(APIURL+"/birthday/loquesea")
+    # Verificar que esta correcta la URL
+    print(r.url)
+    # Contenido de la respuesta
+    print(r.text)
+    # Contenidos de respuesta binarios
+    print(r.content)
+    # Contenido de respuesta JSON
+    print(r.json())
         # print('Tick! The time is: %s' % datetime.now())
     # Ejecutar metodo post de SetBirthday
     # Ejecutar la eliminacion de premios caducados
@@ -124,10 +137,10 @@ if __name__ == "__main__":
     # oauth.init_app(app)
     #app.run(ssl_context="adhoc")
     ## SecondPlane task process
-    # scheduler = BackgroundScheduler()
-    # # scheduler.add_executor('processpool')
-    # scheduler.add_job(giveBirthdayGifts, 'interval', seconds=3)
-    # scheduler.start()
+    scheduler = BackgroundScheduler()
+    # scheduler.add_executor('processpool')
+    scheduler.add_job(giveBirthdayGifts, 'interval', hours=24)
+    scheduler.start()
     # 
     app.run(port=5000)
 

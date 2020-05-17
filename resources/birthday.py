@@ -94,6 +94,7 @@ class BirthdaySetter(Resource):
         # item_json = request.get_json()
         # item = BirthdaySchema().load(item_json)
         # Get notificacion
+        # TODO: Obtener la última configuración
         for birthday in bir_all:
             bir = birthday
         notificacion = NotificacionTemplateModel.find_by_id(bir.id_notificacion)
@@ -118,22 +119,36 @@ class BirthdaySetter(Resource):
                 r_participante_birthdate = p.fecha_nacimiento.replace(year=current_year)
                 r_antiguedad = current_date - p.fecha_antiguedad
                 r_antiguedad = r_antiguedad.days 
+                #  Verificar si no se ha enviado antes el premio al participante
+                tienePremio = PremioParticipanteModel.find_by_field('id_participante', str(p._id))
+                tieneNotificacion = NotificacionModel.find_by_field('id_notificacion', str(notificacion._id))
                 if r_mindate < r_participante_birthdate < r_maxdate and r_antiguedad >= bir.antiguedad:
-                    premio = PremioParticipanteModel(
-                        id_participante = str(p._id),
-                        id_premio = notificacion_id_premio,
-                        estado = 0,
-                        fecha_creacion = datetime.now(),
-                        id_promocion = bir.id_promocion
-                    ).save()
-                    notif = NotificacionModel(
-                        id_participante = str(p._id),
-                        id_notificacion = str(notificacion._id),
-                        estado = 0
-                    ).save()
-                    # print("Envio", list(premio), str(premio._id))
-                    if premio:
-                        count_sends+=1
+                    if not tienePremio and not tieneNotificacion:
+                        # Realizar envío 
+                        premio = PremioParticipanteModel(
+                            id_participante = str(p._id),
+                            id_premio = notificacion_id_premio,
+                            estado = 0,
+                            fecha_creacion = datetime.now(),
+                            id_promocion = bir.id_promocion
+                        ).save()
+                        notif = NotificacionModel(
+                            id_participante = str(p._id),
+                            id_notificacion = str(notificacion._id),
+                            estado = 0
+                        ).save()
+                        # print("Envio", list(premio), str(premio._id))
+                        if premio:
+                            count_sends+=1
+                else:
+                    # Eliminar premios y notificaciones que han caducado
+                    for birthday in bir_all:
+                        if tienePremio and tieneNotificacion:
+                            try:
+                                tienePremio.delete()
+                                tieneNotificacion.delete()
+                            except: 
+                                print("Algun error surgió al eliminar premio y notificación de cumpleaños")
         return {"Total de envios:": count_sends}, 200            
                 # print(str(p.fecha_nacimiento.day), "..", p.fecha_nacimiento.month)
             # elif bir.trigger == '10 dias antes y despues':

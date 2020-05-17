@@ -115,7 +115,7 @@ class Encuesta(Resource):
             print(exc.message)
             return {"message": "No se pudo crear una nueva encuesta."}, 404   
         return {'message': "Encuesta creada y enviada a todos",
-                'EncuestaModel: _id': EncuestaSchema(
+                'EncuestaModel_id': EncuestaSchema(
                 only=(
                 "_id",
                 )).dump(e)

@@ -9,9 +9,9 @@ import datetime as dt
 
 class EncuestaOpcionesModel(MongoModel):
     # descripcion = fields.CharField(default="")
-    calificacion = fields.CharField()
-    rubrica = fields.FloatField()
-    icon = fields.CharField()
+    calificacion = fields.CharField(blank=True, required=False)
+    rubrica = fields.FloatField(blank=True, required=False)
+    icon = fields.CharField(blank=True, required=False)
     # Icono sirve para las encuestas del tipo
     # emogie y puede ser un gif animado
 

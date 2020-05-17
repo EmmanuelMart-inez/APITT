@@ -33,3 +33,21 @@ class BirthdayModel(MongoModel):
             return notif
         except cls.DoesNotExist:
             return None
+    
+
+class BirthdayModelStatus(MongoModel):
+    id_birthday = fields.CharField()
+    id_participante = fields.CharField()
+    status = fields.CharField()
+    year = fields.DateTimeField()
+
+    @classmethod
+    def find_by_id(cls, _Objectid: str) -> "BirthdayModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            print(notif)
+            return notif
+        except cls.DoesNotExist:
+            return None
+

@@ -10,7 +10,7 @@ from os import listdir
 from os.path import isfile, join
 
 UPLOADED_PHOTOS_DEST = 'static/img'
-UPLOADED_PHOTOS_DESTs = '/var/www/html/items-rest/static/img'
+# UPLOADED_PHOTOS_DESTs = '/var/www/html/items-rest/static/img'
 
 class ImageUpload(Resource):
     def post(self):

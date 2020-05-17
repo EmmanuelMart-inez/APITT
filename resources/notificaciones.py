@@ -169,19 +169,20 @@ class NotificacionesAdminList(Resource):
             else: 
                 template.filtros = []
             template.save()
-            filtersObids=[]
-            for fil in n["filtros"]:
-                filtersObids.append(ObjectId(fil))
-            # Enviar a todos los participantes
-            for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
-                # part_id = ObjectId(id)
-                notif = NotificacionModel(
-                id_participante=p._id,
-                id_notificacion=template._id,
-                estado=0,
-                # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
-                ).save()            
-                # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
+            if "filtros" in n and n["filtros"] != []:
+                filtersObids=[]
+                for fil in n["filtros"]:
+                    filtersObids.append(ObjectId(fil))
+                # Enviar a todos los participantes
+                for p in ParticipanteModel.objects.raw({"_id": { "$in": filtersObids}}):
+                    # part_id = ObjectId(id)
+                    notif = NotificacionModel(
+                    id_participante=p._id,
+                    id_notificacion=template._id,
+                    estado=0,
+                    # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable
+                    ).save()            
+                    # PYMODM no tiene soporte transaccional, en un futuro migrar a PYMONGO, que sí tiene soporte
             # return {"message": "Notificacion guardada con éxito."}
         except ValidationError as exc:
             print(exc.message)

@@ -81,6 +81,14 @@ class NotificacionModel(MongoModel):
             return None
         return notif 
 
+    @classmethod
+    def find_by_field(cls, field: str, value: str) -> "PremioParticipanteModel":
+        try:
+            premios = cls.objects.raw({field: value})
+        except cls.DoesNotExist:
+            return None 
+        return premios
+
 
 class NotificacionesModel(MongoModel):
     nottts = fields.EmbeddedDocumentListField(

@@ -80,9 +80,9 @@ class PremioParticipanteModel(MongoModel):
             return None 
     
     @classmethod
-    def find_by_field(cls, field: str, _Objectid: str) -> "PremioParticipanteModel":
+    def find_by_field(cls, field: str, value: str) -> "PremioParticipanteModel":
         try:
-            premios = cls.objects.raw({field: _Objectid})
+            premios = cls.objects.raw({field: value})
         except cls.DoesNotExist:
             return None 
         return premios
