@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, ValidationError
 
 class  AyudaSchema(ma.Schema):
     _id = fields.Str()
-    imagen_icon = fields.URL()
+    imagen_icon = fields.Str()
     titulo = fields.Str()
     descripcion = fields.Str()
 

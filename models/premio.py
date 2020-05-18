@@ -1,3 +1,4 @@
+import datetime as dt
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from pymodm.errors import ValidationError
 #from producto import Producto
@@ -48,7 +49,7 @@ class PremioModel(MongoModel):
                 # part_id = ObjectId(id)
                 notif = PremioParticipanteModel(
                 id_participante=par._id,
-                id_premio = p._id,
+                id_premio = n.link,
                 fecha_creacion=dt.datetime.now(),
                 estado=0,
                 # Estado puede servir para actualizar tambien OJO! ahora esta fijo, pero podrías ser variable

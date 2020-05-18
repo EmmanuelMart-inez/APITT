@@ -295,10 +295,13 @@ class NotificacionAcciones(Resource):
             n = NotificacionTemplateModel.find_by_id(id)
             pprint(n)
             if not n:
-                return {"message": "No se encontro el premio"}, 404
-            p = PremioModel.find_by_id(n.link)
-            if not p:
-                return {"message": "No se encontro el premio"}, 404
+                return {"message": "No se encontro la notificación"}, 404
+            if n.link  != "null" and n.link: 
+                p = PremioModel.find_by_id(n.link)
+                if not p:
+                    return {"message": "No se encontro el premio"}, 404
+            else:
+                p=False
             return {"notificacion": NotificacionTemplateSchema(
                 only=(
                 "_id",
@@ -541,16 +544,20 @@ class NotificacionAcciones(Resource):
             pprint(n)
             if not n:
                 return {"message": "No se encontro la notificacion"}, 404
-            p = PremioModel.find_by_id(n.link)
-            if not p:
-                return {"message": "No se encontro el premio"}, 404
+            if n.link != "null" and n.link:
+                p = PremioModel.find_by_id(n.link)
+                if not p:
+                    return {"message": "No se encontro el premio"}, 404
+            else: 
+                p = None
             try:
                 for np in NotificacionModel.objects.raw({"id_notificacion": n._id}):
                     np.delete()
-                for pp in PremioParticipanteModel.objects.raw({"id_premio": p._id}):
-                    pp.delete()
+                if n.link != "null" and n.link:
+                    for pp in PremioParticipanteModel.objects.raw({"id_premio": p._id}):
+                        pp.delete()
+                    p.delete()
                 n.delete()
-                p.delete()
             except:
                 return {"message": "No se pudo efectuar esta operación"},404 
             return {"message": "Notificación y premio eliminados"}, 200               

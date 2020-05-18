@@ -5,7 +5,7 @@ from marshmallow import Schema, fields, ValidationError
 class CatalogoSchema(ma.Schema):
     _id = fields.Str()
     tipo = fields.Str()
-    imagen = fields.URL()
+    imagen = fields.Str()
     titulo = fields.Str()
     descripcion = fields.Str()
     fecha_vigencia = fields.DateTime()
