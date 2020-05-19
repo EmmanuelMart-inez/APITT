@@ -1,3 +1,4 @@
+import  pymongo
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from models.participante import ParticipanteModel
 from pymodm.errors import ValidationError
@@ -6,7 +7,6 @@ from bson.objectid import ObjectId
 connect('mongodb://localhost:27017/ej1')
 
 import datetime as dt
-
 class EncuestaOpcionesModel(MongoModel):
     # descripcion = fields.CharField(default="")
     calificacion = fields.CharField(blank=True, required=False)
@@ -85,7 +85,6 @@ class ParticipantesEncuestaModel(MongoModel):
         try:
             oid = ObjectId(_Objectid)
             notif = cls.objects.get({'_id': oid})
-            print(notif)
             return notif
         except cls.DoesNotExist:
             return None
@@ -93,7 +92,9 @@ class ParticipantesEncuestaModel(MongoModel):
     @classmethod 
     def find_by_two_fields(cls, field1: str, value1: str, field2: str, value2: str) -> "ParticipantesEncuestaModel":
         try:
-            pencuesta = cls.objects.get({field1: value1, field2: value2})
-            return pencuesta
+            pencuesta = cls.objects.raw({field1: value1, field2: value2})
+            pencuesta_ordered_by_latest = pencuesta.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_pencuesta = pencuesta_ordered_by_latest.first()
+            return last_pencuesta
         except cls.DoesNotExist:
             return None

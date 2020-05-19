@@ -98,19 +98,21 @@ class Encuesta(Resource):
                 # for pagina in e.paginas:
                 #     print(1)
             e.save()
-            for participante in ParticipanteModel.objects.all():
-                try:
-                    # pprint(participante)
-                    # pprint(encuesta)
-                    encuestaParticipante = ParticipantesEncuestaModel(
-                        id_participante=participante._id,
-                        id_encuesta=e._id,
-                        estado="sin responder"
-                    ).save()
-                except ValidationError as exc:
-                    # eliminar los que fueron agregados
-                    print(exc.message, exc)
-                    return {"message": "No se pudo crear una nueva encuesta."}, 404
+            current_encuesta = ParticipantesEncuestaModel.find_by_two_fields("id_encuesta", str(e._id))
+            if not current_encuesta:
+                for participante in ParticipanteModel.objects.all():
+                    try:
+                        # pprint(participante)
+                        # pprint(encuesta)
+                        encuestaParticipante = ParticipantesEncuestaModel(
+                            id_participante=participante._id,
+                            id_encuesta=e._id,
+                            estado="sin responder"
+                        ).save()
+                    except ValidationError as exc:
+                        # eliminar los que fueron agregados
+                        print(exc.message, exc)
+                        return {"message": "No se pudo crear una nueva encuesta."}, 404
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo crear una nueva encuesta."}, 404   

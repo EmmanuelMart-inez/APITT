@@ -410,6 +410,7 @@ class NotificacionAcciones(Resource):
                 "bar_text",
                 "tipo_notificacion",
                 "link",
+                "filtros"
                 )).dump(n)}, 200
             # /admin/notificaciones/<string:id> patch! ya existe!
         elif accion == 'premio':
