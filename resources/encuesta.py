@@ -98,7 +98,7 @@ class Encuesta(Resource):
                 # for pagina in e.paginas:
                 #     print(1)
             e.save()
-            current_encuesta = ParticipantesEncuestaModel.find_by_two_fields("id_encuesta", str(e._id))
+            current_encuesta = ParticipantesEncuestaModel.find_by_field("id_encuesta", str(e._id))
             if not current_encuesta:
                 for participante in ParticipanteModel.objects.all():
                     try:
@@ -260,13 +260,15 @@ class Respuestas(Resource):
         respuesta_json = request.get_json()
         respuesta = ParticipanteEncuestaSchema().load(respuesta_json)
         try:
-            if participante_encuesta.estado == "sin responder":
-                participante = ParticipanteModel.find_by_id(id_participante)
-                if participante and participante.saldo:
-                    encuesta = EncuestaModel.find_by_id(id_encuesta)
-                    if encuesta and encuesta.puntos:
-                        participante.saldo +=  encuesta.puntos
-                        participante.save()
+            # if participante_encuesta.estado == "sin responder":
+            # Por ahora sin validación de sin respondider
+            participante = ParticipanteModel.find_by_id(id_participante)
+            if participante and participante.saldo >= 0:
+                encuesta = EncuestaModel.find_by_id(id_encuesta)
+                print("Sin responder con saldo {}, puntos a otorgar: {}".format(participante.saldo, encuesta.puntos))
+                if encuesta and encuesta.puntos:
+                    participante.saldo +=  encuesta.puntos
+                    participante.save()
             participante_encuesta.fecha_respuesta = dt.datetime.now()
             participante_encuesta.estado = respuesta["estado"]
             participante_encuesta.respuestas = respuesta["respuestas"]

@@ -37,9 +37,12 @@ class EncuestaModel(MongoModel):
     def find_by_id(cls, _Objectid: str) -> "EncuestaModel":
         try:
             oid = ObjectId(_Objectid)
-            notif = cls.objects.get({'_id': oid})
+            notif = cls.objects.raw({'_id': oid})
+            # get latest
+            notif_ordered_by_latest = notif.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_notif = notif_ordered_by_latest.first()
             print(notif)
-            return notif
+            return last_notif
         except cls.DoesNotExist:
             return None
 
@@ -93,6 +96,18 @@ class ParticipantesEncuestaModel(MongoModel):
     def find_by_two_fields(cls, field1: str, value1: str, field2: str, value2: str) -> "ParticipantesEncuestaModel":
         try:
             pencuesta = cls.objects.raw({field1: value1, field2: value2})
+            # Match just one record
+            pencuesta_ordered_by_latest = pencuesta.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_pencuesta = pencuesta_ordered_by_latest.first()
+            return last_pencuesta
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod 
+    def find_by_field(cls, field1: str, value1: str) -> "ParticipantesEncuestaModel":
+        try:
+            pencuesta = cls.objects.raw({field1: value1})
+            # Match just one record
             pencuesta_ordered_by_latest = pencuesta.order_by([("fecha_creacion", pymongo.DESCENDING)])
             last_pencuesta = pencuesta_ordered_by_latest.first()
             return last_pencuesta
