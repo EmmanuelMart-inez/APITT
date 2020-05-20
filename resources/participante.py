@@ -42,6 +42,7 @@ class Participante(Resource):
             "email",
             "foto",
             "fecha_nacimiento",
+            "fecha_antiguedad",
             "tarjeta_sellos", 
             "tarjeta_puntos",
             )).dump(p), 200

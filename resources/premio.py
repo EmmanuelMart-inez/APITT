@@ -82,14 +82,25 @@ class PremioList(Resource):
             # Obtener los ids de los templates de los premios que poseé un participante
             participante_premios = PremioParticipanteModel.find_by_field('id_participante', id)
             if not participante_premios:
-                return {'message': f"El participante con el id: { id }, no poseé ningún premio"}, 404
+                return {'message': f"El participante con el id: { id }, no posee ningún premio"}, 404
+            premios_no_quemados = []
+            for pp in participante_premios:
+                if not len(pp.fechas_redencion) > 0:
+                    premios_no_quemados.append(pp)
+                    # try:
+                    #     pp.delete()    
+                    # except (e):
+                    #     print("No se pudo filtrar los premio quemados, Error: {}".format(e))
+            if len(premios_no_quemados) == 0:
+                return {'message': f"El participante con el id: { id }, no posee ningún premio"}, 404
             premios=[]
-            for premio in participante_premios: 
+            for premio in premios_no_quemados: 
             # Obtener el template de cada premio 
                 if premio.id_premio and premio.id_premio != 'null':
                     premio_template = PremioModel.find_by_id(premio.id_premio)
                     if premio_template:
                         premios.append(premio_template)
+                        premio_template._id = premio._id
             # Obtener el participante
             p = ParticipanteModel.find_by_id(id)
             if not p:
@@ -246,7 +257,8 @@ class Premio(Resource):
 # _id = PremioParticipante._id
 class PremioParticipante(Resource):
     # Regitrar "quemado" de un premio/promoción, añadiendo al el arreglo de fechas en que ha sido redimido
-    # un premio
+    # un premio, también sirve para quemar premios de cumpleaños, es decir, es de cumpleaños pertenece a este 
+    # tipo de premios.
     @classmethod
     def patch(self, id):
         p = PremioParticipanteModel.find_by_id(id)
@@ -254,8 +266,11 @@ class PremioParticipante(Resource):
             return {"message": "No se encontro el premio_participante"}, 404
         p_req = request.get_json()
         try:
+            # ojo con fecha_redencion y "Model: fechaS_rendencion"
             if not "fecha_redencion" in p_req:
-                return {"message": "Solicitud incompleta: Campo fecha_redencion requerido"}, 400
+                p.fechas_redencion.append(dt.datetime.now())
+                p.save()
+                return {"message": "Quemado automático: Campo fecha_redencion faltante, por lo que se utizará la fecha y hora del servidor cuando se realizó esta transacción"}, 202
             date = dateutil.parser.parse(p_req["fecha_redencion"])
             p.fechas_redencion.append(date)
             p.save()

@@ -1,4 +1,5 @@
 import datetime as dt
+import pymongo
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from pymodm.errors import ValidationError
 #from producto import Producto
@@ -13,6 +14,7 @@ import calendar
 import dateutil.parser
 
 class PremioModel(MongoModel):
+    # _id = fields.ObjectId()
     nombre = fields.CharField()
     puntos = fields.IntegerField()
     codigo_barras = fields.BigIntegerField()
@@ -63,12 +65,14 @@ class PremioModel(MongoModel):
             return {"status": 404}
 
 class PremioParticipanteModel(MongoModel):
+    # _id = fields.ObjectId()
     id_promocion = fields.CharField() # Valor tomado del punto de venta para obtener la relación de promociones ##ESTE VA EN EL MODELO SUPERIOR
     id_participante = fields.CharField()
     id_premio = fields.CharField()
     estado = fields.IntegerField()
     fecha_creacion = fields.DateTimeField()
     fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
+    # fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
 
     @classmethod
     def find_by_id(cls, _Objectid: str) -> "PremioParticipanteModel":
@@ -87,3 +91,42 @@ class PremioParticipanteModel(MongoModel):
         except cls.DoesNotExist:
             return None 
         return premios
+
+    @classmethod 
+    def find_by_two_fields(cls, field1: str, value1: str, field2: str, value2: str) -> "ParticipantesEncuestaModel":
+        try:
+            ppremio = cls.objects.raw({field1: value1, field2: value2})
+            # Match just one record
+            ppremio_ordered_by_latest = ppremio.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_ppremio = ppremio_ordered_by_latest.first()
+            return last_ppremio
+        except cls.DoesNotExist:
+            return None
+
+    # """
+    # Obtiene la consulta del campo y valor solicitado y de todos los resultados, toma el más
+    # antiguo, no importa devolver solo uno para el caso de premios ya que las acciones
+    # que se toman aplican para cualquier premio, ejemplo: eliminar un premio de X premios
+    # que tienen el mismo beneficio, se toma el más antiguo para beneficiar al participante
+    # con la vigencia """
+    # @classmethod 
+    # def find_oldest_by_field(cls, field1: str, value1) -> "PremioModel":
+    #     try:
+    #         premio = cls.objects.raw({field1: value1})
+    #         # Match just one record OLDEST
+    #         premio_ordered_by_latest = premio.order_by([("fecha_creacion", pymongo.ASCENDING)])
+    #         last_premio = premio_ordered_by_latest.first()
+    #         return last_premio
+    #     except cls.DoesNotExist:
+    #         return None
+    
+    # @classmethod 
+    # def find_oldest_by_two_fields(cls, field1: str, value1: str, field2: str, value2: str) -> "ParticipantesEncuestaModel":
+    #     try:
+    #         ppremio = cls.objects.raw({field1: value1, field2: value2})
+    #         # Match just one record OLDEST
+    #         ppremio_ordered_by_latest = ppremio.order_by([("fecha_creacion", pymongo.ASCENDING)])
+    #         last_ppremio = ppremio_ordered_by_latest.first()
+    #         return last_ppremio
+    #     except cls.DoesNotExist:
+    #         return None
