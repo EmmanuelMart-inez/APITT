@@ -72,4 +72,27 @@ class Ayuda(Resource):
         except:
             return {"message":"Error: No se pudo eliminar"}, 500
         return {"message": "Eliminado satisfactoriamente"}, 200
+
+    """
+        Actualizar los datos de un elemento de la sección de ayuda en el front Web
+    """
+    @classmethod
+    def put(self, id):
+        a = AyudaModel.find_by_id(id)
+        if not a:
+            return {"message": "No existe el elemento que desea eliminar"}, 404
+        a_req = request.get_json()
+        ayuda = ayuda_schema.load(a_req)
+        try:
+            if "titulo" in ayuda:
+                a.titulo = ayuda["titulo"] 
+            if "descripcion" in ayuda:
+                a.descripcion = ayuda["descripcion"] 
+            if "imagen_icon" in ayuda:
+                a.imagen_icon = ayuda["imagen_icon"] 
+            a.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo actualizar el elemento de ayuda."}, 400
+        return {"Actualizado exitosamente": AyudaSchema().dump(a)}, 200
         
