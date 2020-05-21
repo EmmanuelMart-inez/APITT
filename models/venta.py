@@ -43,6 +43,11 @@ class VentaModel(MongoModel):
     id_vendedor = fields.CharField()
     id_participante = fields.CharField()
     id_ticket_punto_venta = fields.CharField()
+    estado = fields.CharField(blank=True, required=False)
+    # Transacción ==> id_movimiento Movimiento(nested(Venta, Notificacion(nested(Premio, encuesta)), Nivel(nested(Notificacion(nested(Premio, encuesta)))), Promocion?)
+    puntos_otorgados = fields.FloatField(blank=True, required=False)
+    sellos_otorgados = fields.IntegerField(blank=True, required=False)
+    id_notificacion_obtenidas_list = fields.ListField(fields.CharField(), default=[])
 
     @classmethod
     def find_by_id(cls, _Objectid: str, isString: bool) -> "VentaModel":
@@ -51,6 +56,8 @@ class VentaModel(MongoModel):
             notif = cls.objects.get({'_id': oid})
             return notif
         except cls.DoesNotExist:
+            return None
+        except cls.MultipleObjectsReturned:
             return None
 
     @classmethod

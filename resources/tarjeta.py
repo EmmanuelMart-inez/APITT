@@ -113,6 +113,8 @@ class TarjetaSellosTemplate(Resource):
                 new_tarjeta.id_notificacion = tarjeta["id_notificacion"]
             if "id_promocion" in tarjeta:
                 new_tarjeta.id_promocion = tarjeta["id_promocion"]
+            if "trigger" in tarjeta:
+                new_tarjeta.trigger = tarjeta["trigger"]
             if "cantidad_trigger" in tarjeta:
                 new_tarjeta.cantidad_trigger = tarjeta["cantidad_trigger"]
             new_tarjeta.fecha_creacion = dt.datetime.now()
@@ -158,6 +160,8 @@ class TarjetaSellosTemplate(Resource):
                 last_card.id_promocion = tarjeta["id_promocion"]
             if "cantidad_trigger" in tarjeta:
                 last_card.cantidad_trigger = tarjeta["cantidad_trigger"]
+            if "trigger" in tarjeta:
+                last_card.trigger = tarjeta["trigger"]
             last_card.fecha_creacion = dt.datetime.now()
             last_card.save()
         except ValidationError as exc:

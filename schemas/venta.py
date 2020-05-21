@@ -95,6 +95,10 @@ class VentaSchema(ma.Schema):
     id_vendedor = fields.Str()
     id_participante = fields.Str()
     id_ticket_punto_venta = fields.Str()
+    estado = fields.Str(required=False, allow_none=True)
+    puntos_otorgados = fields.Float(allow_none=True, required=False)
+    sellos_otorgados = fields.Integer(allow_none=True, required=False)
+    id_notificacion_obtenidas_list = fields.List(fields.Str(), required=False, allow_none=True)
 
     class Meta:
         fields = (
@@ -106,4 +110,8 @@ class VentaSchema(ma.Schema):
         "promociones",
 		"detalle_venta",
         "id_ticket_punto_venta"
+        "estado",
+        "puntos_otorgados",
+        "sellos_otorgados",
+        "id_notificacion_obtenidas_list",
         )

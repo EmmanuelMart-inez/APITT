@@ -1,5 +1,7 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 from models.participante import ParticipanteModel
+from models.encuesta import ParticipantesEncuestaModel
+from models.premio import PremioParticipanteModel 
 from pymodm.errors import ValidationError
 
 from bson.objectid import ObjectId
@@ -70,6 +72,16 @@ class NotificacionModel(MongoModel):
     #    Promocion, default=[])
 
     @classmethod
+    def find_by_id(cls, _Objectid: str) -> "NotificacionTemplateModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            print(notif)
+            return notif
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
     def add_notificacion(cls, id_not, id_par) -> "NotificacionModel":
         try:
             notif = cls(
@@ -80,6 +92,37 @@ class NotificacionModel(MongoModel):
         except ValidationError as exc:   
             return None
         return notif 
+
+    @classmethod
+    def delete_notificacion_and_link(cls, id_not) -> "NotificacionModel":
+        notif = cls.find_by_id(id_not)
+        if not notif:
+            return None
+        try:
+            # Elimnar premio o encuesta o nada, según sea el caso
+            if notif.tipo_notificacion == 'encuesta':
+                if notif.link and notif.link != 'null':
+                    # Buscar encuesta
+                    enc = ParticipantesEncuestaModel.find_by_id(notif.link)
+                    if enc:
+                        enc.estado = 'respondida'
+                        enc.save()
+                        enc.delete()
+            if notif.tipo_notificacion == 'premio':
+                if notif.link and notif.link != 'null':
+                    # Buscar encuesta
+                    prem = PremioParticipanteModel.find_by_id(notif.link)
+                    if prem:
+                        prem.estado = 1
+                        prem.save()
+                        prem.delete()
+            notif.estado = 1
+            notif.save()
+            # notif.delete()
+            # TODO: Generar movimientos correspondientes
+        except:
+            return None        
+        return True
 
     @classmethod
     def find_by_field(cls, field: str, value: str) -> "PremioParticipanteModel":

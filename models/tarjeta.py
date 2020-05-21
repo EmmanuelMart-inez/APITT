@@ -11,6 +11,7 @@ from models.producto import (
     Atributos,
     ProductoModel,
 )
+import math
 from bson.objectid import ObjectId
 
 import datetime as dt
@@ -81,7 +82,7 @@ class TarjetaSellosModel(MongoModel):
     icono_on = fields.CharField()
     id_notificacion = fields.CharField()
     id_promocion = fields.CharField()
-    trigger = fields.CharField()
+    trigger = fields.CharField() # Forma de obtener un sello
     producto = fields.ListField(fields.CharField(), required=False, blank=True)
     cantidad_trigger = fields.FloatField()
 
@@ -106,13 +107,13 @@ class TarjetaSellosModel(MongoModel):
         return last_config
 
     """ Calcula los sellos que obtiene un cliente
-        al realizar una compra tomando el listado de 
-        productos comprados y comparandolos con los productos
-        que otorgan sello al ser comprados, creados por el 
-        adminstrador del sistema.
+        al realizar una compra si el trigger de sellos es cantidad,
+        tomando el listado de productos comprados y comparandolos con los productos
+        que otorgan sello al ser comprados, creados por el adminstrador del sistema.
+        mútiplicado por la cantidad de productos
     """
     @classmethod
-    def calcular_sellos(cls, detalle_venta: list) -> "TarjetaSellosModel":
+    def calcular_sellos_por_productos(cls, detalle_venta: list) -> "TarjetaSellosModel":
         last_config = cls.get_tarjeta_sellos_actual()
         if not last_config:
             return None
@@ -123,9 +124,38 @@ class TarjetaSellosModel(MongoModel):
             prodList.append(str(prod.producto._id))
         # Intersección de listas de productos validos vs productos en el ticket 
         sellos_products_match = list(set(prodList) & set(last_config.producto))
+        print("ticket:", list(set(prodList)))
+        print("config:", list(set(last_config.producto)))
+        print(sellos_products_match)
+        # Multiplicar la cantidad de productos vendidos por producto
+        count_sellos = 0
+        for producto_comprado_con_sello in sellos_products_match:
+            for producto_comprado in detalle_venta:
+                if producto_comprado_con_sello == str(producto_comprado.producto._id): 
+                    print("compradoda sello: {}, producto.prod._id: {}".format(producto_comprado_con_sello, str(producto_comprado.producto._id)))
+                    # TODO: En un futuro se podría desear que no se de sellos si se aplicó una
+                    # promocion, descuento o en realidad no se está pagando por el producto.
+                    count_sellos += producto_comprado.cantidad
         # print(len(sellos_products_match))
         # print(prodList)
-        return len(sellos_products_match)
+        return count_sellos
+
+    """
+    Calcula la cantidad de sellos obtenidos en la modalidad de cantidad gastada 
+    en el total del ticket (se considera como total al total despues de impuestos y descuentos).
+    """
+    @classmethod 
+    def calcular_sellos_por_cantidad(cls, ticket_venta: list, cantidad: float) -> "TarjetaSellosModel":
+        last_config = cls.get_tarjeta_sellos_actual()
+        if not last_config:
+            return None
+        if not last_config.producto:
+            return  0
+        # redondeo hacia abajo
+        count_puntos = 0
+        if last_config.cantidad_trigger:
+            count_puntos = math.floor(ticket_venta.total / last_config.cantidad_trigger)
+        return count_puntos
 
     
 class HistorialTarjetaSellos(MongoModel):

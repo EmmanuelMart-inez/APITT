@@ -459,7 +459,11 @@ class Promocion(Resource):
 class TicketList(Resource):
     @classmethod
     def get(self):
-        return tickets, 200
+        try:
+            ticks = VentaModel.objects.all()
+        except VentaModel.ValidationError:
+            return {"message": "No se encontó ningún ticket"}, 404
+        return VentaSchema(many=True).dump(ticks), 200
 
     @classmethod
     def post(self):
@@ -484,6 +488,7 @@ class TicketList(Resource):
             #     p. = req[""]
         except ValidationError as exc:
             print(exc.message)
+            p.delete()
             return {"message": "No se pudo crear el nuevo movimiento."}   
         return {'message': "Venta (Ticket) creada",
                 'id_ticket': str(p._id)
@@ -494,11 +499,27 @@ class TicketList(Resource):
 class Ticket(Resource):
     @classmethod
     def get(self, id):
-        for index, item in enumerate(tickets):
-            print(item)
-            if(item['_id'] ==  id):
-                return item, 200
-        return {'No existe un ticket con ese _id'}, 404
+        tick = VentaModel.find_by_id(id)
+        if not tick:
+            return {"message": "No se encontó el ticket"}, 404
+        return VentaSchema(many=False).dump(tick), 200
+        # ONLY:  _id : id de ticket
+    # Multimodal: cuando el _id es una cadena menor a 24 caracteres (ObjectID), se puede buscar:
+        # MANY: quemado: Retorna todos los premios quemados
+        # MANY: no_quemado: Retorna todos los premios no quemados
+        # if id == 'quemado':
+        #     tickets = VentaModel.filter_by_string('estado', 'es', 'quemado')
+        #     if not tickets:
+        #         return {"message": "No se encontó ningún ticket quemado"}, 404
+        # if id == 'no_quemado':
+        #     tickets = VentaModel.filter_by_string('estado', 'es', 'quemado')
+        #     if not tickets:
+        #         return {"message": "No se encontó ningún ticket quemado"}, 404
+        # return VentaSchema(many=False).dump(tickets), 200
+        # tick = VentaModel.find_by_id(id):
+        # if not tick:
+        #     return {"message": "No se encontó el ticket"}, 404
+        # return VentaSchema(many=False).dump(tick), 200
 
     """
      Sistema autonomo para el Punto de Venta: Guardar  y Canjear un ticket proveniente del PV y convertirlo 
@@ -507,18 +528,22 @@ class Ticket(Resource):
 
         id <String> = id del ticket generado por el Punto de venta
     """
-
+    # Reportar un ticket del punto de venta: El punto de venta le otorga el id que se le fue asignado
+    # si no ha sido registrado antes, se registra, en el body viajan los datos del ticket, no depende
+    # de otro endpoint
     @classmethod
     def post(self, id):
         def diff(first, second):
             second = set(second)
             return [item for item in first if item not in second]
-            
+
         ticket = VentaModel.find_by_field('id_ticket_punto_venta', id)
         if ticket:
             return {"message": "El ticket que desea ingresar ya ha sido registrado antes"}, 400
         req_json = request.get_json()
         req = VentaSchema().load(req_json)
+        # print("detalle_save", req_json)
+        # print("detalle_save req_json",req)
         try:
             ticket = VentaModel()
             ticket.id_ticket_punto_venta = id
@@ -534,56 +559,70 @@ class Ticket(Resource):
                 ticket.promociones = req["promociones"]
             if "detalle_venta" in req:
                 ticket.detalle_venta = req["detalle_venta"]
-            ticket.save()
+            # ticket.save()
+            # print("detalle_save",ticket.detalle_venta)
         except ValidationError as exc:
             print(exc.message)
-            return {"message": "No se pudo registrar el ticket."}, 504   
+            return {"message": "No se pudo capturar el ticket."}, 504   
         # Buscar al participante
         p = ParticipanteModel.find_by_id(ticket.id_participante)
         if not p:
             return {'message': f"No participante with id{ str(ticket.id_participante) }"}, 404 
         card_id = TarjetaSellosModel.get_tarjeta_sellos_actual()
         # Transaccion de sellos
-        bonificacion_sellos = TarjetaSellosModel.calcular_sellos(ticket.detalle_venta)
-        is_historial_sellos_new_element = 0
-        if bonificacion_sellos:
-            p.sellos += bonificacion_sellos
-            print("participante sellos: ", p.sellos)
-            # resetear sellos, liberar premio
-            tarjeta_sellos_actual = TarjetaSellosModel.get_tarjeta_sellos_actual()
-            if p.sellos >= tarjeta_sellos_actual.num_sellos:
-                # Verificar el número de premios que se obtienen con los sellos obtenidos en la compra efectuada
-                total_sellos_obtenidos = int(p.sellos // tarjeta_sellos_actual.num_sellos) 
-                # Enviar premio y notificacion si se amerita
-                for prem in range(total_sellos_obtenidos): 
-                    new_notificacion_sello = NotificacionModel(
-                        id_participante = str(p._id),
-                        id_notificacion = str(tarjeta_sellos_actual.id_notificacion),
-                        estado = 0
-                    ).save() 
-                    # Buscar el esquema de la notificación de la tarjeta de sellos
-                    tarjeta_sellos_notificacion = NotificacionTemplateModel.find_by_id(tarjeta_sellos_actual.id_notificacion)
-                    if tarjeta_sellos_notificacion and tarjeta_sellos_notificacion.link and tarjeta_sellos_notificacion.link != "null":
-                        # Envio de premio o encuesta
-                        if tarjeta_sellos_notificacion.tipo_notificacion == "premio":
-                            new_bonificacion_link = PremioParticipanteModel(
-                            # TODO: Modificación en id_promoción
-                                id_participante = str(p._id),
-                                id_premio = tarjeta_sellos_notificacion.link,
-                                estado = 0,
-                                fecha_creacion = dt.datetime.now()
-                            ).save()
-                        if tarjeta_sellos_notificacion.tipo_notificacion == "encuesta":
-                            new_bonificacion_link = ParticipantesEncuestaModel(
-                                id_participante = str(p._id),
-                                id_encuesta = tarjeta_sellos_notificacion.link,
-                                estado = 0, 
-                                fecha_creacion = dt.datetime.now() 
-                            ).save()
-                p.sellos %= tarjeta_sellos_actual.num_sellos
-                new_sello_historial = HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
-                if new_sello_historial:
-                    is_historial_sellos_new_element = 1
+        new_notificacion_sello = None
+        if card_id.trigger == 'producto' or card_id.trigger == 'cantidad': 
+            if card_id.trigger == 'producto':
+                bonificacion_sellos = TarjetaSellosModel.calcular_sellos_por_productos(ticket.detalle_venta)
+            elif card_id.trigger == 'cantidad':
+                bonificacion_sellos = TarjetaSellosModel.calcular_sellos_por_cantidad(ticket, card_id.cantidad_trigger)
+            is_historial_sellos_new_element = 0
+            if bonificacion_sellos:
+                # Quitar puntos que han caducado
+                    # 1. Verificar si ha caducado sus sellos
+                current_date = dt.datetime.now()
+                if current_date < card_id.fecha_inicio and current_date > card_id.fecha_inicio:
+                    # 2. Si sí, quitar sellos
+                    p.sellos = 0
+                    p.save()
+                p.sellos += bonificacion_sellos
+                print("participante sellos: ", p.sellos)
+                # resetear sellos, liberar premio
+                tarjeta_sellos_actual = TarjetaSellosModel.get_tarjeta_sellos_actual()
+                if p.sellos >= tarjeta_sellos_actual.num_sellos:
+                    # Verificar el número de premios que se obtienen con los sellos obtenidos en la compra efectuada
+                    total_sellos_obtenidos = int(p.sellos // tarjeta_sellos_actual.num_sellos) 
+                    # Enviar premio y notificacion si se amerita
+                    for prem in range(total_sellos_obtenidos): 
+                        new_notificacion_sello = NotificacionModel(
+                            id_participante = str(p._id),
+                            id_notificacion = str(tarjeta_sellos_actual.id_notificacion),
+                            estado = 0
+                        ).save() 
+                        # Buscar el esquema de la notificación de la tarjeta de sellos
+                        tarjeta_sellos_notificacion = NotificacionTemplateModel.find_by_id(tarjeta_sellos_actual.id_notificacion)
+                        if tarjeta_sellos_notificacion and tarjeta_sellos_notificacion.link and tarjeta_sellos_notificacion.link != "null":
+                            # Envio de premio o encuesta
+                            if tarjeta_sellos_notificacion.tipo_notificacion == "premio":
+                                new_bonificacion_link = PremioParticipanteModel(
+                                # TODO: Modificación en id_promoción
+                                    id_participante = str(p._id),
+                                    id_premio = tarjeta_sellos_notificacion.link,
+                                    estado = 0,
+                                    fecha_creacion = dt.datetime.now()
+                                ).save()
+                            if tarjeta_sellos_notificacion.tipo_notificacion == "encuesta":
+                                new_bonificacion_link = ParticipantesEncuestaModel(
+                                    id_participante = str(p._id),
+                                    id_encuesta = tarjeta_sellos_notificacion.link,
+                                    estado = 0, 
+                                    fecha_creacion = dt.datetime.now() 
+                                ).save()
+                    p.sellos %= tarjeta_sellos_actual.num_sellos
+                    new_sello_historial = HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
+                    if new_sello_historial:
+                        is_historial_sellos_new_element = 1
+        # Transacción de Puntos
         # Puntos: 1. Verificar si el participante llego a un nuevo nivel
         bonificacion_puntos = ConfigModel.calcular_puntos(ticket.total) 
         nivel_actual = TarjetaPuntosTemplateModel.get_level(p.saldo)
@@ -605,8 +644,8 @@ class Ticket(Resource):
             p.saldo += bonificacion_puntos
         try:    
             p.save()
-        except e:
-            print(e)
+        except :
+            print()
             return {"message": "No se pudieron agregar los puntos al participante"}, 504
         print("saldo del participante:", p.saldo)
         print("bonificacion_puntos:", bonificacion_puntos)
@@ -615,6 +654,18 @@ class Ticket(Resource):
         if new_movimiento:
             movimientos_enviados = 1
         # TODO: Añadir los diferentes tipos de movimientos existentes! !
+        try: 
+            ticket.sellos_otorgados = bonificacion_sellos
+            # TODO: Notificación por puntos
+            ticket.puntos_otorgados = bonificacion_puntos
+            if new_notificacion_sello:
+                ticket.id_notificacion_obtenidas_list.append(str(new_notificacion_sello._id))
+            ticket.save()
+        except ValidationError as exc:            
+            print(exc.message)
+            return {"message": "No se pudo guardar el ticket."}, 504   
+
+        # Retorno
         return {
             'message': "Ticket aceptado con éxito",
             'captura del ticket': 'Exitosa',
@@ -635,11 +686,55 @@ class Ticket(Resource):
     """
     @classmethod
     def delete(self, id):
-        ticket = VentaModel.find_by_id(id)
+        ticket = VentaModel.find_by_field('id_ticket_punto_venta', id)
         if not ticket:
             return {"message": "No se encontro el elemento que desea eliminar"}, 404
+        # Calcular los sellos involucrados
+        sellos = 0
+        participante = ParticipanteModel.find_by_id(ticket.id_participante) 
+        if not participante: 
+            return {"message": "No se encontro el participante asociado a este ticket"}, 404
+        # Quitar sellos
         try:
-            ticket.remove()
-        except e:
+            if participante.sellos and ticket.sellos_otorgados:
+                # Restablecer los sellos antiguos
+                card_id = TarjetaSellosModel.get_tarjeta_sellos_actual()
+                if card_id and card_id.num_sellos:
+                    if ticket.sellos_otorgados > card_id.num_sellos:
+                        #  actual=8, otorgados=12, num_sellos_card = 10, old = 6
+                        #  new_actual = 8 - 12 % 10 
+                        participante.sellos -= ticket.sellos_otorgados % card_id.num_sellos 
+                    if ticket.sellos_otorgados < card_id.num_sellos:
+                        #  actual=4, otorgados=8, num_sellos_card = 10, old = 6
+                        #  new_actual = 4 + 10 % 8 
+                        participante.sellos += card_id.num_sellos % ticket.sellos_otorgados
+                    # Si es igual, no hay un cambio en la tarjeta de sellos del participante
+                participante.save() 
+                sellos = ticket.sellos_otorgados
+        except:
+            return {"message": "No se pudo quitar los sellos otorgados"}, 504
+        # Calcular los puntos involucrados
+        puntos = 0
+        # Quitar puntos
+        try:
+            if participante.saldo and ticket.puntos_otorgados:
+                participante.saldo -= ticket.puntos_otorgados
+                participante.save() 
+                puntos = ticket.puntos_otorgados
+        except:
+            return {"message": "No se pudo quitar los puntos otorgados"}, 504
+        # Calcular y quitar los premios/notificaciones/encuestas involucrados (otro movimiento)
+        if ticket.id_notificacion_obtenidas_list:
+            for notif in ticket.id_notificacion_obtenidas_list:
+                NotificacionModel.delete_notificacion_and_link(notif)
+        # Calcular los niveles involucrados
+        # Quitar niveles
+        # Eliminar ticket
+        try:
+            ticket.delete()
+        except:
             return {"message": "No se pudo eliminar el elemento solicitado"}, 504
-        return {"message": "Ticket de venta eliminado satisfactoriamente"}, 200
+        return {"message": "Ticket de venta eliminado satisfactoriamente",
+                "Puntos cancelados:": puntos,
+                "Sellos cancelados:": sellos,
+        }, 200
