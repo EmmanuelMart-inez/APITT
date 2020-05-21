@@ -1,5 +1,8 @@
 from pymodm import connect, fields, MongoModel, EmbeddedMongoModel
 import pymongo
+from pymodm.errors import ValidationError
+from bson.objectid import ObjectId
+
 # from participante import Participante
 from models.producto import ProductoModel
 from models.empleado import UsuarioModel
@@ -50,7 +53,7 @@ class VentaModel(MongoModel):
     id_notificacion_obtenidas_list = fields.ListField(fields.CharField(), default=[])
 
     @classmethod
-    def find_by_id(cls, _Objectid: str, isString: bool) -> "VentaModel":
+    def find_by_id(cls, _Objectid: str) -> "VentaModel":
         try:
             oid = ObjectId(_Objectid)
             notif = cls.objects.get({'_id': oid})

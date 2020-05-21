@@ -599,6 +599,9 @@ class Ticket(Resource):
                             id_notificacion = str(tarjeta_sellos_actual.id_notificacion),
                             estado = 0
                         ).save() 
+                        # Agregar el id de la notificación (movimiento) al ticket.
+                        if new_notificacion_sello:
+                            ticket.id_notificacion_obtenidas_list.append(str(new_notificacion_sello._id))
                         # Buscar el esquema de la notificación de la tarjeta de sellos
                         tarjeta_sellos_notificacion = NotificacionTemplateModel.find_by_id(tarjeta_sellos_actual.id_notificacion)
                         if tarjeta_sellos_notificacion and tarjeta_sellos_notificacion.link and tarjeta_sellos_notificacion.link != "null":
@@ -658,8 +661,8 @@ class Ticket(Resource):
             ticket.sellos_otorgados = bonificacion_sellos
             # TODO: Notificación por puntos
             ticket.puntos_otorgados = bonificacion_puntos
-            if new_notificacion_sello:
-                ticket.id_notificacion_obtenidas_list.append(str(new_notificacion_sello._id))
+            # if new_notificacion_sello:
+            #     ticket.id_notificacion_obtenidas_list.append(str(new_notificacion_sello._id))
             ticket.save()
         except ValidationError as exc:            
             print(exc.message)
@@ -676,6 +679,7 @@ class Ticket(Resource):
             'Movimientos enviados': movimientos_enviados,
             'Nuevos premios por sellos': is_historial_sellos_new_element,
             'Bonificación de puntos': '{} puntos bonificados'.format(bonificacion_puntos),
+            '_id': str(ticket._id)
         }, 200
 
 
@@ -696,7 +700,7 @@ class Ticket(Resource):
             return {"message": "No se encontro el participante asociado a este ticket"}, 404
         # Quitar sellos
         try:
-            if participante.sellos and ticket.sellos_otorgados:
+            if participante.sellos >= 0 and ticket.sellos_otorgados:
                 # Restablecer los sellos antiguos
                 card_id = TarjetaSellosModel.get_tarjeta_sellos_actual()
                 if card_id and card_id.num_sellos:
@@ -724,9 +728,12 @@ class Ticket(Resource):
         except:
             return {"message": "No se pudo quitar los puntos otorgados"}, 504
         # Calcular y quitar los premios/notificaciones/encuestas involucrados (otro movimiento)
-        if ticket.id_notificacion_obtenidas_list:
+        notifs_quemadas = 0
+        if len(ticket.id_notificacion_obtenidas_list) > 0:
             for notif in ticket.id_notificacion_obtenidas_list:
-                NotificacionModel.delete_notificacion_and_link(notif)
+                if NotificacionModel.delete_notificacion_and_link(notif):
+                    notifs_quemadas+=1
+
         # Calcular los niveles involucrados
         # Quitar niveles
         # Eliminar ticket
@@ -737,4 +744,5 @@ class Ticket(Resource):
         return {"message": "Ticket de venta eliminado satisfactoriamente",
                 "Puntos cancelados:": puntos,
                 "Sellos cancelados:": sellos,
+                "Notificaciones quemadas": notifs_quemadas
         }, 200

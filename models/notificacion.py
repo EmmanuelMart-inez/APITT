@@ -96,33 +96,41 @@ class NotificacionModel(MongoModel):
     @classmethod
     def delete_notificacion_and_link(cls, id_not) -> "NotificacionModel":
         notif = cls.find_by_id(id_not)
+        print("Notificacion encontrada")
         if not notif:
             return None
         try:
-            # Elimnar premio o encuesta o nada, según sea el caso
-            if notif.tipo_notificacion == 'encuesta':
-                if notif.link and notif.link != 'null':
-                    # Buscar encuesta
-                    enc = ParticipantesEncuestaModel.find_by_id(notif.link)
-                    if enc:
-                        enc.estado = 'respondida'
-                        enc.save()
-                        enc.delete()
-            if notif.tipo_notificacion == 'premio':
-                if notif.link and notif.link != 'null':
-                    # Buscar encuesta
-                    prem = PremioParticipanteModel.find_by_id(notif.link)
-                    if prem:
-                        prem.estado = 1
-                        prem.save()
-                        prem.delete()
+            # Obtener el template de la notificacion 
+            template = notif.id_notificacion
+            if template:
+                # Elimnar premio o encuesta o nada, según sea el caso
+                if template.tipo_notificacion == 'encuesta':
+                    if template.link and template.link != 'null':
+                        # Buscar encuesta
+                        enc = ParticipantesEncuestaModel.find_by_id(template.link)
+                        if enc:
+                            print("Notificacion -> Encuesta encontrada")
+                            enc.estado = 'respondida'
+                            enc.save()
+                            enc.delete()
+                if template.tipo_notificacion == 'premio':
+                    if template.link and template.link != 'null':
+                        # Buscar encuesta
+                        prem = PremioParticipanteModel.find_by_id(template.link)
+                        print("Notificacion -> Premio encontrado")
+                        if prem:
+                            prem.estado = 1
+                            prem.save()
+                            prem.delete()
             notif.estado = 1
             notif.save()
+            print("Notificacion eliminada")
             # notif.delete()
             # TODO: Generar movimientos correspondientes
-        except:
+        except ValidationError as exc:
+            print("Excepcion al eliminar notificación: {}".format(exec))
             return None        
-        return True
+        return notif.estado
 
     @classmethod
     def find_by_field(cls, field: str, value: str) -> "PremioParticipanteModel":
