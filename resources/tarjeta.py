@@ -15,7 +15,7 @@ from models.tarjeta import TarjetaPuntosModel, TarjetaSellosModel, TarjetaPuntos
 from schemas.participante import ParticipanteSchema 
 from models.participante import ParticipanteModel 
 from schemas.tarjeta import  TarjetaSellosTemplateSchema, TarjetaSellosSchema, TarjetaPuntosSchema, TarjetaPuntosTemplateSchema
-from marshmallow import pprint
+from marshmallow import pprint, EXCLUDE
 
 participante_schema = ParticipanteSchema(many=True)
 selloscard_schema = TarjetaSellosSchema()
@@ -31,7 +31,7 @@ class SistemaPuntos(Resource):
     @classmethod
     def post(self):
         tarjeta_json = request.get_json()
-        tarjeta = puntoscard_template_schema.load(tarjeta_json)
+        tarjeta = TarjetaPuntosTemplateSchema().load(tarjeta_json)
         try:
             new_tarjeta = TarjetaPuntosTemplateModel()
             if "titulo" in tarjeta:
@@ -40,8 +40,8 @@ class SistemaPuntos(Resource):
                 new_tarjeta.num_puntos = tarjeta["num_puntos"]
             if "dias_vigencia" in tarjeta:
                 new_tarjeta.dias_vigencia = tarjeta["dias_vigencia"]
-            if "max_canjeos" in tarjeta:
-                new_tarjeta.max_canjeos = tarjeta["max_canjeos"]
+            # if "max_canjeos" in tarjeta:
+            #     new_tarjeta.max_canjeos = tarjeta["max_canjeos"]
             if "id_notificacion" in tarjeta:
                 new_tarjeta.id_notificacion = tarjeta["id_notificacion"]
             if "id_promocion" in tarjeta:
@@ -55,7 +55,7 @@ class SistemaPuntos(Resource):
                 'ObjectId': TarjetaPuntosTemplateSchema(
                 only=(
                 "_id",
-                )).dump(new_tarjeta)
+                ), ).dump(new_tarjeta)
         }, 200
 
     @classmethod
@@ -63,9 +63,48 @@ class SistemaPuntos(Resource):
         niveles = TarjetaPuntosTemplateModel.objects.all()
         if not niveles:
             return {"message": "No se encontró ningún nivel"}, 404
-        return TarjetaPuntosTemplateSchema(many=True).dump(niveles)
+        return TarjetaPuntosTemplateSchema().dump(niveles, many=True)
 
 class SistemaPuntosId(Resource):
+    # Obtiene el nivel con el _id: id
+    @classmethod
+    def get(self, id):
+        nivel = TarjetaPuntosTemplateModel.find_by_id(id)
+        if not nivel:
+            return {"message": "No se encontró el nivel"}, 404
+        return TarjetaPuntosTemplateSchema().dump(nivel)
+        
+
+    # Edita los campos del nivel con el _id = id
+    @classmethod
+    def put(self, id):
+        old = TarjetaPuntosTemplateModel.find_by_id(id)
+        if not old:
+            return {"message": "Error, no se encontró el nivel"}, 404 
+        nivel_json = request.get_json()
+        new_nivel = TarjetaPuntosTemplateSchema().load(nivel_json)
+        try:
+            if "titulo" in new_nivel:
+                old.titulo = new_nivel["titulo"]
+            if "num_puntos" in new_nivel:
+                old.num_puntos = new_nivel["num_puntos"]
+            if "dias_vigencia" in new_nivel:
+                old.dias_vigencia = new_nivel["dias_vigencia"]
+            # if "max_canjeos" in new_nivel:
+            #     old.max_canjeos = new_nivel["max_canjeos"]
+            if "id_notificacion" in new_nivel:
+                old.id_notificacion = new_nivel["id_notificacion"]
+            if "id_promocion" in new_nivel:
+                old.id_promocion = new_nivel["id_promocion"]
+            # old.fecha_creacion = dt.datetime.now()
+            old.save()
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo actualizar el nivel"}, 400   
+        return {'message': "nivel modificado",
+                'nivel': TarjetaPuntosTemplateSchema().dump(old)
+        }, 200
+
     @classmethod
     def delete(self, id):
         nivel = TarjetaPuntosTemplateModel.find_by_id(id)

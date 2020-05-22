@@ -1,5 +1,5 @@
 from ma import ma
-from marshmallow import Schema, fields, ValidationError
+from marshmallow import Schema, fields, ValidationError, EXCLUDE
 
 class TarjetaPuntosSchema(ma.Schema):
     _id = fields.Str()
@@ -28,18 +28,19 @@ class TarjetaPuntosTemplateSchema(ma.Schema):
     num_puntos = fields.Float()
     fecha_creacion = fields.DateTime()
     dias_vigencia = fields.Integer()
-    max_canjeos = fields.Integer()
+    # max_canjeos = fields.Integer()
     id_notificacion = fields.Str()
     id_promocion = fields.Str()
 
     class Meta:
+        unknown=EXCLUDE
         fields = (
             "_id",
             "num_puntos",
             "fecha_creacion",
             "dias_vigencia",
             "id_notificacion",
-            "id_promocion"
+            "id_promocion",
         )
          
 

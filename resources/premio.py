@@ -85,8 +85,15 @@ class PremioList(Resource):
                 return {'message': f"El participante con el id: { id }, no posee ningún premio"}, 404
             premios_no_quemados = []
             for pp in participante_premios:
+                # Old method: Por estado {0,1}
                 if not len(pp.fechas_redencion) > 0:
                     premios_no_quemados.append(pp)
+                #- Verificar los premios con vidas con los que dispone el participante
+                # ptemplate = PremioModel.find_by_id(pp.id_premio)
+                # if ptemplate and ptemplate.vidas:
+                #     if not len(pp.fechas_redencion) > ptemplate.vidas:
+                #         premios_no_quemados.append(pp) 
+                #- 
                     # try:
                     #     pp.delete()    
                     # except (e):
@@ -133,7 +140,8 @@ class PremioList(Resource):
                             "fecha_creacion", 
                             "fecha_vigencia", 
                             # "id_producto",
-                            "id_participante"
+                            "id_participante",
+                            "vidas"
                         ), many=True).dump(premios),
                     },200
 
@@ -156,6 +164,7 @@ class PremioId(Resource):
                         "imagen_display",
                         "fecha_creacion", 
                         "fecha_vigencia", 
+                        "vidas",
                         # "fechas_redencion",
                         # "id_producto",
                         # "id_participante"
@@ -186,6 +195,8 @@ class PremioId(Resource):
                 p.fecha_creacion = premio["fecha_creacion"] 
             if "fecha_vigencia" in premio:
                 p.fecha_vigencia = premio["fecha_vigencia"] 
+            if "vidas" in premio:
+                p.vidas = premio["vidas"] 
             # if "fechas_redencion" in premio:
             #     p.fecha_redencion = premio["fecha_redencion"] 
             p.save()
@@ -215,6 +226,8 @@ class Premio(Resource):
                 p.imagen_icon=premio["imagen_icon"]
             if "imagen_display" in premio:
                 p.imagen_display=premio["imagen_display"]
+            if "vidas" in premio:
+                p.vidas=premio["vidas"]
             if "fecha_creacion" in premio:
                 p.fecha_creacion=premio["fecha_creacion"]
             else: 
@@ -252,6 +265,7 @@ class Premio(Resource):
     def delete(self):
         pass
 
+# TODO:
 # Uso del front Web
 # Editar los datos de un premio asiganado a un participante
 # _id = PremioParticipante._id
@@ -269,10 +283,12 @@ class PremioParticipante(Resource):
             # ojo con fecha_redencion y "Model: fechaS_rendencion"
             if not "fecha_redencion" in p_req:
                 p.fechas_redencion.append(dt.datetime.now())
+                p.vidas -= 1
                 p.save()
                 return {"message": "Quemado automático: Campo fecha_redencion faltante, por lo que se utizará la fecha y hora del servidor cuando se realizó esta transacción"}, 202
             date = dateutil.parser.parse(p_req["fecha_redencion"])
             p.fechas_redencion.append(date)
+            p.vidas -= 1
             p.save()
         except ValidationError as exc:
             print(exc.message)

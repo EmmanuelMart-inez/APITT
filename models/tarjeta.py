@@ -23,6 +23,7 @@ import dateutil.parser
 # Establish a connection to the database.
 connect('mongodb://localhost:27017/ej1')
 
+# No se usa! 
 class TarjetaPuntosModel(MongoModel):
     codigo_qr = fields.CharField()
     codigo_barras = fields.CharField()
@@ -37,7 +38,7 @@ class TarjetaPuntosTemplateModel(MongoModel):
     num_puntos = fields.FloatField()
     fecha_creacion = fields.DateTimeField()
     dias_vigencia = fields.IntegerField()
-    max_canjeos = fields.IntegerField()
+    max_canjeos = fields.IntegerField() #"OBSOLET; REMOVED": se excluye desde el schema 
     # fecha_vigencia = fields.DateTimeField()
     # fecha_inicio = fields.DateTimeField()
     # fecha_fin = fields.DateTimeField()

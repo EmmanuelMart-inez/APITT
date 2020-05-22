@@ -733,7 +733,7 @@ class Ticket(Resource):
             for notif in ticket.id_notificacion_obtenidas_list:
                 if NotificacionModel.delete_notificacion_and_link(notif):
                     notifs_quemadas+=1
-
+        # Calcular los quemados de premio vs estado
         # Calcular los niveles involucrados
         # Quitar niveles
         # Eliminar ticket

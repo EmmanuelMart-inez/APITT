@@ -16,6 +16,7 @@ class PremioSchema(ma.Schema):
     fecha_vigencia = fields.DateTime()
     #  = fields.ReferenceField(default=None)
     id_participante = fields.Str()
+    vidas = fields.Integer(required=False)
 
     class Meta:
         fields = (
@@ -29,7 +30,8 @@ class PremioSchema(ma.Schema):
             "fecha_creacion", 
             "fecha_vigencia", 
             "id_producto",
-            "id_participante"
+            "id_participante",
+            "vidas",
         )
 
 class PremioParticipanteSchema(ma.Schema):

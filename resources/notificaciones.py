@@ -328,7 +328,8 @@ class NotificacionAcciones(Resource):
                         "fecha_vigencia", 
                         # "fecha_redencion",
                         # "id_producto",
-                        "id_participante"
+                        "id_participante",
+                        "vidas"
                     )).dump(p)
             }, 200               
         elif accion == 'encuesta':
@@ -434,13 +435,17 @@ class NotificacionAcciones(Resource):
                 if "imagen_icon" in premio:
                     p.imagen_icon = premio["imagen_icon"] 
                 if "imagen_display" in premio:
-                    p.imagen_icon = premio["imagen_icon"] 
+                    p.imagen_display = premio["imagen_icon"] 
                 if "fecha_creacion" in premio:
-                    p.imagen_icon = premio["imagen_icon"] 
+                    p.fecha_creacion = premio["imagen_icon"] 
+                else:
+                    p.fecha_creacion = dt.datetime.now()  
                 if "fecha_vigencia" in premio:
                     p.fecha_vigencia = premio["fecha_vigencia"] 
                 if "fecha_redencion" in premio:
                     p.fecha_redencion = premio["fecha_redencion"] 
+                if "vidas" in premio:
+                    p.vidas = premio["vidas"] 
                 p.save()
             except ValidationError as exc:
                 print(exc.message)
@@ -470,7 +475,8 @@ class NotificacionAcciones(Resource):
                         "fecha_vigencia", 
                         # "fecha_redencion",
                         # "id_producto",
-                        "id_participante"
+                        "id_participante",
+                        "vidas"
                     )).dump(p)
             }, 200               
         elif accion == 'encuesta':

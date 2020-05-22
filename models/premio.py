@@ -23,6 +23,8 @@ class PremioModel(MongoModel):
     imagen_display = fields.CharField()
     fecha_creacion = fields.DateTimeField()
     fecha_vigencia = fields.DateTimeField()
+    vidas = fields.IntegerField(blank=True, required=False, default=1)
+    # TODO: Default 1 es correcto?: Por ahora hace match con el acoplamiento anterior del sistema pero, ¿hay EdgeCases?
     # fecha_redencion = fields.DateTimeField()
     #id_producto = fields.ReferenceField(Producto)
     # id_participante = fields.ReferenceField(ParticipanteModel) Quita al poner la segmentación: "ninguna"
