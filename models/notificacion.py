@@ -87,7 +87,7 @@ class NotificacionModel(MongoModel):
             notif = cls(
                 id_participante=id_par,
                 id_notificacion=id_not,
-                estado=0,
+                estado=0
             ).save()            
         except ValidationError as exc:   
             return None

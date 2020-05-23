@@ -80,9 +80,30 @@ class PremioList(Resource):
         @classmethod
         def get(self, id):
             # Obtener los ids de los templates de los premios que poseé un participante
-            participante_premios = PremioParticipanteModel.find_by_field('id_participante', id)
+            participante_premios = PremioParticipanteModel.find_by_id_participante_vigentes(id)
+            # # INTEGRACION del sistema de premios: Se debe verificar si tiene premios por 
+            # # nivel aunque no tenga premios que no son de nivel
+            # #   1. Buscar al participante
+            # participante = ParticipanteModel.find_by_id(id)
+            # #   2. Obtener los puntos del participante
+            # puntos = participante.saldo
+            # #   3. Obtener los niveles del participante
+            # niveles = None
+            # if puntos:
+            #     niveles = TarjetaPuntosTemplateModel.get_level_vigentes(puntos)
+            #     if niveles:
+            #         for nivl in niveles:
+            # #   4. Obtener los Notificacion -> premios de los niveles 
+            #             if nivl.id_notificacion:
+            #                 notif = NotificacionTemplateModel.find_by_id(nivl.id_notificacion)
+            #                 if notif and notif.link and notif.link != "null" and notif.tipo_notificacion == 'premio':
+            #                     # 5. Obtener los premios de los niveles
+            #                     premio_nivel = find_by_id(notif.link)
+            #                     if premio_nivel:
+            # if not participante_premios and not niveles_premios:
             if not participante_premios:
                 return {'message': f"El participante con el id: { id }, no posee ningún premio"}, 404
+            # Filtrar los premios que ya han sido quemados, es decir, agotaron sus vidas (fechas_redencion)
             premios_no_quemados = []
             for pp in participante_premios:
                 # Old method: Por estado {0,1}
@@ -108,25 +129,25 @@ class PremioList(Resource):
                     if premio_template:
                         premios.append(premio_template)
                         premio_template._id = premio._id
-            # Obtener el participante
-            p = ParticipanteModel.find_by_id(id)
-            if not p:
-                return {"message": "No se encontro el participante buscado"}, 404
-            # Obtener los premios correspondientes al sistema de niveles
-            premios_nivel = TarjetaPuntosTemplateModel.get_level(p.saldo)
-            for nivel_id in premios_nivel:
-            # Obtener el template de cada premio 
-                nivel = TarjetaPuntosTemplateModel.find_by_id(nivel_id)
-                if nivel:
-                    print(nivel_id)
-                    print(len(premios_nivel))
-                    notif = NotificacionTemplateModel.find_by_id(nivel.id_notificacion)
-                    if notif:
-                        if notif.link and notif.link != "null":
-                            # print(type(notif.link))
-                            premio_template = PremioModel.find_by_id(notif.link)
-                            if premio_template:
-                                premios.append(premio_template)
+            # # Obtener los premios del participante por el sistema de puntos Niveles
+            # #   Obtener el participante
+            # p = ParticipanteModel.find_by_id(id)
+            # if not p:
+            #     return {"message": "No se encontro el participante buscado"}, 404
+            # premios_nivel = TarjetaPuntosTemplateModel.get_level(p.saldo)
+            # for nivel_id in premios_nivel:
+            # #   Obtener el template de cada premio 
+            #     nivel = TarjetaPuntosTemplateModel.find_by_id(nivel_id)
+            #     if nivel:
+            #         print(nivel_id)
+            #         print(len(premios_nivel))
+            #         notif = NotificacionTemplateModel.find_by_id(nivel.id_notificacion)
+            #         if notif:
+            #             if notif.link and notif.link != "null":
+            #                 # print(type(notif.link))
+            #                 premio_template = PremioModel.find_by_id(notif.link)
+            #                 if premio_template:
+            #                     premios.append(premio_template)
             return {"Premios":
                         PremioSchema(
                         only=(
@@ -138,7 +159,7 @@ class PremioList(Resource):
                             "imagen_icon",
                             "imagen_display",
                             "fecha_creacion", 
-                            "fecha_vigencia", 
+                            # "fecha_vigencia",  
                             # "id_producto",
                             "id_participante",
                             "vidas"
@@ -193,8 +214,8 @@ class PremioId(Resource):
                 p.imagen_display = premio["imagen_display"] 
             if "fecha_creacion" in premio:
                 p.fecha_creacion = premio["fecha_creacion"] 
-            if "fecha_vigencia" in premio:
-                p.fecha_vigencia = premio["fecha_vigencia"] 
+            if "fecha_vencimiento" in premio:
+                p.fecha_vencimiento = premio["fecha_vencimiento"] 
             if "vidas" in premio:
                 p.vidas = premio["vidas"] 
             # if "fechas_redencion" in premio:
@@ -232,8 +253,8 @@ class Premio(Resource):
                 p.fecha_creacion=premio["fecha_creacion"]
             else: 
                 p.fecha_creacion = dt.datetime.now()
-            if "fecha_vigencia" in premio:
-                p.fecha_vigencia=premio["fecha_vigencia"]
+            if "fecha_vencimiento" in premio:
+                p.fecha_vencimiento=premio["fecha_vencimiento"]
             # if "fecha_redencion" in premio:
             #     p.fecha_redencion=premio["fecha_redencion"]
             # if "id_participante" in premio:
@@ -336,8 +357,8 @@ class PremioParticipante(Resource):
                 p.fecha_creacion = premio["fecha_creacion"] 
             if "fechas_redencion" in premio:
                 p.fechas_redencion = premio["fechas_redencion"] 
-            if "fecha_creacion" in premio:
-                p.fecha_creacion = premio["fecha_creacion"] 
+            if "fecha_vencimiento" in premio:
+                p.fecha_vencimiento = premio["fecha_vencimiento"] 
             # if "fecha_vigencia" in premio:
             #     p.fecha_vigencia = premio["fecha_vigencia"] 
             # if "fechas_redencion" in premio:

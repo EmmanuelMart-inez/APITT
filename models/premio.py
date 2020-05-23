@@ -74,7 +74,7 @@ class PremioParticipanteModel(MongoModel):
     estado = fields.IntegerField()
     fecha_creacion = fields.DateTimeField()
     fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
-    fecha_vencimiento = fields.DateTimeField(required=False, blank=True)
+    fecha_vencimiento = fields.DateTimeField(required=False, blank=True, default=dt.datetime(2030,1,1,1,1,1,100180))
     # fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
 
     @classmethod
@@ -90,7 +90,7 @@ class PremioParticipanteModel(MongoModel):
     @classmethod
     def find_by_field(cls, field: str, value: str) -> "PremioParticipanteModel":
         try:
-            premios = cls.objects.raw({field: value, })
+            premios = cls.objects.raw({field: value})
         except cls.DoesNotExist:
             return None 
         return premios
@@ -108,17 +108,35 @@ class PremioParticipanteModel(MongoModel):
     
     # Obtiene los premios validos del partipantes
     @classmethod
-    def find_by_id_vigentes(cls, _Objectid: str, field: str) -> "PremioParticipanteModel":
+    def find_by_id_participante_vigentes(cls, _Objectid: str) -> "PremioParticipanteModel":
         date_s = dt.datetime.now()
         # date_s = dateutil.parser.parse(dt.datetime.now())
         # print(type(date_s))
         # date_s = dt.datetime.fromisoformat(date_start)
         try: 
-            oid = ObjectId(_Objectid)
-            premios = cls.objects.raw({'id_participante' : oid, field : { "$lt": date_s}})
+            # oid = ObjectId(_Objectid)
+            premios = cls.objects.raw({'id_participante' : _Objectid, 'fecha_vencimiento' : { "$gt": date_s}})
+            # premios = cls.objects.raw({'id_participante' : _Objectid})
             return premios
         except cls.DoesNotExist:
             return None
+
+    @classmethod
+    def add_premio(cls, id_prem, id_par, vencimiento, promo) -> "NotificacionModel":
+        try:
+            premio_parti = cls(
+                id_participante=id_par,
+                id_premio=id_prem,
+                estado=0,
+                fecha_vencimiento=vencimiento,
+                fecha_creacion=dt.datetime.now()
+            ).save()            
+            if promo:
+                premio_parti.id_promocion=promo
+                premio_parti.save()
+        except ValidationError as exc:   
+            return None
+        return premio_parti 
 
     # """
     # Obtiene la consulta del campo y valor solicitado y de todos los resultados, toma el más

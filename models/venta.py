@@ -51,6 +51,7 @@ class VentaModel(MongoModel):
     puntos_otorgados = fields.FloatField(blank=True, required=False)
     sellos_otorgados = fields.IntegerField(blank=True, required=False)
     id_notificacion_obtenidas_list = fields.ListField(fields.CharField(), default=[])
+    id_premios_obtenidos_list = fields.ListField(fields.CharField(), default=[])
 
     @classmethod
     def find_by_id(cls, _Objectid: str) -> "VentaModel":

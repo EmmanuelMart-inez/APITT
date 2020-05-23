@@ -2,6 +2,7 @@ from ma import ma
 from marshmallow import Schema, fields, ValidationError
 from schemas.notificacion import NotificacionSchema
 from schemas.participante import ParticipanteSchema
+import datetime as dt
 
 
 class PremioSchema(ma.Schema):
@@ -14,6 +15,7 @@ class PremioSchema(ma.Schema):
     imagen_display = fields.Str()
     fecha_creacion = fields.DateTime()
     fecha_vigencia = fields.DateTime()
+    fecha_vencimiento = fields.DateTime(default=dt.datetime(2050,1,1,1,1,1,100180))
     #  = fields.ReferenceField(default=None)
     id_participante = fields.Str()
     vidas = fields.Integer(required=False)
@@ -28,6 +30,7 @@ class PremioSchema(ma.Schema):
             "imagen_icon",
             "imagen_display",
             "fecha_creacion", 
+            "fecha_vencimiento",
             "fecha_vigencia", 
             "id_producto",
             "id_participante",
@@ -42,7 +45,7 @@ class PremioParticipanteSchema(ma.Schema):
     estado = fields.Integer()
     fecha_creacion = fields.DateTime()
     fechas_redencion = fields.List(fields.DateTime)
-    fecha_vencimiento = fields.DateTime()
+    fecha_vencimiento = fields.DateTime(default=dt.datetime(2030,1,1,1,1,1,100180))
 
     class Meta:
         fields = (

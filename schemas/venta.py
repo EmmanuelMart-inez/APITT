@@ -99,6 +99,7 @@ class VentaSchema(ma.Schema):
     puntos_otorgados = fields.Float(allow_none=True, required=False)
     sellos_otorgados = fields.Integer(allow_none=True, required=False)
     id_notificacion_obtenidas_list = fields.List(fields.Str(), required=False, allow_none=True)
+    id_premios_obtenidos_list = fields.List(fields.Str(), required=False, allow_none=True)
 
     class Meta:
         fields = (
@@ -114,4 +115,5 @@ class VentaSchema(ma.Schema):
         "puntos_otorgados",
         "sellos_otorgados",
         "id_notificacion_obtenidas_list",
+        "id_premios_obtenidos_list",
         )

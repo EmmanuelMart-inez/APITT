@@ -577,6 +577,9 @@ class Ticket(Resource):
             elif card_id.trigger == 'cantidad':
                 bonificacion_sellos = TarjetaSellosModel.calcular_sellos_por_cantidad(ticket, card_id.cantidad_trigger)
             is_historial_sellos_new_element = 0
+            notificaciones_enviadas_por_sellos = 0
+            encuestas_enviadas_por_sellos = 0
+            premios_enviados_por_sellos = 0
             if bonificacion_sellos:
                 # Quitar puntos que han caducado
                     # 1. Verificar si ha caducado sus sellos
@@ -601,6 +604,7 @@ class Ticket(Resource):
                         ).save() 
                         # Agregar el id de la notificación (movimiento) al ticket.
                         if new_notificacion_sello:
+                            notificaciones_enviadas_por_sellos += 1 
                             ticket.id_notificacion_obtenidas_list.append(str(new_notificacion_sello._id))
                         # Buscar el esquema de la notificación de la tarjeta de sellos
                         tarjeta_sellos_notificacion = NotificacionTemplateModel.find_by_id(tarjeta_sellos_actual.id_notificacion)
@@ -614,6 +618,8 @@ class Ticket(Resource):
                                     estado = 0,
                                     fecha_creacion = dt.datetime.now()
                                 ).save()
+                                if new_bonificacion_link:
+                                    premios_enviados_por_sellos += 1
                             if tarjeta_sellos_notificacion.tipo_notificacion == "encuesta":
                                 new_bonificacion_link = ParticipantesEncuestaModel(
                                     id_participante = str(p._id),
@@ -621,6 +627,8 @@ class Ticket(Resource):
                                     estado = 0, 
                                     fecha_creacion = dt.datetime.now() 
                                 ).save()
+                                if new_bonificacion_link:
+                                    encuestas_enviadas_por_sellos += 1
                     p.sellos %= tarjeta_sellos_actual.num_sellos
                     new_sello_historial = HistorialTarjetaSellos.add_movimiento(str(p._id), str(tarjeta_sellos_actual._id))
                     if new_sello_historial:
@@ -633,15 +641,49 @@ class Ticket(Resource):
         bonificacion_niveles = diff(nivel_sig, nivel_actual)
         print(bonificacion_niveles)
         print(len(bonificacion_niveles))
-        notificaciones_enviadas = 0
+        notificaciones_enviadas_por_puntos = 0
+        encuestas_enviadas_por_puntos = 0
+        premios_enviados_por_puntos = 0
+        premios_enviados = 0
         if len(bonificacion_niveles): 
             for nivel in bonificacion_niveles:
                 new_nivel = TarjetaPuntosTemplateModel.find_by_id(nivel)
                 if new_nivel.id_notificacion:
         # Puntos: 2. Habilitado de niveles: Notificacion y premio
-                    trigger_notificacion = NotificacionModel.add_notificacion(new_nivel.id_notificacion, p._id)
-                    if trigger_notificacion:
-                        notificaciones_enviadas += 1 
+                    # Integración de fecha_vencimiento del sistema de niveles:
+                    if new_nivel.fecha_vencimiento and dt.datetime.now() < new_nivel.fecha_vencimiento:
+                        trigger_notificacion = NotificacionModel.add_notificacion(new_nivel.id_notificacion, p._id)
+                        notificacion = NotificacionTemplateModel.find_by_id(new_nivel.id_notificacion)
+                        print(notificacion)
+                        print(notificacion.tipo_notificacion)
+                        print(notificacion.link)
+                        if notificacion and notificacion.link and notificacion.link != "null":
+                            # Envio de premio o encuesta
+                            if notificacion.tipo_notificacion == "premio":
+                                new_bonificacion_link = PremioParticipanteModel(
+                                # TODO: Modificación en id_promoción
+                                    id_participante = str(p._id),
+                                    id_premio = notificacion.link,
+                                    estado = 0,
+                                    fecha_creacion = dt.datetime.now()
+                                ).save()
+                                if new_bonificacion_link:
+                                    # Añadir los premios enviados en el ticket por el sistema de niveles
+                                    ticket.id_premios_obtenidos_list.append(str(new_bonificacion_link._id))
+                                    premios_enviados_por_puntos += 1
+                            if notificacion.tipo_notificacion == "encuesta":
+                                new_bonificacion_link = ParticipantesEncuestaModel(
+                                    id_participante = str(p._id),
+                                    id_encuesta = notificacion.link,
+                                    estado = 0, 
+                                    fecha_creacion = dt.datetime.now() 
+                                ).save()
+                                if new_bonificacion_link:
+                                    encuestas_enviadas_por_puntos += 1
+                        if trigger_notificacion:
+                            # Añadir las notificaciones enviadas por el sistema de niveles
+                            ticket.id_notificacion_obtenidas_list.append(str(trigger_notificacion._id))
+                            notificaciones_enviadas_por_puntos += 1 
         # Puntos: 3. Transaccion de puntos
         if bonificacion_puntos:
             p.saldo += bonificacion_puntos
@@ -652,7 +694,7 @@ class Ticket(Resource):
             return {"message": "No se pudieron agregar los puntos al participante"}, 504
         print("saldo del participante:", p.saldo)
         print("bonificacion_puntos:", bonificacion_puntos)
-        # Transaccion de movimientos y quema de cupones
+        # Transaccion de movimientos y quema de cupones, sólo hay uno en la parte superior "new_sello_historial"
         new_movimiento = MovimientoAppModel.add_movimiento(str(p._id), "Compra", "entrada", ticket.total, "http://127.0.0.1:5001/download/ayuda4.png")
         if new_movimiento:
             movimientos_enviados = 1
@@ -675,9 +717,13 @@ class Ticket(Resource):
             'Busqueda del participante': 'Exitosa',
             'Bonificacion de sellos': '{} sello(s)'.format(bonificacion_sellos),
             'Habilitación de un nuevo nivel': '{} nivel(es) desbloqueados'.format(len(bonificacion_niveles)),
-            'Notificaciones enviadas': notificaciones_enviadas,
+            'Notificaciones enviadas por tarjeta de sellos': notificaciones_enviadas_por_sellos,
+            'Notificaciones enviadas por sistema de niveles(Puntos)': notificaciones_enviadas_por_puntos,
+            'Nuevas Encuestas por sellos': encuestas_enviadas_por_sellos,
+            'Nuevas Encuestas por puntos': encuestas_enviadas_por_puntos,
             'Movimientos enviados': movimientos_enviados,
-            'Nuevos premios por sellos': is_historial_sellos_new_element,
+            'Nuevos premios por sellos': premios_enviados_por_sellos,
+            'Nuevos premios por puntos': premios_enviados_por_puntos,
             'Bonificación de puntos': '{} puntos bonificados'.format(bonificacion_puntos),
             '_id': str(ticket._id)
         }, 200
@@ -727,24 +773,39 @@ class Ticket(Resource):
                 puntos = ticket.puntos_otorgados
         except:
             return {"message": "No se pudo quitar los puntos otorgados"}, 504
-        # Calcular y quitar los premios/notificaciones/encuestas involucrados (otro movimiento)
+        # Calcular y quitar los notificaciones/encuestas involucrados (otro movimiento)
         notifs_quemadas = 0
+        premios_quemados = 0
         if len(ticket.id_notificacion_obtenidas_list) > 0:
             for notif in ticket.id_notificacion_obtenidas_list:
                 if NotificacionModel.delete_notificacion_and_link(notif):
                     notifs_quemadas+=1
-        # Calcular los quemados de premio vs estado
-        # Calcular los niveles involucrados
+        # Calcular y quitar los notificaciones/encuestas involucrados (otro movimiento) ===> # Calcular los quemados de premio vs estado
+        # --------> # Calcular los niveles involucrados (solo eliminar premios, no se necesita eliminar el nivel,
+        #             ya que este es solo un template )
+        if len(ticket.id_premios_obtenidos_list) > 0:
+            for id_ in ticket.id_premios_obtenidos_list:
+                p = PremioParticipanteModel.find_by_id(id_)
+                print("Se encontro premio")
+        #   1. Verificar que no se haya usado los premios que se desean eliminar, PERO POR AHORA NO
+        #   if p and len(p.fechas_redencion) == 0:
+                if p:
+                    p.delete()
+                    premios_quemados+=1
+        #   1. eliminar premios
         # Quitar niveles
         # Eliminar ticket
         try:
+            # ticket.estado = "Cancelado-Eliminado"
+            # ticket.save()
             ticket.delete()
         except:
             return {"message": "No se pudo eliminar el elemento solicitado"}, 504
         return {"message": "Ticket de venta eliminado satisfactoriamente",
                 "Puntos cancelados:": puntos,
                 "Sellos cancelados:": sellos,
-                "Notificaciones quemadas": notifs_quemadas
+                "Notificaciones quemadas": notifs_quemadas,
+                "Premios eliminados": premios_quemados,
         }, 200
 
         # NOTE: UN ticket otorga beneficios y al cancelar solo se podrá cancelar dichos beneficios. Pero los premios por ahora los canjeamos

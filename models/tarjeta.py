@@ -61,20 +61,39 @@ class TarjetaPuntosTemplateModel(MongoModel):
     """
     @classmethod
     def get_level(cls, participante_puntos: float) -> "list":
-        all_levels = cls.objects.all()
+        all_levels = cls.objects.raw({'fecha_vencimiento': { "$gt" : dt.datetime.now() }})
+        # all_levels = cls.objects.all()
         all_levels_ordered_by_hightest = all_levels.order_by([("num_puntos", pymongo.DESCENDING)])
         level_count = []
         current_date = dt.datetime.now()
         for level in all_levels_ordered_by_hightest:
             if level.num_puntos <= participante_puntos:
-                # Regresar solo vigentes, si no hay fecha_vencimiento, considerar vigente el nivel
-                if level.fecha_vencimiento and level.fecha_vencimiento != "null": 
-                    if level.fecha_vencimiento > current_date:
-                        level_count.append(str(level._id))
-                else:
-                    level_count.append(str(level._id))
+                # # Regresar solo vigentes, si no hay fecha_vencimiento, considerar vigente el nivel
+                # if level.fecha_vencimiento and level.fecha_vencimiento != "null": 
+                #     if current_date < level.fecha_vencimiento:
+                #         level_count.append(str(level._id))
+                # else:
+                #     level_count.append(str(level._id))
+                level_count.append(str(level._id))
         return level_count
 
+    """
+    Metodo del participante para la sección premios del app
+        Regresa la lista de ids de niveles vigentes con los que cuenta
+        un participante
+    """
+    @classmethod
+    def get_level_vigentes(cls, participante_puntos: float) -> "list":
+        all_levels = cls.objects.raw({'fecha_vencimiento':{ '$gt': dt.datetime.now() }})
+        if not all_levels:
+            return None
+        all_levels_ordered_by_hightest = all_levels.order_by([("num_puntos", pymongo.DESCENDING)])
+        level_count = []
+        current_date = dt.datetime.now()
+        for level in all_levels_ordered_by_hightest:
+            if level.num_puntos <= participante_puntos:
+                level_count.append(str(level._id))
+        return level_count
 
 
 ##NOTE: fecha_inicio es diferente que 
