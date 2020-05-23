@@ -684,9 +684,9 @@ class Ticket(Resource):
 
 
     """
-   Para Cancelación de ticket al realizar una cancelación que revierta todos
-   efectos secundarios lo que nos obliga a tener una 
-   tabla que relacione todos estos efectos secundarios
+    Para Cancelación de ticket al realizar una cancelación que revierta todos
+    efectos secundarios lo que nos obliga a tener una 
+    tabla que relacione todos estos efectos secundarios
     """
     @classmethod
     def delete(self, id):
@@ -746,3 +746,7 @@ class Ticket(Resource):
                 "Sellos cancelados:": sellos,
                 "Notificaciones quemadas": notifs_quemadas
         }, 200
+
+        # NOTE: UN ticket otorga beneficios y al cancelar solo se podrá cancelar dichos beneficios. Pero los premios por ahora los canjeamos
+        # por aparte, por lo que a la hora de vender se debe escanear el QR del premio del participante para quemar el premio (añadir la fecha de rendencion)
+        # si cuenta con suficientes vidas

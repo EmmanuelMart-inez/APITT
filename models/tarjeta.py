@@ -37,7 +37,8 @@ class TarjetaPuntosTemplateModel(MongoModel):
     titulo = fields.CharField()
     num_puntos = fields.FloatField()
     fecha_creacion = fields.DateTimeField()
-    dias_vigencia = fields.IntegerField()
+    dias_vigencia = fields.IntegerField() # REMOVED: Cambiado por fecha_vencimiento TODO: Más adelante sería bueno tener esta funcionalidad
+    fecha_vencimiento = fields.DateTimeField() 
     max_canjeos = fields.IntegerField() #"OBSOLET; REMOVED": se excluye desde el schema 
     # fecha_vigencia = fields.DateTimeField()
     # fecha_inicio = fields.DateTimeField()
@@ -63,10 +64,18 @@ class TarjetaPuntosTemplateModel(MongoModel):
         all_levels = cls.objects.all()
         all_levels_ordered_by_hightest = all_levels.order_by([("num_puntos", pymongo.DESCENDING)])
         level_count = []
+        current_date = dt.datetime.now()
         for level in all_levels_ordered_by_hightest:
             if level.num_puntos <= participante_puntos:
-                level_count.append(str(level._id))
+                # Regresar solo vigentes, si no hay fecha_vencimiento, considerar vigente el nivel
+                if level.fecha_vencimiento and level.fecha_vencimiento != "null": 
+                    if level.fecha_vencimiento > current_date:
+                        level_count.append(str(level._id))
+                else:
+                    level_count.append(str(level._id))
         return level_count
+
+
 
 ##NOTE: fecha_inicio es diferente que 
 ##      fecha vigencia, la tarjeta de sellos

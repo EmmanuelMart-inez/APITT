@@ -74,6 +74,7 @@ class PremioParticipanteModel(MongoModel):
     estado = fields.IntegerField()
     fecha_creacion = fields.DateTimeField()
     fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
+    fecha_vencimiento = fields.DateTimeField(required=False, blank=True)
     # fechas_redencion = fields.ListField(fields.DateTimeField(), default=[], required=False, blank=True)
 
     @classmethod
@@ -89,19 +90,33 @@ class PremioParticipanteModel(MongoModel):
     @classmethod
     def find_by_field(cls, field: str, value: str) -> "PremioParticipanteModel":
         try:
-            premios = cls.objects.raw({field: value})
+            premios = cls.objects.raw({field: value, })
         except cls.DoesNotExist:
             return None 
         return premios
 
     @classmethod 
-    def find_by_two_fields(cls, field1: str, value1: str, field2: str, value2: str) -> "ParticipantesEncuestaModel":
+    def find_by_two_fields(cls, field1: str, value1: str, field2: str, value2) -> "PremioParticipanteModel":
         try:
             ppremio = cls.objects.raw({field1: value1, field2: value2})
             # Match just one record
             ppremio_ordered_by_latest = ppremio.order_by([("fecha_creacion", pymongo.DESCENDING)])
             last_ppremio = ppremio_ordered_by_latest.first()
             return last_ppremio
+        except cls.DoesNotExist:
+            return None
+    
+    # Obtiene los premios validos del partipantes
+    @classmethod
+    def find_by_id_vigentes(cls, _Objectid: str, field: str) -> "PremioParticipanteModel":
+        date_s = dt.datetime.now()
+        # date_s = dateutil.parser.parse(dt.datetime.now())
+        # print(type(date_s))
+        # date_s = dt.datetime.fromisoformat(date_start)
+        try: 
+            oid = ObjectId(_Objectid)
+            premios = cls.objects.raw({'id_participante' : oid, field : { "$lt": date_s}})
+            return premios
         except cls.DoesNotExist:
             return None
 

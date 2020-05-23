@@ -86,13 +86,13 @@ class PremioList(Resource):
             premios_no_quemados = []
             for pp in participante_premios:
                 # Old method: Por estado {0,1}
-                if not len(pp.fechas_redencion) > 0:
-                    premios_no_quemados.append(pp)
+                # if not len(pp.fechas_redencion) > 0:
+                #     premios_no_quemados.append(pp)
                 #- Verificar los premios con vidas con los que dispone el participante
-                # ptemplate = PremioModel.find_by_id(pp.id_premio)
-                # if ptemplate and ptemplate.vidas:
-                #     if not len(pp.fechas_redencion) > ptemplate.vidas:
-                #         premios_no_quemados.append(pp) 
+                ptemplate = PremioModel.find_by_id(pp.id_premio)
+                if ptemplate and ptemplate.vidas:
+                    if not len(pp.fechas_redencion) > ptemplate.vidas:
+                        premios_no_quemados.append(pp) 
                 #- 
                     # try:
                     #     pp.delete()    
@@ -280,20 +280,40 @@ class PremioParticipante(Resource):
             return {"message": "No se encontro el premio_participante"}, 404
         p_req = request.get_json()
         try:
-            # ojo con fecha_redencion y "Model: fechaS_rendencion"
+            # Checar si puede quemar el premio el participante 
+            ptemplate = PremioModel.find_by_id(p.id_premio)
+            if ptemplate and ptemplate.vidas:
+                # Es vigente el premio ?
+                if ptemplate.fecha_vigencia:
+                    if dt.datetime.now() > ptemplate.fecha_vigencia:
+                        return {"message": "No se pudo quemar el premio, este premio ya no esta vigente, fecha_vigencia: {}".format(ptemplate.fecha_vigencia)}, 400
+                # Tiene se puede canjear?, es decir tiene vidas?
+                if len(p.fechas_redencion) > ptemplate.vidas:
+                    return {"message": "No se pudo quemar el premio, el participante ha quemado este premio el número máximo de veces disponibles"}, 400
+            else:
+                return {"No se encontró las vidas en el template del premio"}, 404
+            vidas_restantes = ptemplate.vidas - len(p.fechas_redencion)
+            # Quemar premios
+            # ojo con Request_body: fecha_redencion y Model: fechaS_rendencion
             if not "fecha_redencion" in p_req:
                 p.fechas_redencion.append(dt.datetime.now())
-                p.vidas -= 1
+                # p.vidas -= 1
                 p.save()
-                return {"message": "Quemado automático: Campo fecha_redencion faltante, por lo que se utizará la fecha y hora del servidor cuando se realizó esta transacción"}, 202
+                return {
+                    "message": "Quemado automático: Campo fecha_redencion faltante, por lo que se utizará la fecha y hora del servidor cuando se realizó esta transacción",
+                    "vidas_restantes": vidas_restantes
+                    }, 202
             date = dateutil.parser.parse(p_req["fecha_redencion"])
             p.fechas_redencion.append(date)
-            p.vidas -= 1
+            # p.vidas -= 1
             p.save()
         except ValidationError as exc:
             print(exc.message)
             return {"message": "No se pudo actualizar el premio_participante."}, 400
-        return {"message": "fecha_redencion:{} registrada".format(p_req["fecha_redencion"])}, 200
+        return {
+                "message": "fecha_redencion:{} registrada".format(p_req["fecha_redencion"]),
+                "vidas_restantes": vidas_restantes
+                }, 200
 
     # Estado: Sin probar aún    
     @classmethod
@@ -351,3 +371,21 @@ class PremioParticipante(Resource):
                         "fechas_redencion"
                     ), many=False).dump(participante_premios),
                 },200
+
+    # Cancelación de premio redimido, se elimina la última fecha de redención y el estado se regresa a 1
+    @classmethod
+    def delete(self, id):
+        p = PremioParticipanteModel.find_by_id(id)
+        if not p:
+            return {"message": "No se encontro el premio_participante"}, 404
+        p_req = request.get_json()
+        try:
+            if len(p.fechas_redencion) > 0:
+                date_deleted = p.fechas_redencion.pop()
+                p.save()
+            else:
+                return {"message": "El premio con el id: {}, no cuenta con ninguna fecha de redención".format(id)}, 404
+        except ValidationError as exc:
+            print(exc.message)
+            return {"message": "No se pudo actualizar el premio_participante."}, 400
+        return {"message": "Cancelación de transacción: redención del premio {} exitosa".format(date_deleted)}, 200

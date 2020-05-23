@@ -27,7 +27,8 @@ class TarjetaPuntosTemplateSchema(ma.Schema):
     titulo = fields.Str()
     num_puntos = fields.Float()
     fecha_creacion = fields.DateTime()
-    dias_vigencia = fields.Integer()
+    # dias_vigencia = fields.Integer()
+    fecha_vencimiento = fields.DateTime()
     # max_canjeos = fields.Integer()
     id_notificacion = fields.Str()
     id_promocion = fields.Str()
@@ -38,7 +39,7 @@ class TarjetaPuntosTemplateSchema(ma.Schema):
             "_id",
             "num_puntos",
             "fecha_creacion",
-            "dias_vigencia",
+            "fecha_vencimiento",
             "id_notificacion",
             "id_promocion",
         )

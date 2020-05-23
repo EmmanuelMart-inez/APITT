@@ -42,6 +42,7 @@ class PremioParticipanteSchema(ma.Schema):
     estado = fields.Integer()
     fecha_creacion = fields.DateTime()
     fechas_redencion = fields.List(fields.DateTime)
+    fecha_vencimiento = fields.DateTime()
 
     class Meta:
         fields = (
@@ -51,5 +52,6 @@ class PremioParticipanteSchema(ma.Schema):
             "id_promocion",
             "estado",
             "fecha_creacion",
-            "fechas_redencion"
+            "fechas_redencion",
+            "fecha_vencimiento",
         )

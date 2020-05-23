@@ -1,5 +1,6 @@
 import json
 import datetime as dt
+import dateutil.parser
 import functools
 import uuid
 from bson.objectid import ObjectId
@@ -42,6 +43,8 @@ class SistemaPuntos(Resource):
                 new_tarjeta.dias_vigencia = tarjeta["dias_vigencia"]
             # if "max_canjeos" in tarjeta:
             #     new_tarjeta.max_canjeos = tarjeta["max_canjeos"]
+            if "fecha_vencimiento" in tarjeta:
+                new_tarjeta.fecha_vencimiento = tarjeta["fecha_vencimiento"]
             if "id_notificacion" in tarjeta:
                 new_tarjeta.id_notificacion = tarjeta["id_notificacion"]
             if "id_promocion" in tarjeta:
@@ -92,6 +95,11 @@ class SistemaPuntosId(Resource):
                 old.dias_vigencia = new_nivel["dias_vigencia"]
             # if "max_canjeos" in new_nivel:
             #     old.max_canjeos = new_nivel["max_canjeos"]
+            if "fecha_vencimiento" in new_nivel:
+                old.fecha_vencimiento = new_nivel["fecha_vencimiento"]
+                # print("obje: ",new_nivel["fecha_vencimiento"])
+                # print("json: ",nivel_json["fecha_vencimiento"])
+                # print("parsed: ",dateutil.parser.parse(nivel_json["fecha_vencimiento"]))
             if "id_notificacion" in new_nivel:
                 old.id_notificacion = new_nivel["id_notificacion"]
             if "id_promocion" in new_nivel:
