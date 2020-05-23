@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
@@ -39,6 +40,7 @@ from flask_uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed)
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
