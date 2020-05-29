@@ -61,6 +61,9 @@ def joinCollectionToParticipanteModel(cls, CollectionMongoName: str, fi, filters
     return filtersList
 
 def switchFilter(cls, fi):
+    if not "scale" in fi:
+        fi["scale"] = "años"
+        fi["scale_value"] = 0
     if fi['method'] == 'filter_by_date_range':
         fi = filter_by_date_range(cls, fi['date_start'], fi['date_end'], fi['field'])
     elif fi['method'] == 'filter_by_date':

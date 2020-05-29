@@ -83,7 +83,7 @@ class TarjetaSellosTemplateSchema(ma.Schema):
     id_promocion = fields.Str(required=False) 
     trigger = fields.Str()
     producto = fields.List(fields.Str(required=False, allow_none=True), required=False, allow_none=True)
-    cantidad_trigger = fields.Float()
+    cantidad_trigger = fields.Float(allow_none=True)
 
     class Meta:
         fields = (

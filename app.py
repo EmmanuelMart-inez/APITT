@@ -20,7 +20,7 @@ from models.empleado import UsuarioModel
 # from resources.facebook_login import FacebookLogin, FacebookAuthorize
 # from resources.google_login import GoogleLogin, GoogleCallback
 from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
-from resources.upload import ImageUpload, ImageDownload, ImageList
+from resources.upload import ImageUpload, ImageDownload, ImageList, EmojiList
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos, TarjetaSellosTemplate, SistemaPuntos, SistemaPuntosId
 from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
 from resources.premio import Premio, PremioList, PremioId, PremioParticipante #Task:Desacoplar list
@@ -44,6 +44,7 @@ CORS(app)
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
+app.config['UPLOADED_EMOJIS_DEST'] = 'static/img/openmoji-72x72-color'
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 api = Api(app)
@@ -101,6 +102,7 @@ api.add_resource(Ayuda, "/ayuda/<string:id>")
 api.add_resource(ImageUpload, "/upload")
 api.add_resource(ImageDownload, "/download/<string:filename>")
 api.add_resource(ImageList, "/images")
+api.add_resource(EmojiList, "/emojis")
 api.add_resource(Autenticacion, "/autenticacion")
 api.add_resource(LoginSocialNetwork, "/autenticacion/<string:socialNetwork>")
 api.add_resource(RegistroSocialNetwork, "/registro/<string:socialNetwork>")

@@ -127,9 +127,12 @@ class SistemaPuntosId(Resource):
 class TarjetaSellosTemplate(Resource):
     @classmethod
     def get(self):
-        allcards = TarjetaSellosModel.objects.all()
-        allconfig_ordered_by_latest = allcards.order_by([("fecha_creacion", pymongo.DESCENDING)])
-        last_config = allconfig_ordered_by_latest.first()
+        try:
+            allcards = TarjetaSellosModel.objects.all()
+            allconfig_ordered_by_latest = allcards.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_config = allconfig_ordered_by_latest.first()
+        except TarjetaSellosModel.DoesNotExist: 
+            return {"message": "No existe ninguna plantilla de tarjeta de sellos aún"},200
         if not last_config:
             return {"Message": "No existe ninguna tarjeta de sellos activa"}, 404
         return TarjetaSellosTemplateSchema().dump(last_config), 200
@@ -178,9 +181,12 @@ class TarjetaSellosTemplate(Resource):
 
     @classmethod
     def put(self):
-        cards = TarjetaSellosModel.objects.all()
-        cards_ordered_by_latest = cards.order_by([("fecha_creacion", pymongo.DESCENDING)])
-        last_card = cards_ordered_by_latest.first()
+        try:
+            cards = TarjetaSellosModel.objects.all()
+            cards_ordered_by_latest = cards.order_by([("fecha_creacion", pymongo.DESCENDING)])
+            last_card = cards_ordered_by_latest.first()
+        except TarjetaSellosModel.DoesNotExist: 
+            last_card = TarjetaSellosModel()
         # pprint(last_card)
         tarjeta_json = request.get_json()
         tarjeta = selloscard_template_schema.load(tarjeta_json)

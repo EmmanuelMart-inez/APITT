@@ -10,6 +10,7 @@ from os import listdir
 from os.path import isfile, join
 
 UPLOADED_PHOTOS_DEST = 'static/img'
+UPLOADED_EMOJIS_DEST = 'static/img/openmoji-72x72-color'
 # UPLOADED_PHOTOS_DESTs = '/var/www/html/items-rest/static/img'
 
 class ImageUpload(Resource):
@@ -27,9 +28,15 @@ class ImageDownload(Resource):
         return send_from_directory(os.getenv("UPLOADED_PHOTOS_DEST"),
                                filename)
 
+class EmojiList(Resource):
+    def get(self):
+        onlyfiles = [f for f in listdir(os.getenv("UPLOADED_EMOJIS_DEST")) if isfile(join(os.getenv("UPLOADED_EMOJIS_DEST"), f))]
+        # print(onlyfiles)
+        return{"images": onlyfiles}
+
 class ImageList(Resource):
     def get(self):
         onlyfiles = [f for f in listdir(os.getenv("UPLOADED_PHOTOS_DEST")) if isfile(join(os.getenv("UPLOADED_PHOTOS_DEST"), f))]
-        print(onlyfiles)
+        # print(onlyfiles)
         return{"images": onlyfiles}
         

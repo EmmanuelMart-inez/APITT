@@ -25,7 +25,7 @@ class Birthday(Resource):
         try:
             bir = BirthdayModel.objects.all()
         except BirthdayModel.DoesNotExist:
-            return {"message": "No se encontro ninguna configuración cumpleaños"}, 400
+            return {"message": "No se encontro ninguna configuración cumpleaños"}, 404
         return BirthdaySchema(many=True).dump(bir), 200
 
     @classmethod

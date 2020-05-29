@@ -113,7 +113,7 @@ class TarjetaSellosModel(MongoModel):
     id_promocion = fields.CharField()
     trigger = fields.CharField() # Forma de obtener un sello
     producto = fields.ListField(fields.CharField(), required=False, blank=True)
-    cantidad_trigger = fields.FloatField()
+    cantidad_trigger = fields.FloatField(blank=True)
 
     @classmethod
     def find_by_id(cls, _Objectid: str) -> "TarjetaSellosModel":
