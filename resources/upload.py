@@ -24,8 +24,13 @@ class ImageUpload(Resource):
 
 class ImageDownload(Resource):
     def get(self, filename):
-        print(filename)
-        return send_from_directory(os.getenv("UPLOADED_PHOTOS_DEST"),
+        # print(filename)
+        try:
+            pic = send_from_directory(os.getenv("UPLOADED_PHOTOS_DEST"),
+                               filename)
+            return pic
+        except:
+            return send_from_directory(os.getenv("UPLOADED_EMOJIS_DEST"),
                                filename)
 
 class EmojiList(Resource):
