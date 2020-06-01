@@ -44,7 +44,8 @@ CORS(app)
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
-app.config['UPLOADED_EMOJIS_DEST'] = 'static/img/openmoji-72x72-color'
+app.config['UPLOADED_EMOJIS_DEST'] = '/mnt/a/Escom_Semestre9/Bubbletown/Bubbletown_api_v3_stable/static/img/openmoji-72x72-color'
+# app.config['UPLOADED_EMOJIS_DEST'] = 'static/img/openmoji-72x72-color'
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 api = Api(app)

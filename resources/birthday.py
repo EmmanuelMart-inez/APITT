@@ -57,8 +57,11 @@ class Birthday(Resource):
             return {"message": "No se encontró el premio de cumpleaños"}, 404
         item_json = request.get_json()
         item = BirthdaySchema().load(item_json)
+        bir = None
         for birthday in bir_all:
             bir = birthday
+        if not bir:
+            bir = BirthdayModel()
         try:
             if "id_notificacion" in item:
                 bir.id_notificacion = item["id_notificacion"]

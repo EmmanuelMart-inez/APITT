@@ -18,7 +18,7 @@ class NotificacionTemplateModel(MongoModel):
     fecha = fields.DateTimeField()
     imagenIcon = fields.CharField()
     imagenDisplay = fields.CharField()
-    bar_text = fields.CharField()
+    bar_text = fields.CharField(blank=True)
     tipo_notificacion = fields.CharField()
     link = fields.CharField(default="null")
     filtros = fields.ListField(fields.CharField(), blank=True, default=[])
