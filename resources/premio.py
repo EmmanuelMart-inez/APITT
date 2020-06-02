@@ -15,8 +15,8 @@ import dateutil.parser
 from models.premio import PremioModel, PremioParticipanteModel
 from models.participante import ParticipanteModel
 from models.producto import CatalogoModel
-from models.tarjeta import TarjetaPuntosTemplateModel
-from models.notificacion import NotificacionTemplateModel
+from models.tarjeta import TarjetaPuntosTemplateModel, TarjetaPuntosModel
+from models.notificacion import NotificacionTemplateModel, NotificacionModel
 
 from schemas.premio import PremioSchema, PremioParticipanteSchema
 from schemas.participante import ParticipanteSchema 
@@ -81,6 +81,31 @@ class PremioList(Resource):
         def get(self, id):
             # Obtener los ids de los templates de los premios que poseé un participante
             participante_premios = PremioParticipanteModel.find_by_id_participante_vigentes(id)
+            premios_no_quemados = []
+            # INTEGRACION DE PREMIO DE NIVEL CERO(0) O NIVEL DE BIENVENIDA
+            # participante = ParticipanteModel.find_by_id(id)
+            # puntos = participante.saldo
+            # if puntos == 0:
+            #     level0 = TarjetaPuntosTemplateModel.get_level(0)
+            #     if level0:
+            #         # Lev is id notificacion
+            #         for level_id in level0:
+            #             notif0 = TarjetaPuntosTemplateModel.find_by_id(level_id)
+            #             # if lev.link and lev.link != "null":
+            #             notif0 = NotificacionTemplateModel.find_by_id(notif0.id_notificacion)
+            #             if notif0:
+            #                 premio0 = None
+            #                 if notif0.tipo_notificacion == "premio":
+            #                     if notif0:
+            #                         notif = NotificacionModel(id_participante=id, id_notificacion=str(notif0._id), estado=0)
+            #                     if notif0.link:
+            #                         premio0 = PremioParticipanteModel(id_participante=id, id_premio=notif0.link, estado=0).save()
+            #                 if notif0.tipo_notificacion == "encuesta":
+            #                     pass
+            #                 if notif0.tipo_notificacion == "ninguna":
+            #                     pass
+            #                 if premio0:
+            #                     premios_no_quemados.append(notif0)
             # # INTEGRACION del sistema de premios: Se debe verificar si tiene premios por 
             # # nivel aunque no tenga premios que no son de nivel
             # #   1. Buscar al participante
@@ -104,7 +129,6 @@ class PremioList(Resource):
             if not participante_premios:
                 return {'message': f"El participante con el id: { id }, no posee ningún premio"}, 404
             # Filtrar los premios que ya han sido quemados, es decir, agotaron sus vidas (fechas_redencion)
-            premios_no_quemados = []
             for pp in participante_premios:
                 # Old method: Por estado {0,1}
                 # if not len(pp.fechas_redencion) > 0:
@@ -165,6 +189,17 @@ class PremioList(Resource):
                             "vidas"
                         ), many=True).dump(premios),
                     },200
+
+        @classmethod
+        def delete(self, id):
+            # Eliminar los premios que poseé un participante
+            participante_premios = PremioParticipanteModel.find_by_id_participante_vigentes(id)
+            for premio in participante_premios:
+                try:
+                    premio.delete()
+                except:
+                    return {"message": "No se pudo eliminar los premios del participante con el _id enviado"}
+            return {"message": "Premios del participante eliminados" },200
 
 # Recurso del administrador
 class PremioId(Resource):

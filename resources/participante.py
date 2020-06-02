@@ -283,3 +283,22 @@ class WelcomeParticipante(Resource):
             "num_puntos": p.saldo,
             "total_notificaciones": total_notifs,
             }, 200
+
+
+# Herramientas de apoyo para probar el sistema integrado con el punto de venta
+class ParticipanteDemoList(Resource):
+    @classmethod
+    def get(self):
+        ps = ParticipanteModel.find_all()
+        if not ps:
+            return {"message": "No se encontro ningún usuario"}, 404
+        return {
+            'Participantes': ParticipanteSchema(many=True,
+            only=(
+            "_id",
+            "nombre",
+            "paterno",
+            "saldo", 
+            "sellos"
+            )).dump(ps),
+            }, 200

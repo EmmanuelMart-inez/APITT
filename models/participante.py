@@ -122,5 +122,13 @@ class ParticipanteModel(MongoModel):
             return None
 
     @classmethod
+    def find_all(cls) -> "ParticipanteModel":
+        try:
+            users = cls.objects.all()
+            return users
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
     def save_to_db(self):
         self.save()

@@ -19,7 +19,7 @@ from ma import ma
 from models.empleado import UsuarioModel
 # from resources.facebook_login import FacebookLogin, FacebookAuthorize
 # from resources.google_login import GoogleLogin, GoogleCallback
-from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork
+from resources.participante import Participante, ParticipanteList, WelcomeParticipante, Autenticacion, LoginSocialNetwork, RegistroSocialNetwork, ParticipanteDemoList
 from resources.upload import ImageUpload, ImageDownload, ImageList, EmojiList
 from resources.tarjeta import TarjetaSellos, TarjetaPuntos, TarjetaSellosTemplate, SistemaPuntos, SistemaPuntosId
 from resources.notificaciones import NotificacionList, NotificacionesAdminList, NotificacionesAdmin, NotificacionAcciones #Task:Desacoplar list
@@ -75,6 +75,7 @@ def handle_marshmallow_validation(err):
 api.add_resource(Participante, "/participante/<string:id>")
 api.add_resource(WelcomeParticipante, "/wparticipante/<string:id>")
 api.add_resource(ParticipanteList, "/participante")
+api.add_resource(ParticipanteDemoList, "/participantes")
 api.add_resource(TarjetaSellos, "/tarjetasellos/<string:id>")
 api.add_resource(TarjetaSellosTemplate, "/tarjetasellos")
 api.add_resource(TarjetaPuntos, "/tarjetapuntos/<string:id_participante>")

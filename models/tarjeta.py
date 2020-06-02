@@ -32,6 +32,15 @@ class TarjetaPuntosModel(MongoModel):
     fecha_creacion = fields.DateTimeField()
     fecha_vigencia = fields.DateTimeField()
 
+    @classmethod
+    def find_by_id(cls, _Objectid: str) -> "TarjetaPuntosTemplateModel":
+        try:
+            oid = ObjectId(_Objectid)
+            notif = cls.objects.get({'_id': oid})
+            return notif
+        except cls.DoesNotExist:
+            return None
+
 # Sistema de niveles
 class TarjetaPuntosTemplateModel(MongoModel):
     titulo = fields.CharField()
