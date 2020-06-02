@@ -431,13 +431,13 @@ class NotificacionAcciones(Resource):
                 if "codigo_barras" in premio:
                     p.codigo_barras = premio["codigo_barras"] 
                 if "codigo_qr" in premio:
-                    p.codigo_barras = premio["codigo_barras"] 
+                    p.codigo_barras = premio["codigo_qr"] 
                 if "imagen_icon" in premio:
                     p.imagen_icon = premio["imagen_icon"] 
                 if "imagen_display" in premio:
-                    p.imagen_display = premio["imagen_icon"] 
+                    p.imagen_display = premio["imagen_display"] 
                 if "fecha_creacion" in premio:
-                    p.fecha_creacion = premio["imagen_icon"] 
+                    p.fecha_creacion = premio["fecha_creacion"] 
                 else:
                     p.fecha_creacion = dt.datetime.now()  
                 if "fecha_vigencia" in premio:

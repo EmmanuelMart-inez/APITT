@@ -9,7 +9,7 @@ from flask_restful import Resource
 from os import listdir
 from os.path import isfile, join
 
-UPLOADED_PHOTOS_DEST = '/mnt/a/Escom_Semestre9/Bubbletown/Bubbletown_api_v3_stable/static/img'
+UPLOADED_PHOTOS_DEST='/mnt/a/Escom_Semestre9/Bubbletown/Bubbletown_api_v3_stable/static/img'
 UPLOADED_EMOJIS_DEST = '/mnt/a/Escom_Semestre9/Bubbletown/Bubbletown_api_v3_stable/static/img/openmoji-72x72-color'
 # UPLOADED_PHOTOS_DESTs = '/var/www/html/items-rest/static/img'
 

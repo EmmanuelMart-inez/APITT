@@ -70,12 +70,23 @@ productos = [
 #       asignar una promocion con n productos por el precio de este producto "promoción X"
 #       que acabas de crear
 promociones = [
+    {
+		"_id": '5e701fba1377db6386eb11dw',
+		"titulo": "Ningún: Promoción/Premio no registrado en el punto de venta",
+        "descripcion": "Algún otro premio",
+        # "imagen": "https://bubbletown.com/download/promo1.png", 
+        "imagen": "box.PNG", 
+		"precio_venta": 100.0,
+        "costo_venta": 50.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
+	},
 	{
 		"_id": '5e701fba1377db6386eb11da',
-		"titulo": "BubbleCombo",
-        "descripcion": "por la compra de un blbla..",
+		"titulo": "Bolipán gratis",
+        "descripcion": "Un bolitpán de sabor de temporada de regalo",
         # "imagen": "https://bubbletown.com/download/promo1.png", 
-        "imagen": "http://127.0.0.1:5001/download/promo1.png", 
+        "imagen": "bolipangratis.PNG", 
 		"precio_venta": 100.0,
         "costo_venta": 50.0,
 		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
@@ -83,21 +94,21 @@ promociones = [
 	},
     {
 		"_id": '5e701fba1377db6386eb11db',
-		"titulo": "50% de descuento sobre tu compra",
-        "descripcion": "por la compra de un...",
+		"titulo": "Bebida BubbleTwin gratis",
+        "descripcion": "Bubble Twin sabor beso de Taro con 3 toppings gratis",
         # "imagen": "https://bubbletown.com/download/promo2.png", 
-        "imagen": "http://127.0.0.1:5001/download/promo2.png", 
-		"precio_venta": 100.0,
+        "imagen": "gratisbebida1.PNG", 
+		"precio_venta": 85.0,
         "costo_venta": 50.0,
 		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
 		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
 	},
     {
 		"_id": '5e701fba1377db6386eb11dc',
-		"titulo": "2x1 en bolipanes",
-        "descripcion": "por la compra de un...",
+		"titulo": "Bebida Spicy Chai GRATIS",
+        "descripcion": "Spicy chai 600 ml regalo de lealtad",
         # "imagen": "https://bubbletown.com/download/promo3.png", 
-        "imagen": "http://127.0.0.1:5001/download/promo3.png", 
+        "imagen": "gratistechai.PNG", 
 		"precio_venta": 100.0,
         "costo_venta": 50.0,
 		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
@@ -105,10 +116,9 @@ promociones = [
 	},
     {
 		"_id": '5e701fba1377db6386eb11dd',
-		"titulo": "3x2 en café",
-        "descripcion": "por la compra de un...",
-        # "imagen": "https://bubbletown.com/download/promo3.png", 
-        "imagen": "http://127.0.0.1:5001/download/promo3.png", 
+		"titulo": "15 porciento de descuento",
+        "descripcion": "Cupón valido por el 15\% de descuento sobre el consumo del participante",
+        "imagen": "15descuento.png", 
 		"precio_venta": 100.0,
         "costo_venta": 50.0,
 		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
@@ -116,14 +126,35 @@ promociones = [
 	},
     {
 		"_id": '5e701fba1377db6386eb11df',
-		"titulo": "Combo: 3 bolipanes + 1 bubbleFreezze mediano por $179",
-        "descripcion": "por la compra de un...",
-        "imagen": "http://127.0.0.1:5001/download/promo4.jpg", 
-		"precio_venta": 100.0,
+		"titulo": "25 porciento de descuento",
+        "descripcion": "Cupón valido por el 25\% de descuento sobre el consumo del participante",
+        "imagen": "25descuento.png", 
+		"precio_venta": 0.0,
+        "costo_venta": 0.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
+	},
+    {
+		"_id": '5e701fba1377db6386eb11dg',
+		"titulo": "40 porciento de descuento",
+        "descripcion": "Cupón valido por el 40\% de descuento sobre el consumo del participante",
+        "imagen": "40descuento.png", 
+		"precio_venta": 60.0,
         "costo_venta": 50.0,
 		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
 		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
-	}
+	},
+    {
+		"_id": '5e701fba1377db6386eb11da',
+		"titulo": "Cupón 2x1 en café",
+        "descripcion": "Cupón valido por 2 cafés de 420 ml. por el precio de 1",
+        # "imagen": "https://bubbletown.com/download/promo1.png", 
+        "imagen": "2x1.PNG", 
+		"precio_venta": 36.0,
+        "costo_venta": 18.0,
+		"fecha_vigencia_start":  "2029-06-06T16:00:00Z",
+		"fecha_vigencia_end":  "2029-06-06T16:00:00Z",
+	},
 	# {
 	# 	"_id": "5e701fc31377db6386eb11d",
 	# 	"titulo": "50% de descuento sobre tu compra",
@@ -695,7 +726,7 @@ class Ticket(Resource):
         print("saldo del participante:", p.saldo)
         print("bonificacion_puntos:", bonificacion_puntos)
         # Transaccion de movimientos y quema de cupones, sólo hay uno en la parte superior "new_sello_historial"
-        new_movimiento = MovimientoAppModel.add_movimiento(str(p._id), "Compra", "entrada", ticket.total, "http://127.0.0.1:5001/download/ayuda4.png")
+        new_movimiento = MovimientoAppModel.add_movimiento(str(p._id), "Compra", "entrada", ticket.total, "ayuda4.png")
         if new_movimiento:
             movimientos_enviados = 1
         # TODO: Añadir los diferentes tipos de movimientos existentes! !
